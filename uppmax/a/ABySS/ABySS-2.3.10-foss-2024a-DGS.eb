@@ -1,0 +1,53 @@
+# Douglas G Scofield 6/2025 UPPMAX
+#    updated to 2.3.10, added SQLite dependency, updated btllib version,
+#    segregated build dependencies and noted RPATH-resolvable dependencies
+###############################################################
+
+easyblock = 'ConfigureMake'
+
+name = 'ABySS'
+version = '2.3.10'
+
+homepage = 'https://www.bcgsc.ca/platform/bioinfo/software/abyss'
+description = """Assembly By Short Sequences - a de novo, parallel, paired-end sequence assembler"""
+
+toolchain = {'name': 'foss', 'version': '2024a'}
+toolchainopts = {'usempi': True, 'cstd': 'c++17'}
+
+github_account = 'bcgsc'
+source_urls = ['http://github.com/%(github_account)s/%(namelower)s/releases/download/%(version)s/']
+sources = [SOURCELOWER_TAR_GZ]
+checksums = ['bbe42e00d1ebb53ec6afaad07779baaaee994aa5c65b9a38cf4ad2011bb93c65']
+
+builddependencies = [
+    ('Autoconf',   '2.72'),
+    ('Automake',   '1.16.5'),
+]
+
+dependencies = [
+    ('Boost',      '1.85.0'),
+    ('sparsehash', '2.0.4'),
+    ('SQLite',     '3.45.3'),
+    ('btllib',     '1.7.3'),
+]
+
+# toolchain not included because use of MPI requires it be loaded
+local_linkdependencies = [
+    ('Boost',      '1.85.0'),
+    ('sparsehash', '2.0.4'),
+    ('SQLite',     '3.45.3'),
+    ('btllib',     '1.7.3'),
+    toolchain,
+]
+
+preconfigopts = "./autogen.sh && "
+configopts = 'CXXFLAGS="$CXXFLAGS -Wno-error"'
+
+sanity_check_paths = {
+    'files': ["bin/ABYSS", "bin/ABYSS-P"],
+    'dirs': []
+}
+
+sanity_check_commands = ['ABYSS --help']
+
+moduleclass = 'bio'

@@ -1,0 +1,28 @@
+Douglas Scofield UPPMAX 02/2026
+auto select and thus the sanity test didn't work for offline mode
+===============================
+diff -ruN busco-5.8.2.orig/src/busco/BuscoDownloadManager.py busco-5.8.2/src/busco/BuscoDownloadManager.py
+--- busco-5.8.2.orig/src/busco/BuscoDownloadManager.py	2024-12-05 09:41:46.000000000 +0100
++++ busco-5.8.2/src/busco/BuscoDownloadManager.py	2026-02-04 16:58:39.170013659 +0100
+@@ -48,7 +48,7 @@
+         self.download_base_url = config.get("busco_run", "download_base_url")
+         self.local_download_path = config.get("busco_run", "download_path")
+         self._create_main_download_dir()
+-        if not type(self).version_files is not None and not self.offline:
++        if not type(self).version_files is not None:
+             try:
+                 self._obtain_versions_file()
+             except BatchFatalError as bfe:
+@@ -82,7 +82,11 @@
+ 
+         for tsleep in [10, 100, None]:
+             try:
+-                urllib.request.urlretrieve(remote_filepath, local_filepath)
++                # if self.offline and we do want to check if offline versions are the latest,
++                # then this download really should be to temporary location and we check from
++                # that copy
++                if not self.offline or not os.path.isfile(local_filepath):
++                    urllib.request.urlretrieve(remote_filepath, local_filepath)
+                 type(self).version_files = pd.read_csv(
+                     local_filepath,
+                     sep="\t",

@@ -1,0 +1,40 @@
+# Douglas Scofield UPPMAX 05/2026
+# - update version
+# - UPPMAX bioinfo toolchain 2024a
+#################################
+
+easyblock = 'PythonPackage'
+
+name = 'Unidecode'
+version = '1.4.0'
+
+homepage = 'https://github.com/avian2/unidecode'
+description = "Python library for lossy ASCII transliterations of Unicode text (port of Text::Unidecode Perl module)"
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+sources = [SOURCE_TAR_GZ]
+checksums = ['ce35985008338b676573023acc382d62c264f307c8f7963733405add37ea2b23']
+
+builddependencies = [
+    ('binutils', '2.42'),
+]
+
+dependencies = [
+    ('Python', '3.12.3'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+fix_python_shebang_for = ['bin/unidecode']
+
+sanity_check_paths = {
+    'files': ['bin/unidecode'],
+    'dirs': ['lib/python%(pyshortver)s/site-packages'],
+}
+
+sanity_check_commands = ["unidecode -h"]
+
+moduleclass = 'lib'

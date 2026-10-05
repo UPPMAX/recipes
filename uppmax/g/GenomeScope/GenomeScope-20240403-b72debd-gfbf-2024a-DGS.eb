@@ -1,0 +1,56 @@
+# Douglas Scofield UPPMAX 03/2026
+# - provide ability to run genomescope.R script and not the
+#   python2 *.py *.pl genome simulation code
+#################################
+
+easyblock = 'Tarball'
+
+name = 'GenomeScope'
+_lastcommit = 'b72debd'
+_lastcommitdate = '20240403'
+version = "%s-%s" % (_lastcommitdate, _lastcommit)
+
+homepage = 'https://github.com/schatzlab/genomescope'
+description = "Fast genome analysis from unassembled short reads"
+
+usage = """
+Instructions for getting started can be found at 'https://github.com/schatzlab/genomescope#getting-started'
+"""
+
+toolchain = {'name': 'gfbf', 'version': '2024a'}  # determined by R/4.4.2
+
+github_account = 'schatzlab'
+sources = [{
+    'filename': '%(name)s-v%(version)s.tar.xz',
+    'git_config': {
+        'url': 'https://github.com/%(github_account)s',
+        'repo_name': '%(namelower)s',
+        'commit': _lastcommit,
+        #'keep_git_dir': True,
+    }
+}]
+checksums = ['5c8c2819a1cd33918281d750915d2282d2f1c8b6357268e996343da3db0d52f2']
+
+dependencies = [
+    ('Jellyfish', '2.3.1', '', {'name': 'GCCcore', 'version': '13.3.0'}),  # annoyingly needed to keep from building -GCC-13.3.0 version
+    ('R', '4.4.2'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+modextrapaths = {
+    'PATH': '',
+}
+
+sanity_check_paths = {
+    'files': ['%(namelower)s.R'],
+    'dirs': [],
+}
+
+sanity_check_commands = [
+    '%(namelower)s.R --help',
+]
+
+moduleclass = 'bio'

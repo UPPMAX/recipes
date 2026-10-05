@@ -1,0 +1,69 @@
+easyblock = 'PythonBundle'
+
+name = 'msprime'
+version = '1.3.2'
+
+homepage = 'https://msprime.readthedocs.io'
+description = "msprime is a coalescent simulator and library for processing tree-based genetic data."
+
+toolchain = {'name': 'gfbf', 'version': '2024a'}
+
+builddependencies = [
+    ('hatchling', '1.24.2'),
+]
+
+dependencies = [
+    ('Python', '3.12.3'),
+    ('SciPy-bundle', '2024.05'),  # for numpy
+    ('GSL', '2.8'),
+]
+
+local_linkdependencies = [
+    ('GSL', '2.8'),
+    toolchain,
+]
+
+exts_list = [
+    ('svgwrite', '1.4.3', {
+        'source_tmpl': '%(name)s-%(version)s.zip',
+        'checksums': ['a8fbdfd4443302a6619a7f76bc937fc683daf2628d9b737c891ec08b8ce524c3'],
+    }),
+    ('jsonschema', '4.18.6', {         # jsonschema needed by tskit
+        'checksums': ['ce71d2f8c7983ef75a756e568317bf54bc531dc3ad7e66a128eae0d51623d8a3'],
+    }),
+    ('tskit', '0.6.4', {
+        'checksums': ['bdac1bb7e3ae3d1f562ec191b5d840156e082dd2adc6af7c41b170c4fb1be792'],
+    }),
+    ('ruamel.yaml.clib', '0.2.15', {   # ruamel.yaml* needed by demes
+        'modulename': False,
+        'source_tmpl': 'ruamel_yaml_clib-%(version)s.tar.gz',
+        'checksums': ['46e4cc8c43ef6a94885f72512094e482114a8a706d3c555a34ed4b0d20200600'],
+    }),
+    ('ruamel.yaml', '0.18.17', {
+        'source_tmpl': 'ruamel_yaml-%(version)s.tar.gz',
+        'checksums': ['9091cd6e2d93a3a4b157ddb8fabf348c3de7f1fb1381346d985b6b247dcd8d3c'],
+    }),
+    ('demes', '0.2.3', {
+        'checksums': ['9e613b65b475dba277bca751de1f37a89fd5eb4d856ba27733a2099c8a823617'],
+    }),
+    ('newick', '1.10.0', {
+        'checksums': ['16058c9162b05befca98423c03daaab0f7a614dd8404e0dea2e8a0c7f89a773e'],
+    }),
+    (name, version, {
+        'checksums': ['60c475d8cedf05c54c1c185cddc5357d7daa25f3e7604768c389bf2084de3f89'],
+    }),
+]
+
+sanity_check_paths = {
+    'files': ['bin/msp', 'bin/mspms', 'bin/tskit', 'bin/demes'],
+    'dirs': ['lib/python%(pyshortver)s/site-packages'],
+}
+
+sanity_check_commands = [
+    'demes --help',
+    'tskit --help',
+    'msp --help',
+    'mspms --help',
+]
+
+moduleclass = 'bio'

@@ -1,0 +1,11 @@
+Douglas Scofield UPPMAX 12/2025
+Use proper shebang for trim_galore script
+diff -ru TrimGalore-0.6.10.orig/trim_galore TrimGalore-0.6.10/trim_galore
+--- TrimGalore-0.6.10.orig/trim_galore	2023-02-02 12:25:31.000000000 +0100
++++ TrimGalore-0.6.10/trim_galore	2025-12-30 16:59:29.986798000 +0100
+@@ -1,4 +1,4 @@
+-#!/usr/bin/perl
++#!/usr/bin/env perl
+ use strict;
+ use warnings;
+ use Getopt::Long;

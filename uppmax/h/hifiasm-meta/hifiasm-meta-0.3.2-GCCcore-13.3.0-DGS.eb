@@ -1,0 +1,50 @@
+# Douglas G Scofield UPPMAX 6/2025
+#     based off hifiasm-0.20.0
+#########################################
+
+easyblock = 'MakeCp'
+
+name = 'hifiasm-meta'
+version = '0.3.2'
+
+homepage = 'https://github.com/xfengnefx/hifiasm-meta'
+description = """De novo metagenome assembler, based on hifiasm, a haplotype-resolved de novo assembler for PacBio Hifi reads."""
+#software_license = 'LicenseMIT'
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+github_account = 'xfengnefx'
+source_urls = [GITHUB_SOURCE]
+sources = ['hamtv%(version)s.tar.gz']
+checksums = ['f295998b2dee6ab99ac86ee797bf41f927b12371608ef42da2b3db20e05d2e93']
+
+builddependencies = [
+    ('binutils', '2.42'),
+]
+
+dependencies = [
+    ('zlib',     '1.3.1'),
+]
+
+local_linkdependencies = [
+    ('zlib',     '1.3.1'),
+    toolchain,
+]
+
+buildopts = 'CC="$CC" CXX="$CXX" CXXFLAGS="$CXXFLAGS" CPPFLAGS="$CPPFLAGS"'
+
+local_programname = name.lower().replace('-','_')
+
+files_to_copy = [
+    ([local_programname], 'bin'),
+    ([local_programname + '.1'], 'share/man/man1'),
+    'LICENSE', 'README.md',
+]
+
+sanity_check_paths = {
+    'files': [ 'bin/' + local_programname ],
+    'dirs' : [ 'share'],
+}
+sanity_check_commands = [ local_programname + ' -h' ]
+
+moduleclass = 'bio'

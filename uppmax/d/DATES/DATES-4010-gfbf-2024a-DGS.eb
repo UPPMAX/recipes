@@ -1,0 +1,66 @@
+# Douglas Scofield UPPMAX 02/2026
+# - support its *.lua scripts using LuaJIT
+# - support its *.js scripts using k8
+#################################
+
+easyblock = 'MakeCp'
+
+name = 'DATES'
+version = '4010'
+_commit = '431b18e'
+
+homepage = 'https://github.com/MoorjaniLab/DATES_v4010'
+description = """DATES (Distribution of Ancestry Tracts of Evolutionary Signals) is a method to estimate the
+ time of admixture in ancient DNA samples described in Chintalapati et al. 2022 biorxiv"""
+
+toolchain = {'name': 'gfbf', 'version': '2024a'}
+
+sources = [{
+    'source_urls': ['https://github.com/MoorjaniLab/DATES_v4010/archive'],
+    'download_filename': '%s.tar.gz' % _commit,
+    'filename': SOURCE_TAR_GZ,
+}]
+checksums = ['b892e660bce204f0c727c0b0c2e049b0aea8091a0da28a396b1bf308344f65ed']
+
+dependencies = [
+    ('GSL', '2.8'),
+    ('Perl', '5.38.2'),
+    ('gnuplot', '6.0.1'),
+    ('Ghostscript','10.03.1'),
+]
+
+local_linkdependencies = [
+    ('GSL', '2.8'),
+    toolchain,
+]
+
+prebuildopts  = 'make clean && ( cd nicksrc && make clean ) && make clobber && '
+prebuildopts += 'sed -i "s/-lopenblas/-lflexiblas/" Makefile && '
+
+build_cmd = 'make install'
+
+local_perl = [
+    'calc_error', 'dates_jackknife', 'dates_plot', 'dates_wtjack', 'fixhdr', 'run_dates_expfit',
+]
+local_bin = [
+    'dates', 'dates_expfit', 'dowtjack', 'grabpars', 'simpjack2',
+]
+
+files_to_copy = [
+    (['bin/*'], 'bin'),
+]
+
+
+fix_perl_shebang_for = ['bin/%s' % x for x in local_perl]
+
+sanity_check_paths = {
+    'files': ['bin/%s' % x for x in local_perl] + ['bin/%s' % x for x in local_bin],
+    'dirs': [],
+}
+
+sanity_check_commands = [
+    'dates | grep "Version %(version)s"',
+    'grabpars',
+]
+
+moduleclass = 'bio'

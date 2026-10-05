@@ -1,0 +1,53 @@
+# Douglas Scofield UPPMAX 01/2026
+# - new tool
+# - UPPMAX bioinfo toolchain 2024a
+#################################
+
+easyblock = "MakeCp"
+
+name = 'selscan'
+version = '2.1.1'
+
+homepage = 'https://github.com/szpiech/selscan'
+description = """
+Haplotype-based scans for selection.
+
+%(name)s currently implements EHH, iHS, XP-EHH, nSL, XP-nSL and iHH12.
+"""
+
+toolchain = {'name': 'GCC', 'version': '13.3.0'}
+toolchainopts = {'opt': True, 'cstd': 'c++17'}
+
+github_account = 'szpiech'
+source_urls = [GITHUB_SOURCE]
+sources = ['v%(version)s.tar.gz']
+checksums = [
+    '92079a2f41ef9df494635e8fb112ef35beb41349837a1cbd6a6b5c7d4689fbb7',  # v2.1.1.tar.gz
+]
+
+dependencies = [
+    ('zlib', '1.3.1'),
+    ('GSL', '2.8'),
+]
+
+local_linkdependencies = [
+    ('zlib', '1.3.1'),
+    ('GSL', '2.8'),
+    toolchain,
+]
+
+start_dir = 'src'
+
+files_to_copy = [([ 'norm', 'selscan' ], 'bin')]
+
+sanity_check_paths = {
+    'files': [ 'bin/norm', 'bin/selscan' ],
+    'dirs': [ ]
+}
+
+sanity_check_commands = [
+    'norm --help',
+    'selscan --help',
+]
+
+moduleclass = 'bio'

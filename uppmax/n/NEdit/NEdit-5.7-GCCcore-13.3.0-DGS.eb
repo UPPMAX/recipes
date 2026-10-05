@@ -1,0 +1,50 @@
+# Douglas G Scofield UPPMAX 11/2025
+# - new patch to create pkgconfig file, also submitted as cereal PR https://github.com/USCiLab/cereal/pull/844
+#####################################
+
+easyblock = 'MakeCp'
+
+name = 'NEdit'
+version = '5.7'
+
+homepage = 'https://sourceforge.net/projects/nedit/'
+description = """A fast, compact Motif/X11 plain text editor, for most popular Unix systems. Features significant
+support for programmers including syntax highlighting, macro language, and streamlined keyboard navigation.
+Mature and stable."""
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+source_urls = [ SOURCEFORGE_SOURCE ]
+sources = [ '%(namelower)s-%(version)s-src.tar.gz' ]
+
+checksums = [ 'add9ac79ff973528ad36c86858238bac4f59896c27dbf285cbe6a4d425fca17a' ]
+
+builddependencies = [
+    ('binutils', '2.42'),
+]
+
+dependencies = [
+    ('motif', '2.3.8'),
+]
+
+local_linkdependencies = [
+    ('motif', '2.3.8'),
+    toolchain,
+]
+
+prebuildopts = "sed -i -e 's|-I/usr/X11R6/include ||' -e 's|-I/usr/X11R6/lib ||' makefiles/Makefile.linux && "
+
+build_cmd = "make linux"
+
+files_to_copy = [
+    ( [ 'source/nedit', 'source/nc' ], 'bin' ),
+]
+
+sanity_check_paths = {
+    'files': [ 'bin/nedit', 'bin/nc' ],
+    'dirs' : [ ],
+}
+
+sanity_check_commands = [ 'nedit -version' ]
+
+moduleclass = 'tools'

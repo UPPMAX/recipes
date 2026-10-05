@@ -1,0 +1,60 @@
+# Douglas Scofield UPPMAX 01/2026
+# - update version
+# - UPPMAX bioinfo toolchain 2024a
+#################################
+
+easyblock = 'Binary'
+
+name = 'mosdepth'
+version = '0.3.12'
+local_hts_nim_ver = '0.3.30'
+
+homepage = 'https://github.com/brentp/mosdepth'
+description = "Fast BAM/CRAM depth calculation for WGS, exome, or targeted sequencing"
+
+toolchain = {'name': 'GCC', 'version': '13.3.0'}
+
+sources = [
+    {
+        'source_urls': ['https://github.com/brentp/hts-nim/archive/'],
+        'download_filename': 'v%s.tar.gz' % local_hts_nim_ver,
+        'filename': 'hts-nim-%s.tar.gz' % local_hts_nim_ver,
+    },
+    {
+        'source_urls': ['https://github.com/brentp/mosdepth/archive/'],
+        'download_filename': 'v%(version)s.tar.gz',
+        'filename': SOURCE_TAR_GZ,
+    },
+]
+checksums = [
+    {'hts-nim-%s.tar.gz' % local_hts_nim_ver: 'a4be4dcb3144dd1ffd280c8efbd8c92d3809b7052224436abfa772a823783b46'},
+    {'%(name)s-%(version)s.tar.gz': '8047865fb446b7b4da3dc11226febf00e8dfdaf4e203972a53aeb5fb037bdb4d'},
+]
+
+dependencies = [
+    ('Nim', '2.2.6'),
+    ('HTSlib', '1.21.1'),
+    ('PCRE', '8.45'),
+]
+
+local_linkdependencies = [
+    ('Nim', '2.2.6'),
+    ('HTSlib', '1.21.1'),
+    ('PCRE', '8.45'),
+    toolchain,
+]
+
+extract_sources = True
+
+install_cmd = "cd %(builddir)s/hts-nim-*/ && nimble install --nimbleDir:%(installdir)s --verbose -y && "
+install_cmd += "cd ../mosdepth-*/ && "
+install_cmd += "nimble install --nimbleDir:%(installdir)s --verbose -y"
+
+sanity_check_paths = {
+    'files': ['bin/mosdepth'],
+    'dirs': [],
+}
+
+sanity_check_commands = ["mosdepth --help"]
+
+moduleclass = 'bio'

@@ -1,0 +1,33 @@
+easyblock = 'ConfigureMake'
+
+name = 'FastME'
+version = '2.1.6.4'
+
+homepage = 'http://www.atgc-montpellier.fr/fastme/'
+description = "FastME: a comprehensive, accurate and fast distance-based phylogeny inference program."
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+# Must update source url based on gitlab's the raw file in tarballs/ directory
+source_urls = [ 'https://gite.lirmm.fr/atgc/%(name)s/-/raw/08e2150495640a45b89fb816edd894bec8219186/tarball' ]
+sources = [ '%(namelower)s-%(version)s.tar.gz' ]
+checksums = [ 'd9f585671d5514de28b8826c0e287e5a59c84d9a1acbf9256322a17b1fbba388' ]
+
+builddependencies = [
+    ('Autotools', '20231222'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+preconfigopts = "autoreconf -if && "
+
+sanity_check_paths = {
+    'files': ['bin/fastme'],
+    'dirs': []
+}
+
+sanity_check_commands = ["fastme --help"]
+
+moduleclass = 'bio'

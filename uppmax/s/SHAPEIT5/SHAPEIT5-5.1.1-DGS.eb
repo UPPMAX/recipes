@@ -1,0 +1,64 @@
+# Douglas G Scofield UPPMAX 8/2025
+# - based on A5-miseq easyconfig which was based on novoalign
+# - download individual binaries
+##
+easyblock = 'Binary'
+
+name = 'SHAPEIT5'
+version = '5.1.1'
+
+homepage = 'https://odelaneau.github.io/shapeit5/'
+description = """
+SHAPEIT5 is a software package to estimate haplotypes in large genotype datasets, with a special focus on rare variants.
+"""
+
+toolchain = SYSTEM
+
+# The filenames that are downloaded. Save each to a versioned name, and install
+# using its original name and also a symlink without the _static suffix.  We
+# remove the suffix by removing the final 7 characters, so in case of changes,
+# adjust accordingly.
+local_sources = [
+    'ligate_static',
+    'phase_common_static',
+    'phase_rare_static',
+    'simulate_static',
+    'switch_static',
+    'xcftools_static',
+]
+
+github_account = 'odelaneau'
+source_urls = [GITHUB_LOWER_RELEASE]
+
+sources = [{
+    'filename': '%s-v%%(version)s' % x,
+    'download_filename': '%s' % x,
+} for x in local_sources ]
+
+checksums = [{
+    'ligate_static-v%(version)s'       : '1b5acbf659660ec2491207413df4c8b5f12a9f5de057432c498039c201f59395',
+    'phase_common_static-v%(version)s' : 'a6a69f54cbc6b20a49a06ecb07506e77bac466aba1dc6e650dbabd5cf24abf23',
+    'phase_rare_static-v%(version)s'   : 'd7cc0e7c63158b037a202c6672d972e6d52a1520143cd72a7a26abb706b102aa',
+    'simulate_static-v%(version)s'     : 'f61d52274614947169681cb069d895548a5c3e98ac5695871f6a2b18e9562461',
+    'switch_static-v%(version)s'       : 'a378a10c112c3a1c5a3a8a9a1bb27ca83644a65035ddfd3fcd0b79aebc7ea5c0',
+    'xcftools_static-v%(version)s'     : '08f1880f17bdde4e7093729f12d083b05037ff21602c41fb0e156273cf9de267',
+}]
+
+extract_sources = False
+
+# install the files using their original names, make them executable, and create a symlink to each without the suffix _static
+# note changes in strings between phrases so everything concatenates sanely
+install_cmd = 'mkdir %(installdir)s/bin && '
+install_cmd += ''.join(f'mv {x}-v%(version)s %(installdir)s/bin/{x} && ' for x in local_sources)
+install_cmd += 'cd %(installdir)s/bin && '
+install_cmd += ''.join(f'chmod +x %s && ' % x for x in local_sources)
+install_cmd += ' && '.join(f'ln -s {x} {x[:-7]}' for x in local_sources) # different because it's the last
+
+sanity_check_paths = {
+    'files': [ 'bin/%s' % x for x in local_sources + [ x[:-7] for x in local_sources ] ], # originals + without the suffix
+    'dirs' : [ 'bin' ]
+}
+
+sanity_check_commands = [x + ' | grep "Version  *: %(version)s"' for x in [ local_sources[0], local_sources[0][:-7] ] ]
+
+moduleclass = 'bio'

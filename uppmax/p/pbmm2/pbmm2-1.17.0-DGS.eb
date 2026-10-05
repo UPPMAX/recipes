@@ -1,0 +1,59 @@
+# Douglas G Scofield UPPMAX 8/2025
+# - based on A5-miseq easyconfig which was based on novoalign
+# - download individual binaries
+##
+easyblock = 'Binary'
+
+name = 'pbmm2'
+version = '1.17.0'
+
+homepage = 'https://github.com/PacificBiosciences/pbmm2'
+description = """
+pbmm2 is a SMRT C++ wrapper for minimap2's C API. Its purpose is to support
+native PacBio input and output, provide sets of recommended parameters,
+generate sorted output on-the-fly, and postprocess alignments. Sorted output
+can be used directly for polishing using GenomicConsensus, if BAM has been used
+as input to pbmm2. Benchmarks show that pbmm2 outperforms BLASR in sequence
+identity, number of mapped bases, and especially runtime. pbmm2 is the official
+replacement for BLASR.
+"""
+
+toolchain = SYSTEM
+
+# The filename that is downloaded. Save to a versioned name.
+# and install
+# using its original name and also a symlink without the _static suffix.  We
+# remove the suffix by removing the final 7 characters, so in case of changes,
+# adjust accordingly.
+local_sources = [ 'pbmm2' ]
+
+github_account = 'PacificBioSciences'
+source_urls = [GITHUB_LOWER_RELEASE]
+
+sources = [{
+    'filename': '%s-v%%(version)s' % x,
+    'download_filename': '%s' % x,
+} for x in local_sources ]
+
+checksums = [{
+    'pbmm2-v%(version)s' : '26c8900acd0cc105de53429aaff69d71ae2c8d222ec147e54097db3f5c927ba8',
+}]
+
+extract_sources = False
+
+# install the files using their original names, make them executable, and create a symlink to each without the suffix _static
+# note changes in strings between phrases so everything concatenates sanely
+install_cmd = 'mkdir %(installdir)s/bin && '
+install_cmd += ''.join(f'mv {x}-v%(version)s %(installdir)s/bin/{x} && ' for x in local_sources)
+install_cmd += 'cd %(installdir)s/bin && '
+install_cmd += ''.join(f'chmod +x %s && ' % x for x in local_sources)
+install_cmd += ' && '.join(f'ln -s {x} {x}-v%(version)s' for x in local_sources) # different because it's the last
+
+sanity_check_paths = {
+    'files': [ 'bin/%s' % x for x in local_sources ],
+    'dirs' : [ 'bin' ]
+}
+
+sanity_check_commands = [x + ' --version | head -n 1 | grep "' + x + ' %(version)s"' for x in local_sources ]
+
+moduleclass = 'bio'

@@ -1,0 +1,62 @@
+# Douglas Scofield UPPMAX 03/2026
+# - much newer version
+# - no dependency on node-semver
+#################################
+
+easyblock = 'PythonBundle'
+
+name = 'conan'
+version = '2.26.2'
+
+homepage = 'https://conan.io'
+description = "Decentralized, open-source (MIT), C/C++ package manager."
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+builddependencies = [
+    ('binutils', '2.42'),
+]
+
+dependencies = [
+    ('Python', '3.12.3'),
+    ('PyYAML', '6.0.2'),
+    ('tqdm', '4.66.5'),
+    ('Python-bundle-PyPI', '2024.06'),
+]
+
+exts_list = [
+    ('bottle', '0.13.1', {
+        'checksums': ['a48852dc7a051353d3e4de3dd5590cd25de370bcfd94a72237561e314ceb0c88'],
+    }),
+    ('distro', '1.9.0', {
+        'checksums': ['2fa77c6fd8940f116ee1d6b94a2f90b13b5ea8d019b98bc8bafdcabcdd9bdbed'],
+    }),
+    ('fasteners', '0.19', {
+        'checksums': ['b4f37c3ac52d8a445af3a66bce57b33b5e90b97c696b7b984f530cf8f0ded09c'],
+    }),
+    ('patch-ng', '1.18.1', {
+        'checksums': ['52fd46ee46f6c8667692682c1fd7134edc65a2d2d084ebec1d295a6087fc0291'],
+    }),
+    ('pluginbase', '1.0.1', {
+        'checksums': ['ff6c33a98fce232e9c73841d787a643de574937069f0d18147028d70d7dee287'],
+    }),
+    ('PyJWT', '2.9.0', {
+        'modulename': 'jwt',
+        'source_tmpl': SOURCELOWER_TAR_GZ,
+        'checksums': ['7e1e5b56cc735432a7369cbfa0efe50fa113ebecdc04ae6922deba8b84582d0c'],
+    }),
+    (name, version, {
+        'source_tmpl': '%(version)s.tar.gz',
+        'source_urls': ['https://github.com/conan-io/conan/archive/'],
+        'checksums': ['a8ba4b0781b8d6991211e3cfde5eb816328c06b062a77fca75158ada55d82a88'],
+    }),
+]
+
+sanity_check_paths = {
+    'files': ['bin/conan'],
+    'dirs': ['lib/python%(pyshortver)s/site-packages'],
+}
+
+sanity_check_commands = ["conan --help"]
+
+moduleclass = 'devel'

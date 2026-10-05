@@ -1,0 +1,65 @@
+# bamUtil
+#
+# Douglas G Scofield 6/2025 UPPMAX
+#
+# There's a convoluted makefile-based build procedure using makefiles shipped
+# with libStatGen that build generic libStatGen-based tools.  Within bamUtil
+# itself is a draft cmake process that seems to do the trick and is much easier
+# to munge.
+#########################################
+
+easyblock = 'CMakeMakeCp'
+
+name = 'bamUtil'
+version = '1.0.15'
+
+homepage = 'https://genome.sph.umich.edu/wiki/BamUtil'
+description = """BamUtil contains several programs that perform operations on SAM/BAM files. All of these programs are built into a single executable, bam."""
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+github_account = 'statgen'
+source_urls = [ GITHUB_SOURCE ]
+#source_urls = [ GITHUB_SOURCE + '/refs/tags' ]
+#https://github.com/statgen/bamUtil/archive/refs/tags/v1.0.15.tar.gz
+
+sources = ['v%(version)s.tar.gz']
+checksums = ['24ac4bdb81eded6e33f60dba85ec3d32ebdb06d42f75df775c2632bbfbd8cce9']
+
+builddependencies = [
+    ('binutils',   '2.42'),
+    ('CMake',      '3.29.3'),
+    ('libStatGen', '1.0.15'),  # here because bamUtil links against its static library
+]
+dependencies = [
+    ('zlib',       '1.3.1'),
+]
+
+local_linkdependencies = [
+    ('zlib',       '1.3.1'),
+    toolchain,
+]
+
+configure_without_installdir = True
+
+preconfigopts = 'cd %(builddir)s/%(name)s-%(version)s && sed -i -e "s/1\.0\.14/1.0.15/" CMakeLists.txt && '
+# ${EBROOTLIBSTATGEN} set by libStatGen/1.0.15 gets substituted within the results of the next two sed commands
+preconfigopts += 'sed -i -e "s@\${CMAKE_SOURCE_DIR}/../libStatGen/libStatGen.a@${EBROOTLIBSTATGEN}/lib/libStatGen.a@" CMakeLists.txt && '
+preconfigopts += 'sed -i -e "s@\${CMAKE_SOURCE_DIR}/../libStatGen/include@${EBROOTLIBSTATGEN}/include@" CMakeLists.txt && '
+preconfigopts += 'sed -i -e "s/target_link_libraries(bam libz.dylib)/target_link_libraries(bam z m)/" CMakeLists.txt && '
+preconfigopts += 'cd %(builddir)s/easybuild_obj && '
+
+srcdir = '%(builddir)s/%(name)s-%(version)s'
+
+files_to_copy = [
+    ( [ 'bin/bam' ], 'bin'),
+]
+
+sanity_check_paths = {
+    'files': [ 'bin/bam' ],
+    'dirs':  [],
+}
+
+sanity_check_commands = [ 'bam help' ]
+
+moduleclass = 'bio'

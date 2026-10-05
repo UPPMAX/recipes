@@ -1,0 +1,304 @@
+# Douglas Scofield UPPMAX 03/2026
+# - remove defs of CC and system library paths
+# - include arm64 in accepted 64-bit architectures (its mechanism is still not ideal)
+# - remove architecture selection
+# - where c++ is desired, use $(CXX)
+# - update VERSION file and within the tool
+#################################
+diff -ruN SOAPdenovo2.orig/Makefile SOAPdenovo2/Makefile
+--- SOAPdenovo2.orig/Makefile	2026-03-27 10:31:47.606128287 +0100
++++ SOAPdenovo2/Makefile	2026-03-27 13:30:00.062239455 +0100
+@@ -1,5 +1,5 @@
+ MAKEFLAGS += --no-print-directory
+-CC = g++
++#CC = g++
+ ifdef debug
+ CFLAGS=         -O0 -g -fomit-frame-pointer -DDEBUG
+ else
+@@ -10,12 +10,12 @@
+ PROG=       SOAPdenovo-63mer SOAPdenovo-127mer SOAPdenovo-fusion
+ INCLUDES=   -I./sparsePregraph/inc -I./standardPregraph/inc
+ 
+-LIBPATH=    -L./sparsePregraph/inc -L./standardPregraph/inc -L/lib64 -L/usr/lib64
++LIBPATH=    -L./sparsePregraph/inc -L./standardPregraph/inc
+ LIBS=       -pthread -lz -lm
+-EXTRA_FLAGS= 
++EXTRA_FLAGS=
+ 
+ BIT_ERR = 0
+-ifeq (,$(findstring $(shell uname -m), x86_64 ppc64 ia64))
++ifeq (,$(findstring $(shell uname -m), x86_64 ppc64 ia64 arm64))
+ BIT_ERR = 1
+ endif
+ 
+@@ -24,17 +24,17 @@
+ LIBS += -lbam -lrt
+ endif
+ 
+-ifneq (,$(findstring $(shell uname -m), x86_64))
+-CFLAGS += -m64
+-endif
+-
+-ifneq (,$(findstring $(shell uname -m), ia64))
+-CFLAGS +=
+-endif
+-
+-ifneq (,$(findstring $(shell uname -m), ppc64))
+-CFLAGS += -mpowerpc64
+-endif
++#ifneq (,$(findstring $(shell uname -m), x86_64))
++#CFLAGS += -m64
++#endif
++#
++#ifneq (,$(findstring $(shell uname -m), ia64))
++#CFLAGS +=
++#endif
++#
++#ifneq (,$(findstring $(shell uname -m), ppc64))
++#CFLAGS += -mpowerpc64
++#endif
+ 
+ 
+ all: SOAPdenovo-63mer SOAPdenovo-127mer SOAPdenovo-fusion 
+@@ -46,20 +46,20 @@
+ SOAPdenovo-63mer:
+ 	@cd sparsePregraph;make 63mer=1 debug=1 clean all;cd ..;
+ 	@cd standardPregraph;make 63mer=1 debug=1 clean all;cd ..;
+-	@$(CC) sparsePregraph/*.o standardPregraph/*.o $(LIBPATH) $(LIBS) $(EXTRA_FLAGS) -o SOAPdenovo-63mer
++	@$(CXX) sparsePregraph/*.o standardPregraph/*.o $(LIBPATH) $(LIBS) $(EXTRA_FLAGS) -o SOAPdenovo-63mer
+ SOAPdenovo-127mer:
+ 	@cd sparsePregraph;make 127mer=1 debug=1 clean all;cd ..;
+ 	@cd standardPregraph;make 127mer=1 debug=1 clean all;cd ..;
+-	@$(CC) sparsePregraph/*.o standardPregraph/*.o $(LIBPATH) $(LIBS) $(EXTRA_FLAGS) -o SOAPdenovo-127mer
++	@$(CXX) sparsePregraph/*.o standardPregraph/*.o $(LIBPATH) $(LIBS) $(EXTRA_FLAGS) -o SOAPdenovo-127mer
+ else
+ SOAPdenovo-63mer:
+ 	@cd sparsePregraph;make 63mer=1 clean all;cd ..;
+ 	@cd standardPregraph;make 63mer=1 clean all;cd ..;
+-	@$(CC) sparsePregraph/*.o standardPregraph/*.o $(LIBPATH) $(LIBS) $(EXTRA_FLAGS) -o SOAPdenovo-63mer
++	@$(CXX) sparsePregraph/*.o standardPregraph/*.o $(LIBPATH) $(LIBS) $(EXTRA_FLAGS) -o SOAPdenovo-63mer
+ SOAPdenovo-127mer:
+ 	@cd sparsePregraph;make 127mer=1 clean all;cd ..;
+ 	@cd standardPregraph;make 127mer=1 clean all;cd ..;
+-	@$(CC) sparsePregraph/*.o standardPregraph/*.o $(LIBPATH) $(LIBS) $(EXTRA_FLAGS) -o SOAPdenovo-127mer
++	@$(CXX) sparsePregraph/*.o standardPregraph/*.o $(LIBPATH) $(LIBS) $(EXTRA_FLAGS) -o SOAPdenovo-127mer
+ endif
+ 
+ clean:
+diff -ruN SOAPdenovo2.orig/VERSION SOAPdenovo2/VERSION
+--- SOAPdenovo2.orig/VERSION	2026-03-27 10:31:47.606128287 +0100
++++ SOAPdenovo2/VERSION	2026-03-27 12:52:41.608479492 +0100
+@@ -1 +1 @@
+-2.04-r241
++2.04-r242-20250920
+diff -ruN SOAPdenovo2.orig/fusion/Makefile SOAPdenovo2/fusion/Makefile
+--- SOAPdenovo2.orig/fusion/Makefile	2026-03-27 10:31:47.607128281 +0100
++++ SOAPdenovo2/fusion/Makefile	2026-03-27 13:18:35.161016534 +0100
+@@ -1,30 +1,30 @@
+ # Generated automatically from Makefile.in by configure.
+-SHELL = /bin/sh
++#SHELL = /bin/sh
+ 
+ exec_prefix = .
+ bindir = $(exec_prefix)/bin
+ libdir = 
+ mandir = 
+ 
+-CC = gcc
++#CC = gcc
+ CCOPT = -O3 -fprefetch-loop-arrays -funroll-loops -fomit-frame-pointer -w 
+-LIBS = -lm -lpthread
++LIBS = -pthread -lm
+ INCDIRS = -Iinc/
+ CFLAGS = ${CCOPT} ${INCDIRS}
+ 
+ all: SOAPdenovo-fusion
+-SRCS1 = searchPath.c scaffold.c check.c seq.c bundle.c potential.c\
+-	loadGraph.c mem_manager.c attachPEinfo.c newhash.c\
+-	output_scaffold.c orderContig.c connect.c hashFunction.c\
++SRCS1 = searchPath.c scaffold.c check.c seq.c bundle.c potential.c \
++	loadGraph.c mem_manager.c attachPEinfo.c newhash.c \
++	output_scaffold.c orderContig.c connect.c hashFunction.c \
+ 	readseq1by1.c fib.c fibHeap.c stack.c kmer.c prepare.c
+-OBJS1 = searchPath.o scaffold.o check.o seq.o bundle.o potential.o\
+-	loadGraph.o mem_manager.o attachPEinfo.o newhash.o\
+-	output_scaffold.o orderContig.o connect.o hashFunction.o\
++OBJS1 = searchPath.o scaffold.o check.o seq.o bundle.o potential.o \
++	loadGraph.o mem_manager.o attachPEinfo.o newhash.o \
++	output_scaffold.o orderContig.o connect.o hashFunction.o \
+ 	readseq1by1.o fib.o fibHeap.o stack.o kmer.o prepare.o
+ 
+-SRCS2 = prlHashCtg.c prlRead2Ctg.c map.c localAsm.c\
++SRCS2 = prlHashCtg.c prlRead2Ctg.c map.c localAsm.c \
+ 	lib.c darray.c prlReadFillGap.c read2scaf.c
+-OBJS2 = prlHashCtg.o prlRead2Ctg.o map.o localAsm.o\
++OBJS2 = prlHashCtg.o prlRead2Ctg.o map.o localAsm.o \
+ 	lib.o darray.o prlReadFillGap.o read2scaf.o
+ 
+ 
+diff -ruN SOAPdenovo2.orig/sparsePregraph/Makefile SOAPdenovo2/sparsePregraph/Makefile
+--- SOAPdenovo2.orig/sparsePregraph/Makefile	2026-03-27 10:31:47.622128196 +0100
++++ SOAPdenovo2/sparsePregraph/Makefile	2026-03-27 13:29:45.214321322 +0100
+@@ -1,4 +1,4 @@
+-CC=            g++
++#CC=            g++
+ ifdef debug
+ CFLAGS=         -O0 -g -fomit-frame-pointer -DDEBUG
+ else
+@@ -7,15 +7,15 @@
+ 
+ DFLAGS=         
+ OBJS=		build_graph.o build_edge.o multi_threads.o \
+-			build_preArc.o pregraph_sparse.o io_func.o\
++			build_preArc.o pregraph_sparse.o io_func.o \
+ 			global.o convert_soapdenovo.o
+ PROG=           
+ INCLUDES=	-I./inc
+ SUBDIRS=    . 
+-LIBPATH=	-L./inc -L/usr/lib64
++LIBPATH=	-L./inc
+ LIBS=       -pthread -lz
+ EXTRA_FLAGS=
+-VERSION =    1.0.3
++VERSION =    $(shell cat ../VERSION)
+ 
+ ifdef 127mer
+ CFLAGS += -D_127MER_
+@@ -28,7 +28,7 @@
+ 
+ 
+ BIT_ERR = 0
+-ifeq (,$(findstring $(shell uname -m), x86_64 ppc64 ia64))
++ifeq (,$(findstring $(shell uname -m), x86_64 ppc64 ia64 arm64))
+ BIT_ERR = 1
+ endif
+ 
+@@ -37,23 +37,23 @@
+ LIBS += -lbam
+ endif
+ 
+-ifneq (,$(findstring $(shell uname -m), x86_64))
+-CFLAGS += -m64
+-endif
+-
+-ifneq (,$(findstring $(shell uname -m), ia64))
+-CFLAGS += 
+-endif
+-
+-ifneq (,$(findstring $(shell uname -m), ppc64))
+-CFLAGS += -mpowerpc64
+-endif
++#ifneq (,$(findstring $(shell uname -m), x86_64))
++#CFLAGS += -m64
++#endif
++#
++#ifneq (,$(findstring $(shell uname -m), ia64))
++#CFLAGS += 
++#endif
++#
++#ifneq (,$(findstring $(shell uname -m), ppc64))
++#CFLAGS += -mpowerpc64
++#endif
+ 
+ .SUFFIXES:.cpp .o
+ 
+ .cpp.o:
+ 		@printf "Compiling $<...                               \r"
+-		@$(CC) -c $(CFLAGS) $(DFLAGS) $(INCLUDES) $< || echo "Error in command: $(CC) -c $(CFLAGS) $(DFLAGS) $(INCLUDES) $<"
++		@$(CXX) -c $(CFLAGS) $(DFLAGS) $(INCLUDES) $< || echo "Error in command: $(CXX) -c $(CFLAGS) $(DFLAGS) $(INCLUDES) $<"
+ 
+ all:		$(OBJS) 
+ 		@printf "$(PROG) objects generated.                    \n"
+@@ -66,7 +66,7 @@
+ 
+ pregraph_sparse: clean envTest $(OBJS)
+ 		@printf "Linking...                                     \r"
+-		@$(CC) $(CFLAGS)$(INCLUDES) -o $(PROG)  $(OBJS) $(LIBPATH) $(LIBS) $(ENTRAFLAGS)
++		@$(CXX) $(CFLAGS) $(INCLUDES) -o $(PROG)  $(OBJS) $(LIBPATH) $(LIBS) $(EXTRA_FLAGS)
+ 		@printf "$(PROG) compilation done.                      \n"
+ 
+ clean:
+diff -ruN SOAPdenovo2.orig/standardPregraph/Makefile SOAPdenovo2/standardPregraph/Makefile
+--- SOAPdenovo2.orig/standardPregraph/Makefile	2026-03-27 10:31:47.635128123 +0100
++++ SOAPdenovo2/standardPregraph/Makefile	2026-03-27 13:30:28.128085343 +0100
+@@ -5,7 +5,7 @@
+ #
+ ###################################
+ 
+-CC=             gcc
++#CC=             gcc
+ GCCVERSIONMAJOR := $(shell expr `$(CC) -dumpversion | cut -f1 -d.` \>= 4)
+ GCCVERSIONMINOR := $(shell expr `$(CC) -dumpversion | cut -f2 -d.` \>= 4)
+ ifdef debug
+@@ -21,18 +21,18 @@
+ 		loadPreGraph.o localAsm.o main.o map.o mem_manager.o \
+ 		newhash.o node2edge.o orderContig.o output_contig.o output_pregraph.o \
+ 		output_scaffold.o pregraph.o prlHashCtg.o prlHashReads.o prlRead2Ctg.o \
+-		prlRead2path.o prlReadFillGap.o read2scaf.o readInterval.o stack.o\
++		prlRead2path.o prlReadFillGap.o read2scaf.o readInterval.o stack.o \
+ 		readseq1by1.o scaffold.o searchPath.o seq.o splitReps.o \
+ 		cutTip_graph2.o linearEdge.o kmerhash.o read2edge.o iterate.o
+ PROG=       SOAPdenovo-63mer
+ INCLUDES=   -Iinc
+ SUBDIRS=    .
+-LIBPATH=    -L./inc -L/lib64 -L/usr/lib64
++LIBPATH=    -L./inc
+ LIBS=       -pthread -lz -lm 
+ EXTRA_FLAGS=
+ 
+ BIT_ERR = 0
+-ifeq (,$(findstring $(shell uname -m), x86_64 ppc64 ia64))
++ifeq (,$(findstring $(shell uname -m), x86_64 ppc64 ia64 arm64))
+ BIT_ERR = 1
+ endif
+ 
+@@ -49,17 +49,17 @@
+ LIBS += -lbam -lrt 
+ endif
+ 
+-ifneq (,$(findstring $(shell uname -m), x86_64))
+-CFLAGS += -m64
+-endif
+-
+-ifneq (,$(findstring $(shell uname -m), ia64))
+-CFLAGS += 
+-endif
+-
+-ifneq (,$(findstring $(shell uname -m), ppc64))
+-CFLAGS += -mpowerpc64
+-endif
++#ifneq (,$(findstring $(shell uname -m), x86_64))
++#CFLAGS += -m64
++#endif
++#
++#ifneq (,$(findstring $(shell uname -m), ia64))
++#CFLAGS += 
++#endif
++#
++#ifneq (,$(findstring $(shell uname -m), ppc64))
++#CFLAGS += -mpowerpc64
++#endif
+ 
+ .SUFFIXES:.c .o
+ 
+@@ -79,7 +79,7 @@
+ 
+ SOAPdenovo:	envTest $(OBJS)
+ 		@printf "Linking...                                          \r"
+-		@$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBPATH) $(LIBS) $(ENTRAFLAGS)
++		@$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBPATH) $(LIBS) $(EXTRA_FLAGS)
+ 		@printf "$(PROG) compilation done.                           \n"
+ 
+ clean:
+diff -ruN SOAPdenovo2.orig/standardPregraph/main.c SOAPdenovo2/standardPregraph/main.c
+--- SOAPdenovo2.orig/standardPregraph/main.c	2026-03-27 10:31:47.659127987 +0100
++++ SOAPdenovo2/standardPregraph/main.c	2026-03-27 12:56:40.346147479 +0100
+@@ -59,7 +59,7 @@
+ int main ( int argc, char **argv )
+ {
+   crc32c_Init();
+-  fprintf ( stderr, "\nVersion 2.04: released on July 13th, 2012\nCompile %s\t%s\n", __DATE__, __TIME__ );
++  fprintf ( stderr, "\nVersion 2.04-r242-20250920: commit 7560c0b on September 20th, 2025\nCompile %s\t%s\n", __DATE__, __TIME__ );
+   argc--;
+   argv++;
+ 

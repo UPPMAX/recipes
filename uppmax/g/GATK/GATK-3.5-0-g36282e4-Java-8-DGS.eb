@@ -1,0 +1,44 @@
+# Douglas Scofield UPPMAX 04/2026
+# - resurrect, some labs require this older version
+# - new download URL, GATK archives (top-level URL is https://storage.googleapis.com/gatk-software/)
+# - requires Java 8
+#################################
+
+easyblock = 'Tarball'
+
+name = 'GATK'
+version = '3.5-0-g36282e4'
+versionsuffix = '-Java-%(javaver)s'
+
+homepage = 'http://www.broadinstitute.org/gatk/'
+description = """
+The Genome Analysis Toolkit or GATK is a software package developed at the Broad Institute 
+to analyse next-generation resequencing data. The toolkit offers a wide variety of tools,
+with a primary focus on variant discovery and genotyping as well as strong emphasis on 
+data quality assurance. Its robust architecture, powerful processing engine and 
+high-performance computing features make it capable of taking on projects of any size.
+
+This version requires Java 8, and will thus be incompatible with a number of newer tools."""
+
+toolchain = SYSTEM
+
+sources = [{
+    'source_urls': [ 'https://storage.googleapis.com/gatk-software/package-archive/gatk' ],
+    'filename': 'GenomeAnalysisTK-%(version)s.tar.bz2', 
+}]
+checksums = ['ad413252b223cd7b4e39cfb44db9d4be218702fde6b150306bd599e05587efc5']
+
+dependencies = [('Java', '8')]
+
+modloadmsg = "%(name)s/%(version)s: To execute GATK run: java -jar $EBROOTGATK/GenomeAnalysisTK.jar ..."
+
+sanity_check_paths = {
+    'files': ["GenomeAnalysisTK.jar"],
+    'dirs': ["resources"],
+}
+
+sanity_check_cmds = [
+    'java -jar $EBROOTGATK/GenomeAnalysisTK.jar --version | grep -F "%(version)s"',
+]
+
+moduleclass = 'bio'

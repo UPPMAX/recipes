@@ -1,0 +1,67 @@
+# Douglas G Scofield UPPMAX 8/2025
+# - based on novoalign easyconfig
+# - Ancient, but provides all its own binaries and the .jars run with java 17
+##
+easyblock = 'Binary'
+
+name = 'A5-miseq'
+version = '20160825'
+
+homepage = 'https://sourceforge.net/projects/ngopt/'
+description = """De novo assembly & analysis of Illumina sequence data, including the
+A5 pipeline, A5-miseq, tools to evaluate assembly quality, and scripts to facilitate
+data submission to NCBI and the RAST annotation system"""
+
+toolchain = { 'name': 'GCCcore', 'version': '13.3.0' }
+
+# Project at Sourceforce is named 'ngopt' but tool tarball is A5-miseq and it is known by this latter name
+source_urls = [ 'https://downloads.sourceforge.net/project/ngopt/' ]
+sources = [ '%s_linux_%%(version)s.tar.gz' % name.lower().replace('-', '_') ]
+checksums = [ '76a2798d617d45f4539e73ef2df5f899503ac4a54c3a406faf37db6282127fe9' ]
+
+extract_sources = True
+
+dependencies = [
+    ('Perl', '5.38.2'),
+    ('Java', '17', '', SYSTEM),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+local_executables = [
+    'a5_pipeline.pl',
+    'bcftools',
+    'bwa',
+    'fasta2agp.pl',
+    'idba_ud',
+    'idba_ud500',
+    'samtools',
+    'sga',
+    'vcfutils.pl',
+    'SSPACE/SSPACE',
+    'SSPACE/bowtie/bowtie',
+    'SSPACE/bowtie/bowtie-build',
+]
+
+local_jars = [
+    'A5qc.jar',
+    'GetInsertSize.jar',
+    'trimmomatic.jar',
+]
+
+fix_perl_shebang_for = [ 'bin/*.pl', 'bin/SSPACE/SSPACE' ]
+
+prepend_to_path = None
+
+runtest = '%(start_dir)s/test.a5.sh'
+
+sanity_check_paths = {
+    'files': [ 'README.txt', 'adapter.fasta', 'test.a5.sh',
+               [ 'bin/%s' % x for x in local_executables ],
+               [ 'bin/%s' % x for x in local_jars ], ],
+    'dirs' : [ 'example', 'bin/SSPACE/dotlib' ],
+}
+
+moduleclass = 'bio'

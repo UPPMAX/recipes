@@ -1,0 +1,140 @@
+# Douglas Scofield UPPMAX 03/2026
+# - use EB dependencies for BamTools NLopt popt, shared libraries for each
+# - define and use CXXFLAGS and LDFLAGS
+# - use CXX consistently, not CPP
+# - install all executables, scripts and man page
+# - clean everything
+# - /usr/bin/env perl for perl scripts
+# - find snpAD in PATH in run_windows.pl
+#################################
+diff -ruN snpAD-0.3.11.orig/Bam2snpAD/Makefile snpAD-0.3.11/Bam2snpAD/Makefile
+--- snpAD-0.3.11.orig/Bam2snpAD/Makefile	2023-01-31 09:22:00.000000000 +0100
++++ snpAD-0.3.11/Bam2snpAD/Makefile	2026-03-03 11:24:56.522016611 +0100
+@@ -1,26 +1,21 @@
+ 
+-all: Bam2snpAD bamtools snpADJoin
++all: Bam2snpAD snpADJoin
+ 
+-bamtools/build/src/libbamtools.a: 
+-	rm -rf bamtools
+-	git clone https://github.com/pezmaster31/bamtools.git
+-	mkdir bamtools/build || true
+-	cd bamtools/build ; cmake .. ; make
+-
+-Bam2snpAD: bamtools/build/src/libbamtools.a src/BamAliIt.cpp src/BamTable.cpp src/FastaSlurp.cpp 
+-	$(CXX) -std=c++11 -O3 -g -I src/ -Wall -I bamtools/build/src -I bamtools/src -c -o src/BamAliIt.o src/BamAliIt.cpp 
+-	$(CXX) -std=c++11 -O3 -g -I src/ -Wall -I bamtools/build/src -I bamtools/src -c -o src/BamTable.o src/BamTable.cpp 
+-	$(CXX) -std=c++11 -O3 -g -I src/ -Wall -I bamtools/build/src -I bamtools/src -c -o src/FastaSlurp.o src/FastaSlurp.cpp 
+-	$(CXX) -std=c++11 -O3 -g -I src/ -Wall -I bamtools/build/src -I bamtools/src -L bamtools/build/src -o Bam2snpAD src/BamAliIt.o src/BamTable.o src/FastaSlurp.o -lpopt -lz -lbamtools -lstdc++ -lz
++CXXFLAGS = -std=c++11 -O3 -Isrc -I$(EBROOTBAMTOOLS)/include/bamtools -Wall
++LDFLAGS = -lpopt -lbamtools -lstdc++ -lz
++
++Bam2snpAD: src/BamAliIt.cpp src/BamTable.cpp src/FastaSlurp.cpp 
++	$(CXX) $(CXXFLAGS) -c -o src/BamAliIt.o src/BamAliIt.cpp 
++	$(CXX) $(CXXFLAGS) -c -o src/BamTable.o src/BamTable.cpp 
++	$(CXX) $(CXXFLAGS) -c -o src/FastaSlurp.o src/FastaSlurp.cpp 
++	$(CXX) $(CXXFLAGS) -o Bam2snpAD src/BamAliIt.o src/BamTable.o src/FastaSlurp.o $(LDFLAGS)
+ 
+ snpADJoin: src/snpADJoin.cc src/SnpADFile.cc src/SnpADFile.h
+-	$(CXX) -std=c++11 -O3 -g -I src/ -Wall -c -o src/SnpADFile.o src/SnpADFile.cc
+-	$(CXX) -std=c++11 -O3 -g -I src/ -Wall -c -o src/snpADJoin.o src/snpADJoin.cc
+-	$(CXX) -std=c++11 -O3 -g -I src/ -Wall -o snpADjoin src/SnpADFile.o src/snpADJoin.o
++	$(CXX) $(CXXFLAGS) -c -o src/SnpADFile.o src/SnpADFile.cc
++	$(CXX) $(CXXFLAGS) -c -o src/snpADJoin.o src/snpADJoin.cc
++	$(CXX) $(CXXFLAGS) -o snpADjoin src/SnpADFile.o src/snpADJoin.o $(LDFLAGS)
+ 	
+ 
+ clean:
+ 	rm -rf src/*.o Bam2snpAD
+ 
+-super-clean:
+-	rm -f bamtools/lib/libbamtools.a
+diff -ruN snpAD-0.3.11.orig/Makefile snpAD-0.3.11/Makefile
+--- snpAD-0.3.11.orig/Makefile	2023-01-31 09:22:00.000000000 +0100
++++ snpAD-0.3.11/Makefile	2026-03-03 11:03:36.377333425 +0100
+@@ -18,7 +18,15 @@
+ 	install -m 755 Bam2snpAD/snpADjoin $(DESTDIR)$(PREFIX)/bin/
+ 	install -m 755 snpAD/snpAD $(DESTDIR)$(PREFIX)/bin/
+ 	install -m 755 snpAD/snpADCall $(DESTDIR)$(PREFIX)/bin/
+-	
++	install -m 755 snpAD/snpAD $(DESTDIR)$(PREFIX)/bin/
++	install -m 755 snpAD/snpADCall $(DESTDIR)$(PREFIX)/bin/
++	install -m 755 snpAD/snpADci $(DESTDIR)$(PREFIX)/bin/
++	install -m 755 snpAD/snpADll $(DESTDIR)$(PREFIX)/bin/
++	install -m 755 snpAD/reservoir_sampling.pl $(DESTDIR)$(PREFIX)/bin/
++	install -m 755 snpAD/run_windows.pl $(DESTDIR)$(PREFIX)/bin/
++	install -d $(DESTDIR)$(PREFIX)/share/man/man1/
++	install -m 644 man/BamToSnpAD.1 $(DESTDIR)$(PREFIX)/share/man/man1/
++
+ release:
+ 	echo "#define SNPAD_VERSION \"`cat VERSION`\"" > version.h
+ 	git commit version.h -m "new version"
+diff -ruN snpAD-0.3.11.orig/snpAD/Makefile snpAD-0.3.11/snpAD/Makefile
+--- snpAD-0.3.11.orig/snpAD/Makefile	2023-01-31 09:22:00.000000000 +0100
++++ snpAD-0.3.11/snpAD/Makefile	2026-03-03 11:26:43.522488584 +0100
+@@ -1,5 +1,6 @@
+ 
+-CPP = $(CXX) -O3 -ggdb -std=c++11 -pthread -DDEBUG
++CXXFLAGS = -O3 -std=c++11 -pthread
++LDFLAGS = -lnlopt -lm -lpthread -Wl,--no-as-needed -lpopt
+ OBJS = Error.o Data.o MLHet_thread.o MLHet_thread_tstv.o MLHetRB_thread.o log_add.o
+ HDRS = Error.h Data.h MLHet_thread.h MLHet_thread_tstv.h MLHetRB_thread.h log_add.h
+ 
+@@ -9,23 +10,23 @@
+ all: snpAD snpADCall snpADll snpADci
+ 
+ snpADCall: ${OBJSCall} ${HDRSCall}
+-	$(CPP) -o snpADCall ${OBJSCall} -lm -lpopt
++	$(CXX) -o snpADCall ${OBJSCall} $(LDFLAGS)
+ 
+ snpADll: ${OBJS} snpADll.o ${HDRS}
+-	$(CPP) -o snpADll snpADll.o ${OBJS} -lnlopt -lm -lpthread -Wl,--no-as-needed -lpopt
++	$(CXX) -o snpADll snpADll.o ${OBJS} $(LDFLAGS)
+ 
+ snpADci: ${OBJS} snpADci.o ${HDRS}
+-	$(CPP) -o snpADci snpADci.o ${OBJS} -lnlopt -lm -lpthread -Wl,--no-as-needed -lpopt
++	$(CXX) -o snpADci snpADci.o ${OBJS} $(LDFLAGS)
+ 
+ snpAD: ${OBJS} snpAD.o ${HDRS}
+-	$(CPP) -o snpAD snpAD.o ${OBJS} -lnlopt -lm -lpthread -Wl,--no-as-needed -lpopt
++	$(CXX) -o snpAD snpAD.o ${OBJS} $(LDFLAGS)
+ 
+ %.o: %.cc %.h
+-	$(CPP) -c -o $@ $<
++	$(CXX) $(CXXFLAGS) -c -o $@ $<
+ 
+ %.o: %.cc 
+-	$(CPP) -c -o $@ $<
++	$(CXX) $(CXXFLAGS) -c -o $@ $<
+ 
+ clean: 
+-	rm -f ${OBJS} snpAD ${OBJSCall} snpADCall snpADll snpAD.o snpADCall.o snpADll.o snpADci.o
++	rm -f ${OBJS} snpAD ${OBJSCall} snpADci snpADCall snpADll snpAD.o snpADCall.o snpADll.o snpADci.o
+ 
+diff -ruN snpAD-0.3.11.orig/snpAD/reservoir_sampling.pl snpAD-0.3.11/snpAD/reservoir_sampling.pl
+--- snpAD-0.3.11.orig/snpAD/reservoir_sampling.pl	2023-01-31 09:22:00.000000000 +0100
++++ snpAD-0.3.11/snpAD/reservoir_sampling.pl	2026-03-03 11:55:10.598112363 +0100
+@@ -1,4 +1,4 @@
+-#!/usr/bin/perl
++#!/usr/bin/env perl
+ 
+ # "Algorithm R" (Jeffrey Vitter 1985)
+ 
+diff -ruN snpAD-0.3.11.orig/snpAD/run_windows.pl snpAD-0.3.11/snpAD/run_windows.pl
+--- snpAD-0.3.11.orig/snpAD/run_windows.pl	2023-01-31 09:22:00.000000000 +0100
++++ snpAD-0.3.11/snpAD/run_windows.pl	2026-03-03 11:55:44.927945783 +0100
+@@ -1,4 +1,4 @@
+-#!/usr/bin/perl
++#!/usr/bin/env perl
+ 
+ use strict ;
+ use Getopt::Long ;
+@@ -61,7 +61,7 @@
+ 
+ 	my $X = $$ ;
+ 
+-	open SNPAD, "|/home/pruefer/svn/snpAD-0.3/snpAD/snpAD -e $errorf -R -F -o $X.est /dev/stdin 2>$X.err >$X.out" ;
++	open SNPAD, "|snpAD -e $errorf -R -F -o $X.est /dev/stdin 2>$X.err >$X.out" ;
+ 	foreach ( my $i = 0 ; $i < @$buf ; $i++ ) {
+ 		print SNPAD join "\t", @{$buf->[$i]} ;
+ 	}

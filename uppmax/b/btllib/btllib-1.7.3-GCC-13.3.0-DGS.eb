@@ -1,0 +1,49 @@
+# Douglas G Scofield UPPMAX 6/2025
+#     demarcate build depencies
+#     download software release bundle instead of git clone
+#############################################
+
+easyblock = 'CmdCp'
+
+name = 'btllib'
+version = '1.7.3'
+
+homepage = 'https://github.com/bcgsc/btllib'
+description = """Bioinformatics Technology Lab common code library"""
+
+toolchain = {'name': 'GCC', 'version': '13.3.0'}
+toolchainopts = {'openmp': True}
+
+github_account = 'bcgsc'
+source_urls = [GITHUB_RELEASE]
+sources = [SOURCELOWER_TAR_GZ]
+checksums = ['31e7124e1cda9eea6f27b654258a7f8d3dea83c828f0b2e8e847faf1c5296aa3']
+
+builddependencies = [
+    ('Meson', '1.4.0'),
+    ('Ninja', '1.12.1'),
+    ('CMake', '3.29.3'),
+]
+
+dependencies = [
+    ('gzip', '1.13'),
+    ('Python', '3.12.3'),
+    ('SAMtools', '1.21.1'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+cmds_map = [('.*', "./compile")]
+
+files_to_copy = [(['install/bin/*'], 'bin'), (['install/lib/*'], 'lib'), (['install/include/*'], 'include')]
+
+sanity_check_paths = {
+    'files': ['bin/randseq', 'bin/indexlr', 'bin/mi_bf_generate'],
+    'dirs': [],
+}
+
+sanity_check_commands = ['randseq --help', 'indexlr --help']
+
+moduleclass = 'lang'

@@ -1,0 +1,41 @@
+# This is a contribution from Fred Hutch
+# Authors::     John Dey jfdey@fredhutch.org
+#
+# Douglas G Scofield UPPMAX 8/2025
+# - based on BAli-Phy-3.6.0.eb
+# - update to 3.6.1, download from github
+# - more sanity_check_commands
+#######################
+
+easyblock = 'Tarball'
+
+name = 'BAli-Phy'
+version = '3.6.1'
+
+homepage = 'https://www.bali-phy.org/'
+description = """BAli-Phy estimates multiple sequence alignments and evolutionary trees from DNA, amino acid,
+ or codon sequences.  It uses likelihood-based evolutionary models of substitutions and insertions and
+ deletions to place gaps.  """
+
+
+toolchain = SYSTEM
+local_prebuiltos = 'linux64'
+
+github_account = 'bredelings'
+source_urls = [ 'https://github.com/%(github_account)s/%(name)s/releases/download/%(version)s' ]
+sources = [ '%%(namelower)s-%%(version)s-%s.tar.gz' % local_prebuiltos ]
+checksums = [ '4a263aa012b8d94a1c2537e33826b4fea6b5ee5826b66b98ea3d89f3a82e2ed4' ]
+
+sanity_check_paths = {
+    'files': ['bin/%(namelower)s'],
+    'dirs': ['bin', 'lib', 'share'],
+}
+
+sanity_check_commands = [
+    "alignment-draw --help",
+    "%(namelower)s --help",
+    "%(namelower)s --version | grep -F 'VERSION: %(version)s'",
+    "trees-distances --help",
+]
+
+moduleclass = 'bio'

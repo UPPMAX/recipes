@@ -1,0 +1,75 @@
+# Douglas Scofield UPPMAX 02/2026
+# - resurrecting from 4.9.4
+# - update to 2.3.2
+# - install db scripts bin lib directories
+# - UPPMAX bioinfo toolchain 2024a
+#################################
+
+easyblock = 'CMakeMakeCp'
+
+name = 'PLAST'
+version = '2.3.2'
+versionsuffix = '-Java-%(javaver)s'
+
+homepage = "https://plast.inria.fr/"
+description = """PLAST is a fast, accurate and NGS scalable bank-to-bank sequence similarity
+search tool providing significant accelerations of seeds-based heuristic
+comparison methods, such as the Blast suite of algorithms.
+
+Brief help is available with '%(namelower)s -h'.  Complete documentation is available at
+https://plast.inria.fr/user-guide/
+"""
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+toolchainopts = {'pic': True, 'cstd': 'c++11'}
+
+_untardir = '%(namelower)s_source_v%(version)s'
+source_urls = ['https://github.com/PLAST-software/plast-library/releases/download/v%(version)s/']
+sources = [_untardir + '.tar.gz']
+checksums = ['39c07cfaf1f49e1e071cdb4670d26129e845a8b13b3d1f60f46b383e8ad5988b']
+
+builddependencies = [
+    ('CMake', '3.29.3'),
+    ('binutils', '2.42'),
+    ('Perl', '5.38.2')
+]
+
+dependencies = [
+    ('Java', '17', '', SYSTEM),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+postinstallcmds = [
+    'cp -rv %(builddir)s/' + _untardir + '/db %(installdir)s',
+    'cp -rv %(builddir)s/' + _untardir + '/scripts %(installdir)s',
+    'sed -i "s@build/@@" %(installdir)s/scripts/test-plast.sh',
+    'sed -i "s@build/@@" %(installdir)s/scripts/plast.sh',
+    'find %(installdir)s/include -type f -print0 | xargs -0 chmod -x'
+]
+
+files_to_copy = [
+    ( ['bin/Release/*'], 'bin' ),
+    ( ['lib/Release/*'], 'lib' ),
+    ( ['include/*'],     'include' ),
+]
+
+modextrapaths = {
+    'PATH': 'scripts',
+    'CPLUS_INCLUDE_PATH': 'include',
+}
+
+sanity_check_paths = {
+    'files': [ 'bin/plast', 'scripts/test-plast.sh', 'scripts/plast.sh',
+               'lib/libPlastLibrary.%s' % SHLIB_EXT ],
+    'dirs': [ 'db', 'scripts', 'include', 'include/algo', 'include/alignment', 'include/misc' ],
+}
+
+sanity_check_commands = [
+    'plast -h',
+    'test-plast.sh',
+]
+
+moduleclass = 'bio'

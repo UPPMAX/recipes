@@ -1,0 +1,25 @@
+name = 'MPICH'
+version = '4.2.2-static'
+
+homepage = 'https://www.mpich.org/'
+description = """MPICH is a high-performance and widely portable implementation
+of the Message Passing Interface (MPI) standard (MPI-1, MPI-2 and MPI-3)."""
+
+toolchain = {'name': 'GCC', 'version': '13.3.0'}
+
+source_urls = ['https://www.mpich.org/static/downloads/4.2.2']
+#sources = [SOURCELOWER_TAR_GZ]
+sources = ['mpich-4.2.2.tar.gz']
+checksums = ['883f5bb3aeabf627cb8492ca02a03b191d09836bbe0f599d8508351179781d41']
+
+dependencies = [
+    ('UCX', '1.16.0'),
+]
+
+#configopts = 'FFLAGS="-w -fallow-argument-mismatch -O2" --with-device=ch4:ucx --with-ucx=$EBROOTUCX'
+#BC 20250806
+#configopts = 'FFLAGS="-w -fallow-argument-mismatch -O2" --with-device=ch4:ucx --with-ucx=$EBROOTUCX --enable-static --disable-shared --disable-cxx --enable-timer-type=gettimeofday'
+#BC 20260617
+configopts = 'FFLAGS="-w -fallow-argument-mismatch -O2" --with-device=ch4:ucx --with-ucx=$EBROOTUCX --enable-static --disable-shared --disable-cxx'
+
+moduleclass = 'mpi'

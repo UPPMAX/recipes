@@ -1,0 +1,65 @@
+# Douglas Scofield UPPMAX 03/2026
+# - new tool
+# - build problems with modern gcc, so build from commit 7560c0b which fixes these issues
+#################################
+
+easyblock = 'MakeCp'
+
+name = 'SOAPdenovo2'
+_thisversion = '2.04-r242'
+_thiscommitdate = '20250920'
+_thiscommit = '7560c0b'
+version = f'{_thisversion}-{_thiscommitdate}'
+
+homepage = 'https://github.com/aquaskyline/SOAPdenovo2'
+description = """
+SOAPdenovo2 is a novel short-read assembly method that can build a de novo draft
+assembly for the human-sized genomes. The program is specially designed to
+assemble Illumina GA short reads. It creates new opportunities for building
+reference sequences and carrying out accurate analyses of unexplored genomes in
+a cost effective way.
+
+This version is ahead of the most recent released version, built from the source
+as of commit """ + f'{_thiscommit} dated {_thiscommitdate}.' + """
+
+An example configuration is available at the homepage, and also locally at
+$EBROOTSOAPDENOVO2/example.config
+"""
+
+toolchain = {'name': 'GCC', 'version': '13.3.0'}
+
+github_account = 'aquaskyline'
+source_urls = [GITHUB_SOURCE]
+sources = [{'download_filename': '%s.tar.gz' % _thiscommit, 'filename': SOURCE_TAR_GZ}]
+patches = ['%(name)s-%(version)s_compilation-versioning.patch']
+checksums = [
+    {SOURCE_TAR_GZ: '41386f6b259cea4aedba33c447719fa90b793dceb80f562f2f87c3ff56bb6421'},
+    {'%(name)s-%(version)s_compilation-versioning.patch': 'abe56f73aa7e7fe3338e2ec4bd40d9614770a96dafff3aecc326c60dfd268513'},
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+max_parallel = 1
+
+files_to_copy = [
+    (['SOAPdenovo-127mer', 'SOAPdenovo-63mer', 'SOAPdenovo-fusion'], 'bin'),
+    'example.config',
+    'LICENSE',
+    'README.md',
+    'VERSION',
+]
+
+sanity_check_paths = {
+    'files': ['bin/SOAPdenovo-127mer', 'bin/SOAPdenovo-63mer', 'bin/SOAPdenovo-fusion', 'example.config'],
+    'dirs': []
+}
+
+sanity_check_cmds = [
+    'SOAPdenovo-127mer 2>&1 | grep -F "%(version)s"',
+    'SOAPdenovo-63mer 2>&1 | grep -F "%(version)s"',
+    'SOAPdenovo-fusion',
+]
+
+moduleclass = 'bio'

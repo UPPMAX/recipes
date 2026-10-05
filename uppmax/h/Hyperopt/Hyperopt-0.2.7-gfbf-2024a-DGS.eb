@@ -1,0 +1,39 @@
+# Douglas Scofield UPPMAX 05/2026
+# - UPPMAX bioinfo toolchain 2024a, prefer gfbf
+################################
+
+easyblock = 'PythonBundle'
+
+name = 'Hyperopt'
+version = '0.2.7'
+
+homepage = 'http://hyperopt.github.io/hyperopt/'
+description = """hyperopt is a Python library for optimizing over awkward search spaces with real-valued,
+ discrete, and conditional dimensions."""
+
+toolchain = {'name': 'gfbf', 'version': '2024a'}
+
+dependencies = [
+    ('Python', '3.12.3'),
+    ('SciPy-bundle', '2024.05'),
+    ('networkx', '3.4.2'),
+    ('tqdm', '4.66.5'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+exts_list = [
+    #('cloudpickle', '2.2.1', {  ## cloudpickle 3.0.0 is provided by Python-bundle-PyPI/2024.06 loaded by SciPy-bundle/2024.05
+    #    'checksums': ['d89684b8de9e34a2a43b3460fbca07d09d6e25ce858df4d5a44240403b6178f5'],
+    #}),
+    ('py4j', '0.10.9.7', {
+        'checksums': ['0b6e5315bb3ada5cf62ac651d107bb2ebc02def3dee9d9548e3baac644ea8dbb'],
+    }),
+    ('%(namelower)s', version, {
+        'checksums': ['1bf89ae58050bbd32c7307199046117feee245c2fd9ab6255c7308522b7ca149'],
+    }),
+]
+
+moduleclass = 'lib'

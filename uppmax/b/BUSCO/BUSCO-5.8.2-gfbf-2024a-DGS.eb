@@ -1,0 +1,94 @@
+# Updated by: Pavel Grochal (INUITS)
+# Updated by: Sebastien Moretti (SIB)
+#
+# Douglas Scofield UPPMAX 01/2026
+# - UPPMAX bioinfo toolchian 2024a
+# - fix config file  # SEE BELOW TO MAKE LOCAL CHANGES
+# - fix raw string problem in bin/busco with Python 3.12+: SyntaxWarning: invalid escape sequence '\w'
+# - access datasets
+# - define BUSCO_CONFIG_FILE (used by BUSCO)
+# - define BUSCO_LINEAGE_SETS (our own)
+# o handle AUGUSTUS config copy
+#####################################
+
+easyblock = 'PythonPackage'
+
+name = 'BUSCO'
+version = '5.8.2'
+
+# eventually provide this via a Dataset easyconfig
+_lineagesets_datapath = '/sw/data/local/%(name)s_Data/v%(version_major)s'
+
+homepage = 'https://busco.ezlab.org/'
+description = """BUSCO: assessing genome assembly and annotation completeness with single-copy orthologs
+
+A local download of the full set of lineage sets as of 2026-02-03 is available at $BUSCO_LINEAGE_SETS
+
+Use with the lineage -l option, for example:
+
+    busco -l $BUSCO_LINEAGE_SETS/fungi_odb12 ...
+
+Offline mode is set by default.
+"""
+
+# software_license = 'LicenseMIT'
+
+toolchain = {'name': 'gfbf', 'version': '2024a'}
+
+source_urls = ['https://gitlab.com/ezlab/%(namelower)s/-/archive/%(version)s']
+sources = [SOURCELOWER_TAR_BZ2]
+patches = [ 'BUSCO-5.8.2_fix-versions-offline-mode.patch' ]
+checksums = [{
+    SOURCELOWER_TAR_BZ2: '342a6e017f8ac3076ed311150f1f7a5a07697f729e4fc2df1f180b6641ba75d3',
+    'BUSCO-5.8.2_fix-versions-offline-mode.patch': 'de0432ea984adcf4541b839d39020f5829e7daa030dad8502d213a4736b05609',
+}]
+
+dependencies = [
+    ('Python', '3.12.3'),
+    ('SciPy-bundle', '2024.05'),
+    ('R', '4.4.2'),
+    ('Biopython', '1.84'),
+    ('BLAST+', '2.16.0'),
+    ('HMMER', '3.4'),
+    ('prodigal', '2.6.3'),
+    ('AUGUSTUS', '3.5.0'),
+    ('SEPP', '4.5.5'),
+    ('MetaEuk', '6'),
+    ('BBMap', '39.19'),
+    ('miniprot', '0.18'),
+]
+
+postinstallcmds = [
+    "mkdir -p %(installdir)s/bin %(installdir)s/doc",
+    "cp %(builddir)s/%(namelower)s-%(version)s/scripts/* %(installdir)s/bin",
+    "cp %(builddir)s/%(namelower)s-%(version)s/LICENSE %(installdir)s/doc",
+    "cp -r %(builddir)s/%(namelower)s-%(version)s/test_data %(installdir)s",
+    "cp -r %(builddir)s/%(namelower)s-%(version)s/config %(installdir)s",
+    r"sed -i 's/ \"cannot import/ r\"cannot import/' %(installdir)s/bin/busco", # fix invalid excape \w
+    # config/config.ini changes
+    r"sed -i 's/^\(path\)/\;\1/g' %(installdir)s/config/config.ini",  # comment out direct paths to tools
+    r"sed -i 's/^;\(offline\)/\1/' %(installdir)s/config/config.ini",  # default to offline mode with local datasets
+    r"sed -i 's@^;\(download_path\).*$@\1 = " + _lineagesets_datapath + "@' %(installdir)s/config/config.ini",  # location for local datasets
+]
+
+modextravars = {
+    'BUSCO_CONFIG_FILE': '%(installdir)s/config/config.ini',
+    'BUSCO_LINEAGE_SETS': _lineagesets_datapath,
+}
+
+sanity_check_paths = {
+    'files': ['bin/%(namelower)s', 'bin/generate_plot.py'],
+    'dirs': ['test_data', 'lib/python%(pyshortver)s/site-packages/%(namelower)s'],
+}
+
+sanity_check_commands = [
+    "%(namelower)s --help",
+    "%(namelower)s -i %(installdir)s/test_data/bacteria/genome.fna "
+        "--cpu %(parallel)s --mode geno --out test_bacteria.out",
+    "%(namelower)s -i %(installdir)s/test_data/eukaryota/genome.fna "
+        "--cpu %(parallel)s --mode geno --out test_eukaryota.out"
+]
+
+modloadmsg = "%(name)s/%(version)s: see 'module help %(name)s/%(version)s' for availability of lineage sets"
+
+moduleclass = 'bio'

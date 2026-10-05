@@ -1,0 +1,54 @@
+# Douglas G Scofield UPPMAX 12/2025
+# - install prebuilt linux intel binaries
+###################################
+
+easyblock = 'Tarball'
+
+name = 'IQ-TREE'
+version = '3.0.1'
+
+homepage = 'https://iqtree.github.io/'
+description = """Efficient software for phylogenomic inference.
+
+IQ-TREE - Efficient Tree Reconstruction.  A fast search algorithm (Nguyen et al., 2015) to infer phylogenetic trees by maximum likelihood. IQ-TREE compares favorably to RAxML and PhyML.
+
+ModelFinder - Fast and Accurate Model Selection.  ModelFinder (Kalyaanamoorthy et al., 2017) is 10 to 100 times faster than jModelTest and ProtTest. It also finds best-fit partitioning scheme like PartitionFinder.
+
+UFBoot - Ultrafast Bootstrap Approximation.  UFBoot (Minh et al., 2013) provides approximately unbiased branch support values and runs 100X faster than nonparametric bootstrap and 10 to 40 times faster than RAxML rapid bootstrap.
+
+AliSim - Alignment Simulator New!  AliSim (Ly-Trong et al., 2023) allows to quickly simulate multiple sequence alignments under more realistic models than Seq-Gen and INDELible.
+
+Example files are available in $EBROOTIQMINTREE/share/example. Copy the files to run examples, e.g.,
+
+    cp -v $EBROOTIQMINTREE/share/example/* .
+
+    iqtree%(version_major)s -s example.phy
+
+    iqtree%(version_major)s -s example.phy -p example.nex
+
+Either 'iqtree%(version_major)s' or 'iqtree' may be used, they are synonyms.
+"""
+
+toolchain = SYSTEM
+
+github_account = 'iqtree'
+source_urls = [ 'https://github.com/%(github_account)s/iqtree%(version_major)s/releases/download/v%(version)s' ]
+sources = [ 'iqtree-%(version)s-Linux-intel.tar.gz' ]
+checksums = [ '2fe1f38daba07a7fb00b696572291e9a72a4e18918619c57c70f63857096bdbc' ]
+
+postinstallcmds = [
+    "mkdir -p %(installdir)s/share/example && mv %(installdir)s/example.* %(installdir)s/models.nex  %(installdir)s/share/example/",
+    "cd %(installdir)s/bin && ln -s iqtree%(version_major)s iqtree",
+]
+
+sanity_check_paths = {
+    'files': [
+        'bin/iqtree%(version_major)s',
+        'bin/iqtree',
+    ],
+    'dirs': [ 'share/example' ],
+}
+
+sanity_check_commands = ['iqtree%(version_major)s | grep "version %(version)s"']
+
+moduleclass = 'bio'

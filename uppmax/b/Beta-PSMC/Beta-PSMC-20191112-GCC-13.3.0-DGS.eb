@@ -1,0 +1,73 @@
+# Douglas Scofield UPPMAX 01/2026
+# - new tool
+# - based on psmc easyconfig, which is also updated
+# - UPPMAX bioinfo toolchain 2024a
+# - dec2img.js load k8 and hashbang
+# - pcnt_bezier.lua load module providing luajit
+#################################
+
+easyblock = 'MakeCp'
+
+name = 'Beta-PSMC'
+version = '20191112'  # date of _commit
+_commit = '1e9ab32'
+
+homepage = 'https://github.com/%(github_account)s/%(name)s'
+description = """%(name)s modifies Li's psmc to uncover more detailed population
+history using a Beta distribution."""
+
+toolchain = {'name': 'GCC', 'version': '13.3.0'}
+
+github_account = 'ChenHuaLab'
+sources = [{
+    'source_urls': ['https://github.com/%(github_account)s/%(name)s/archive/'],
+    'download_filename': '%s.tar.gz' % _commit,
+    'filename': SOURCE_TAR_GZ,
+}]
+checksums = ['898b3e3b991ddce52bdd7aff7e89ec3a83a758af37b213b3012f1901b92c6928']
+
+dependencies = [
+    ('Perl', '5.38.2'),
+    ('k8', '1.2'),
+    ('LuaJIT', '2.1.ROLLING_20260109'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+buildopts = ' && cd utils && make'
+
+local_utils = [
+    'avg.pl', 'calD', 'cntcpg', 'ctime_plot.pl', 'dec2ctime.pl', 'dec2img.js', 'decode2bed.pl',
+    'fq2psmcfa', 'history2ms.pl', 'ms2psmcfa.pl', 'mutDiff', 'pcnt_bezier.lua', 'psmc2history.pl',
+    'psmc_plot.pl', 'psmc_trunc.pl', 'splitfa',
+]
+
+files_to_copy = [
+    (['beta-psmc'], 'bin'),
+    (['utils/%s' % x for x in local_utils], 'bin')
+]
+
+postinstallcmds = [
+    # recommended help, see perldoc Getopt::Std
+    "sed -i '/use Getopt::Std;/a $Getopt::Std::STANDARD_HELP_VERSION = 1;' %(installdir)s/bin/*.pl",
+    "sed -i '1i#!/usr/bin/env k8' %(installdir)s/bin/dec2img.js",
+] + [ "chmod +x %%(installdir)s/bin/*.%s" % x for x in [ 'pl', 'js', 'lua' ] ]
+
+fix_perl_shebang_for = ['bin/*.pl']
+
+sanity_check_paths = {
+    'files': ['bin/beta-psmc'] + ['bin/%s' % x for x in local_utils],
+    'dirs': [],
+}
+
+sanity_check_commands = [
+    'beta-psmc 2>&1 |grep "Usage:"',
+    'calD 2>&1 |grep "Usage:"',
+    'avg.pl --help',
+    'ctime_plot.pl --help',
+    'dec2img.js || echo "ok"',
+]
+
+moduleclass = 'bio'

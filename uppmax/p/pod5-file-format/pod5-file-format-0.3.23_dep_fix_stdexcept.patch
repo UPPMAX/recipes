@@ -1,0 +1,41 @@
+Repeat changes from the 0.3.10 patch, and add missing header
+diff -r -u pod5-file-format-0.3.23.orig/c++/CMakeLists.txt pod5-file-format-0.3.23/c++/CMakeLists.txt
+--- pod5-file-format-0.3.23.orig/c++/CMakeLists.txt	2024-11-21 11:27:14.000000000 +0100
++++ pod5-file-format-0.3.23/c++/CMakeLists.txt	2025-11-04 17:28:24.342281000 +0100
+@@ -2,7 +2,7 @@
+ 
+ if (ENABLE_CONAN)
+     find_package(Arrow REQUIRED CONFIG)
+-    find_package(Flatbuffers REQUIRED CONFIG)
++    find_package(FlatBuffers REQUIRED CONFIG)
+     find_package(zstd REQUIRED CONFIG)
+     find_package(ZLIB REQUIRED CONFIG)
+ 
+@@ -11,7 +11,7 @@
+     endif()
+ else()
+     find_package(Arrow REQUIRED)
+-    find_package(Flatbuffers REQUIRED)
++    find_package(FlatBuffers REQUIRED)
+     find_package(zstd REQUIRED)
+     find_package(ZLIB REQUIRED)
+ 
+@@ -21,6 +21,7 @@
+ endif()
+ 
+ find_package(Threads REQUIRED)
++find_package(pybind11 REQUIRED)
+ 
+ find_program(
+     FLATBUFFERS_FLATC_EXECUTABLE
+diff -r -u pod5-file-format-0.3.23.orig/c++/pod5_format/thread_pool.cpp pod5-file-format-0.3.23/c++/pod5_format/thread_pool.cpp
+--- pod5-file-format-0.3.23.orig/c++/pod5_format/thread_pool.cpp	2024-11-21 11:27:14.000000000 +0100
++++ pod5-file-format-0.3.23/c++/pod5_format/thread_pool.cpp	2025-11-04 17:28:53.893167000 +0100
+@@ -7,6 +7,7 @@
+ #include <mutex>
+ #include <optional>
+ #include <thread>
++#include <stdexcept>
+ #include <vector>
+ 
+ namespace pod5 {

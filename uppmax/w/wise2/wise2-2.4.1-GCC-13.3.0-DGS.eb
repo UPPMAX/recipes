@@ -1,0 +1,54 @@
+# Douglas G Scofield UPPMAX 6/2025
+# built using UPPMAX bio toolchain uppmax-bio-foss-2024a
+
+easyblock = 'MakeCp'
+
+name = 'wise2'
+version = '2.4.1'
+
+homepage = 'https://www.ebi.ac.uk/~birney/wise2/'
+# also https://github.com/nathanweeks/exonerate
+description = """The Wise2 package is now a rather stately bioinformatics package that has be around for a while. Its key programs are genewise, a program for aligning proteins or protein HMMs to DNA, and dynamite a rather cranky 'macro language' which automates the production of dynamic programming."""
+
+toolchain = {'name': 'GCC', 'version': '13.3.0'}
+
+source_urls = ['https://www.ebi.ac.uk/~birney/']
+sources = ['wise%(version)s.tar.gz']
+checksums = ['240e2b12d6cd899040e2efbcb85b0d3c10245c255f3d07c1db45d0af5a4d5fa1']
+
+builddependencies = [
+    ('GLib', '1.1.15'),  # static only, so not runtime dependency
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+# parallel build fails
+max_parallel = 1
+
+configure_cmd = None
+
+prebuildopts  = "cd src && "
+prebuildopts += "sed -i 's/^EXTRALIBS = -lm/EXTRALIBS = `glib-config --libs` -lm/' makefile && "
+prebuildopts += "sed -i 's/csh welcome.csh/sh welcome.csh/' makefile && "
+prebuildopts += "sed -i 's/\<getline\>/seqfile_getline/g' HMMer2/sqio.c && "
+prebuildopts += "sed -i 's/\<isnumber\>/isdigit/g' models/phasemodel.c && "
+
+build_cmd = "make all"
+
+_bins = [ 'dba', 'dnal', 'estwise', 'estwisedb', 'genewise', 'genewisedb', 'promoterwise', 'psw', 'pswdb', 'scanwise', 'scanwise_server' ]
+
+files_to_copy = [
+    ( [ 'src/bin/%s' % x for x in _bins ], 'bin' ),
+    'wisecfg',
+]
+
+modextravars = {'WISECONFIGDIR': '%(installdir)s/wisecfg'}
+
+sanity_check_paths = {
+    'files': ['bin/%s' % x for x in _bins],
+    'dirs': ['wisecfg'],
+}
+
+moduleclass = 'bio'

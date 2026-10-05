@@ -1,0 +1,47 @@
+# Build very old version used by very old wise2
+#
+# Builds cleanly with gcc 5, for gcc 13 manage duplicate definitions of utility functions
+#
+# D G Scofield UPPMAX 6/2025
+
+easyblock = 'ConfigureMake'
+
+name = 'GLib'
+version = '1.1.15'
+
+homepage = 'http://www.gtk.org/'
+description = """GLib is one of the base libraries of the GTK+ project"""
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+source_urls = [FTPGNOME_SOURCE]
+sources = [SOURCELOWER_TAR_GZ]
+checksums = ['bc61ad8b8fcaf52fcda081729c60fe75bd6bd7e1b239db04cd3246a301052f09']
+
+builddependencies = [
+    ('binutils', '2.42'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+configure_cmd_prefix = "CFLAGS='-fcommon -Wl,--allow-multiple-definition' "
+
+host_type = "i686"
+
+configopts = "--host=%s --disable-maintainer-mode --enable-static=yes --enable-shared=no --mandir=%%(installdir)s/share/man" % host_type
+
+sanity_check_paths = {
+    'files': [
+        'bin/glib-config',
+        'include/glib.h', 'include/gmodule.h',
+        'lib/libglib.a', 'lib/libgmodule.a', 'lib/libgthread.a',
+    ],
+    'dirs': [
+        'lib/glib',
+        'share/man',
+    ],
+}
+
+moduleclass = 'vis'

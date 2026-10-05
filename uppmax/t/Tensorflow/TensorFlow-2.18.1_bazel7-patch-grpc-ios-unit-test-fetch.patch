@@ -1,0 +1,29 @@
+diff -ruN tf-grpc-ios.orig/tensorflow/workspace2.bzl tf-grpc-ios.work/tensorflow/workspace2.bzl
+--- tf-grpc-ios.orig/tensorflow/workspace2.bzl	2026-04-13 15:41:47.889528594 +0200
++++ tf-grpc-ios.work/tensorflow/workspace2.bzl	2026-04-13 16:10:16.381997646 +0200
+@@ -442,6 +442,7 @@
+         patch_file = [
+             "//third_party/grpc:generate_cc_env_fix.patch",
+             "//third_party/grpc:register_go_toolchain.patch",
++            "//third_party/grpc:grpc-bazel7-stub-ios-unit-test.patch",
+         ],
+         system_link_files = {
+             "//third_party/systemlibs:BUILD": "bazel/BUILD",
+diff -ruN tf-grpc-ios.orig/third_party/grpc/grpc-bazel7-stub-ios-unit-test.patch tf-grpc-ios.work/third_party/grpc/grpc-bazel7-stub-ios-unit-test.patch
+--- tf-grpc-ios.orig/third_party/grpc/grpc-bazel7-stub-ios-unit-test.patch	1970-01-01 01:00:00.000000000 +0100
++++ tf-grpc-ios.work/third_party/grpc/grpc-bazel7-stub-ios-unit-test.patch	2026-04-13 15:43:03.544739457 +0200
+@@ -0,0 +1,14 @@
++--- a/bazel/grpc_build_system.bzl
+++++ b/bazel/grpc_build_system.bzl
++@@ -25,7 +25,10 @@
++
++ load("//bazel:cc_grpc_library.bzl", "cc_grpc_library")
++ load("@upb//bazel:upb_proto_library.bzl", "upb_proto_library")
++-load("@build_bazel_rules_apple//apple:ios.bzl", "ios_unit_test")
+++
+++def ios_unit_test(**kwargs):
+++    pass
+++
++
++ # The set of pollers to test against if a test exercises polling
++ POLLERS = ["epollex", "epoll1", "poll"]

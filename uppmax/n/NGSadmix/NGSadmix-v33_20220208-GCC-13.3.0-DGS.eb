@@ -1,0 +1,63 @@
+easyblock = 'MakeCp'
+
+name = 'NGSadmix'
+version = 'v33_20220208'
+_commit = 'fbf9e1304ac1feb0b31b0ab5926b205a939e7a10'
+
+homepage = 'https://www.popgen.dk/software/index.php/NgsAdmix'
+description = """NGSadmix is a tool for estimating individual admixture proportions from NGS
+data. It is based on genotype likelihoods and works well for medium and low
+coverage NGS data. It is a fancy multithreaded c/c++ program which makes it
+useful for large datasets.
+
+The strengths of NGSadmix is that it takes the uncertainty introduced in NGS
+sequencing data into account when inferring an individual's ancestry by using
+genotype likelihoods that considers the uncertainty caused by unobserved
+genotypes.
+
+As with the other existing software, ADMIXTURE and STRUCTURE, NGSadmix can
+detect admixture recent enough to cause structure in the population in terms of
+differing allele frequencies. Historical admixture events after which many
+generations has passed in the population, leaves no signature in terms of
+systematic differences in allele frequencies between individuals.
+"""
+
+toolchain = {'name': 'GCC', 'version': '13.3.0'}
+
+github_account = 'ANGSD'
+_source_prefix  = '%(namelower)s32'
+_source         = _source_prefix + '.cpp'
+_source_version = _source_prefix + '-%(version)s.cpp'
+checksums = ['0e8de90d734c19a9fedac0a9d2a1752e6a751bca739f5ad461779497f4d3927b']
+
+sources = [{
+    'source_urls': [ 'https://raw.githubusercontent.com/%(github_account)s/angsd/' + _commit + '/misc' ],
+    'filename': _source_version,
+    'download_filename': _source, 
+    'extract_cmd': 'cp %s %(builddir)s',
+}]
+
+skipsteps = [ 'configure' ]
+maxparallel = 1
+
+dependencies = [
+    ('zlib', '1.3.1'),
+]
+
+local_linkdependencies = [
+    ('zlib', '1.3.1'),
+    toolchain,
+]
+
+build_cmd = "$CXX $CXXFLAGS -O3 -lpthread -lz -o %(name)s " + _source_version + " $LDFLAGS"
+
+files_to_copy = [(['NGSadmix'], 'bin')]
+
+sanity_check_paths = {
+    'files': [ 'bin/NGSadmix' ],
+    'dirs': [],
+}
+
+sanity_check_commands = [ "NGSadmix 2>&1 | grep 'Arguments:'" ]
+
+moduleclass = 'bio'

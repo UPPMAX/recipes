@@ -1,0 +1,50 @@
+# Douglas G Scofield UPPMAX 01/2025
+# - new tool, bash scripts
+###################################
+
+easyblock = 'Binary'
+
+name = 'Bats'
+version = '1.13.0'
+
+homepage = 'https://github.com/bats-core/bats-core'
+description = """Bats: Bash Automated Testing System
+Bats is a TAP-compliant testing framework for Bash 3.2 or above. It provides a simple
+way to verify that the UNIX programs you write behave as expected.
+
+This (bats-core) is a fork of the original Bats repository that continues its development."""
+
+toolchain = SYSTEM
+
+github_account = 'bats-core'
+source_urls = [ 'https://github.com/%(github_account)s/%(github_account)s/archive/refs/tags/' ]
+sources = [ 'v%(version)s.tar.gz' ]
+checksums = [ 'a85e12b8828271a152b338ca8109aa23493b57950987c8e6dff97ba492772ff3' ]
+
+extract_sources = True
+
+install_cmd = './install.sh %(installdir)s'
+
+modextrapaths = {
+    'MANPATH': 'share/man',
+}
+
+sanity_check_paths = {
+    'files': [
+        'bin/iqtree%(version_major)s',
+        'share/example/example.cf',
+        'share/example/example.nex',
+        'share/example/example.phy',
+        'share/example/models.nex',
+    ],
+    'dirs': [ ],
+}
+
+sanity_check_paths = {
+    'files': ['bin/bats'],
+    'dirs': ['lib', 'libexec', 'share/man'],
+}
+
+sanity_check_commands = [ 'bats --version | grep -F "%(name)s %(version)s"' ]
+
+moduleclass = 'bio'

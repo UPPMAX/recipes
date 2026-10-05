@@ -1,0 +1,108 @@
+# Douglas Scofield UPPMAX 02/2026
+# - switch from sed to patch
+# - do not use included zlib and bamtools, instead use EB modules
+# - increase cmake version to suppress deprecation messages
+#################################
+diff -ruN NextGenMap-0.5.5.orig/CMakeLists.txt NextGenMap-0.5.5/CMakeLists.txt
+--- NextGenMap-0.5.5.orig/CMakeLists.txt	2017-11-13 10:40:47.000000000 +0100
++++ NextGenMap-0.5.5/CMakeLists.txt	2026-02-18 16:26:45.525832514 +0100
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 2.8)
++cmake_minimum_required(VERSION 3.5)
+ project(NextGenMap)
+ 
+ set( NGM_VERSION_MAJOR 0 )
+@@ -44,7 +44,6 @@
+ endif()
+ 
+ 
+-
+ IF(NOT APPLE)
+ 	add_subdirectory(opencl-sdk)
+ endif()
+@@ -57,11 +56,9 @@
+   set(OPENCL_LIBRARIES "-lOpenCL")
+ ENDIF()
+ 
+-include_directories("${CMAKE_CURRENT_BINARY_DIR}/lib/zlib-1.2.7")
+-include_directories("${PROJECT_SOURCE_DIR}/lib/zlib-1.2.7")
+-
+-add_subdirectory(lib/zlib-1.2.7)
+-add_subdirectory(lib/bamtools-2.3.0)
++find_package(ZLIB REQUIRED)
++find_package(PkgConfig REQUIRED)
++pkg_check_modules(BAMTOOLS REQUIRED bamtools-1)
+ 
+ IF(NOT APPLE)
+ 	include_directories("${CMAKE_CURRENT_BINARY_DIR}/opencl-sdk/AMD-APP-SDK-v2.8.1.0-RC-lnx64/include")
+diff -ruN NextGenMap-0.5.5.orig/src/CMakeLists.txt NextGenMap-0.5.5/src/CMakeLists.txt
+--- NextGenMap-0.5.5.orig/src/CMakeLists.txt	2017-11-13 10:40:47.000000000 +0100
++++ NextGenMap-0.5.5/src/CMakeLists.txt	2026-02-18 16:28:26.203345012 +0100
+@@ -1,9 +1,7 @@
+-cmake_minimum_required(VERSION 2.8)
++cmake_minimum_required(VERSION 3.5)
+ project(NextGenMap)
+ 
+ include_directories (../lib/seqan-library-1.4.1/include)
+-#include_directories (../lib/bamtools-2.3.0/src/api)
+-include_directories (../lib/bamtools-2.3.0/src)
+ include_directories (../lib/mason/opencl)
+ include_directories (../include)
+ include_directories (parser)
+@@ -51,8 +49,9 @@
+ 
+ target_link_libraries(ngm-core pthread)
+ target_link_libraries(ngm-core MASonOpenCl)	
+-TARGET_LINK_LIBRARIES(ngm-core BamTools-static)
+-TARGET_LINK_LIBRARIES(ngm-core zlibstatic)
++TARGET_LINK_LIBRARIES(ngm-core ${BAMTOOLS_LIBRARIES})
++TARGET_INCLUDE_DIRECTORIES(ngm-core PUBLIC ${BAMTOOLS_INCLUDE_DIRS})
++TARGET_LINK_LIBRARIES(ngm-core z)
+ #target_link_libraries(ngm-core "-lz")
+ 	
+ add_definitions(-D _BAM) 
+@@ -95,7 +94,8 @@
+ 
+ target_link_libraries(ngm-core-debug pthread)
+ target_link_libraries(ngm-core-debug MASonOpenCl-debug)	
+-TARGET_LINK_LIBRARIES(ngm-core-debug BamTools-static)
+-TARGET_LINK_LIBRARIES(ngm-core-debug zlibstatic)
++TARGET_LINK_LIBRARIES(ngm-core-debug ${BAMTOOLS_LIBRARIES})
++TARGET_INCLUDE_DIRECTORIES(ngm-core-debug PUBLIC ${BAMTOOLS_INCLUDE_DIRS})
++TARGET_LINK_LIBRARIES(ngm-core-debug z)
+ #target_link_libraries(ngm-core-debug "-lz")
+ 
+diff -ruN NextGenMap-0.5.5.orig/utils/CMakeLists.txt NextGenMap-0.5.5/utils/CMakeLists.txt
+--- NextGenMap-0.5.5.orig/utils/CMakeLists.txt	2017-11-13 10:40:47.000000000 +0100
++++ NextGenMap-0.5.5/utils/CMakeLists.txt	2026-02-18 16:26:40.380857426 +0100
+@@ -1,8 +1,7 @@
+-cmake_minimum_required(VERSION 2.8)
++cmake_minimum_required(VERSION 3.5)
+ 
+ include_directories (../include)
+ include_directories (../src)
+-include_directories (../lib/bamtools-2.3.0/src)
+ include_directories (../src/parser)
+ include_directories (../src/writer)
+ include_directories (../src/misc)
+@@ -59,13 +58,16 @@
+ 
+ add_definitions(-D _BAM)
+ 
++TARGET_INCLUDE_DIRECTORIES(ngm-utils PUBLIC ${BAMTOOLS_INCLUDE_DIRS})
++TARGET_INCLUDE_DIRECTORIES(ngm-utils-debug PUBLIC ${BAMTOOLS_INCLUDE_DIRS})
++
+ TARGET_LINK_LIBRARIES(ngm-utils pthread)
+ TARGET_LINK_LIBRARIES(ngm-utils-debug pthread)
+ 
+-TARGET_LINK_LIBRARIES(ngm-utils BamTools-static)
+-TARGET_LINK_LIBRARIES(ngm-utils-debug BamTools-static)
++TARGET_LINK_LIBRARIES(ngm-utils ${BAMTOOLS_LIBRARIES})
++TARGET_LINK_LIBRARIES(ngm-utils-debug ${BAMTOOLS_LIBRARIES})
+ 
+-TARGET_LINK_LIBRARIES(ngm-utils zlibstatic)
++TARGET_LINK_LIBRARIES(ngm-utils z)
+ #TARGET_LINK_LIBRARIES(ngm-utils "-lz")
+-TARGET_LINK_LIBRARIES(ngm-utils-debug zlibstatic)
++TARGET_LINK_LIBRARIES(ngm-utils-debug z)
+ #TARGET_LINK_LIBRARIES(ngm-utils-debug "-lz")

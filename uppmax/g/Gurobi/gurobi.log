@@ -1,0 +1,16 @@
+
+Gurobi 12.0.1 (linux64, gurobi_cl) logging started Fri Aug 15 17:27:27 2025
+
+Set parameter LicenseID to value 2389910
+Set parameter GURO_PAR_SPECIAL
+Set parameter TokenServer to value "pelle1.uppmax.uu.se"
+Set parameter LogFile to value "gurobi.log"
+Using license file /sw/arch/eb/software/Gurobi/12.0.1-GCCcore-13.3.0/gurobi.lic
+
+Gurobi 12.0.1 (linux64, gurobi_cl) logging started Fri Aug 15 17:27:56 2025
+
+Set parameter LicenseID to value 2389910
+Set parameter GURO_PAR_SPECIAL
+Set parameter TokenServer to value "pelle1.uppmax.uu.se"
+Set parameter LogFile to value "gurobi.log"
+Using license file /sw/arch/eb/software/Gurobi/12.0.1-GCCcore-13.3.0/gurobi.lic

@@ -1,0 +1,194 @@
+diff -ruN AdmixTools-8.0.2.orig/convertf/ind2pheno.perl AdmixTools-8.0.2/convertf/ind2pheno.perl
+--- AdmixTools-8.0.2.orig/convertf/ind2pheno.perl	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/convertf/ind2pheno.perl	2026-01-26 17:50:50.308154307 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl
+ 
+ $in = $ARGV[0]; # .ind file
+diff -ruN AdmixTools-8.0.2.orig/perlsrc/dof4 AdmixTools-8.0.2/perlsrc/dof4
+--- AdmixTools-8.0.2.orig/perlsrc/dof4	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/perlsrc/dof4	2026-01-26 18:02:30.393166260 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl  -w 
+ 
+ ($par) = @ARGV ; 
+diff -ruN AdmixTools-8.0.2.orig/perlsrc/dof4a AdmixTools-8.0.2/perlsrc/dof4a
+--- AdmixTools-8.0.2.orig/perlsrc/dof4a	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/perlsrc/dof4a	2026-01-26 18:02:30.393166260 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl  -w 
+ 
+ ($par) = @ARGV ; 
+diff -ruN AdmixTools-8.0.2.orig/perlsrc/fxtract AdmixTools-8.0.2/perlsrc/fxtract
+--- AdmixTools-8.0.2.orig/perlsrc/fxtract	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/perlsrc/fxtract	2026-01-26 18:02:30.394166268 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl -w
+ 
+ use Getopt::Std ;
+diff -ruN AdmixTools-8.0.2.orig/perlsrc/getresult AdmixTools-8.0.2/perlsrc/getresult
+--- AdmixTools-8.0.2.orig/perlsrc/getresult	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/perlsrc/getresult	2026-01-26 18:02:30.394166268 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl -w
+ 
+ ($IN, $OUT, $tag) = @ARGV ;
+diff -ruN AdmixTools-8.0.2.orig/perlsrc/jackdiff AdmixTools-8.0.2/perlsrc/jackdiff
+--- AdmixTools-8.0.2.orig/perlsrc/jackdiff	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/perlsrc/jackdiff	2026-01-26 18:02:30.395166277 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl  -w 
+ 
+ use Getopt::Std ;
+diff -ruN AdmixTools-8.0.2.orig/perlsrc/mkpretty AdmixTools-8.0.2/perlsrc/mkpretty
+--- AdmixTools-8.0.2.orig/perlsrc/mkpretty	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/perlsrc/mkpretty	2026-01-26 18:02:30.395166277 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl  -w 
+ 
+ ## mkpretty infile outfile 
+diff -ruN AdmixTools-8.0.2.orig/perlsrc/numlines AdmixTools-8.0.2/perlsrc/numlines
+--- AdmixTools-8.0.2.orig/perlsrc/numlines	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/perlsrc/numlines	2026-01-26 18:02:30.396166285 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl -w
+ 
+ ($IN) = @ARGV ;
+diff -ruN AdmixTools-8.0.2.orig/perlsrc/xtractcol AdmixTools-8.0.2/perlsrc/xtractcol
+--- AdmixTools-8.0.2.orig/perlsrc/xtractcol	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/perlsrc/xtractcol	2026-01-26 18:02:30.396166285 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl -w
+ 
+ ($COLS, $xflag) = @ARGV ;
+diff -ruN AdmixTools-8.0.2.orig/perlsrc/xtractcoltab AdmixTools-8.0.2/perlsrc/xtractcoltab
+--- AdmixTools-8.0.2.orig/perlsrc/xtractcoltab	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/perlsrc/xtractcoltab	2026-01-26 18:02:30.396166285 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl -w
+ 
+ ($COLS, $xflag) = @ARGV ;
+diff -ruN AdmixTools-8.0.2.orig/perlsrc/xtractcolv AdmixTools-8.0.2/perlsrc/xtractcolv
+--- AdmixTools-8.0.2.orig/perlsrc/xtractcolv	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/perlsrc/xtractcolv	2026-01-26 18:02:30.397166294 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl -w
+ 
+ ($COLS, $xflag) = @ARGV ;
+diff -ruN AdmixTools-8.0.2.orig/perlsrc/xtractcolx AdmixTools-8.0.2/perlsrc/xtractcolx
+--- AdmixTools-8.0.2.orig/perlsrc/xtractcolx	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/perlsrc/xtractcolx	2026-01-26 18:02:30.397166294 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl -w
+ 
+ ($COLS, $xflag) = @ARGV ;
+diff -ruN AdmixTools-8.0.2.orig/src/Makefile AdmixTools-8.0.2/src/Makefile
+--- AdmixTools-8.0.2.orig/src/Makefile	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/src/Makefile	2026-01-29 17:58:57.881229420 +0100
+@@ -2,11 +2,11 @@
+ TOP=../bin
+ BIN=$(HOMEL)/../bin
+ 
+-override LDLIBS += -lgsl -lopenblas -lm -lnick
++override LDLIBS += -lgsl -lflexiblas -lm -lnick
+ # Some Linux distributions require separate lapacke library
+ # override LDLIBS += -llapacke
+-override LDFLAGS += -g  -p -pg -L./nicksrc
+-override CFLAGS += -c -g -p -pg -Wimplicit -I./ -I./nicksrc -fno-common
++override LDFLAGS += -L./nicksrc
++override CFLAGS += -c -Wimplicit -I./ -I./nicksrc -fno-common
+ # Mac additions using homebrew installations
+ #override CFLAGS += -I/usr/local/opt/openblas/include -I/usr/local/opt/gsl/include
+ #override LDFLAGS += -L/usr/local/opt/openblas/lib -L/usr/local/opt/gsl/lib
+@@ -119,10 +119,9 @@
+ 	cp $(PROGS) $(TOP)
+ 	cp $(PROGS2) $(TOP)
+ 	cp $(PROGS3) $(TOP)
+-	cp $(PROGS3) $(TOP)
+ 	cp ../perlsrc/* $(TOP) 
+-	cp fxtract $(BIN)
+-	cp -r script $(BIN) 
++	cp fxtract $(TOP)
++	cp -r script $(TOP) 
+ 
+ uninstall:
+ 	rm -f tables
+diff -ruN AdmixTools-8.0.2.orig/src/fxtract AdmixTools-8.0.2/src/fxtract
+--- AdmixTools-8.0.2.orig/src/fxtract	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/src/fxtract	2026-01-26 17:45:27.730370133 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl -w
+ 
+ use Getopt::Std ;
+diff -ruN AdmixTools-8.0.2.orig/src/rexpfit.r AdmixTools-8.0.2/src/rexpfit.r
+--- AdmixTools-8.0.2.orig/src/rexpfit.r	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/src/rexpfit.r	2026-01-26 17:48:00.184687561 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env Rscript
+ #!/usr/bin/Rscript
+ args <- commandArgs(TRUE)
+ 
+diff -ruN AdmixTools-8.0.2.orig/src/script/grepcol AdmixTools-8.0.2/src/script/grepcol
+--- AdmixTools-8.0.2.orig/src/script/grepcol	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/src/script/grepcol	2026-01-26 17:49:41.468561395 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl -w
+ 
+ ($col, $grepstr)  = @ARGV ;     
+diff -ruN AdmixTools-8.0.2.orig/src/script/grepcolf AdmixTools-8.0.2/src/script/grepcolf
+--- AdmixTools-8.0.2.orig/src/script/grepcolf	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/src/script/grepcolf	2026-01-26 17:49:41.469561404 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl  -w 
+ 
+ ($col, $file) = @ARGV ; 
+diff -ruN AdmixTools-8.0.2.orig/src/script/mktmp AdmixTools-8.0.2/src/script/mktmp
+--- AdmixTools-8.0.2.orig/src/script/mktmp	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/src/script/mktmp	2026-01-26 17:49:41.469561404 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl  -w 
+ 
+ ($lo, $tag) = @ARGV  ; 
+diff -ruN AdmixTools-8.0.2.orig/src/script/xtractcol AdmixTools-8.0.2/src/script/xtractcol
+--- AdmixTools-8.0.2.orig/src/script/xtractcol	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/src/script/xtractcol	2026-01-26 17:49:41.470561412 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl -w
+ 
+ ($COLS, $xflag) = @ARGV ;
+diff -ruN AdmixTools-8.0.2.orig/src/wtjack.pl AdmixTools-8.0.2/src/wtjack.pl
+--- AdmixTools-8.0.2.orig/src/wtjack.pl	2024-09-06 17:22:21.000000000 +0200
++++ AdmixTools-8.0.2/src/wtjack.pl	2026-01-26 17:46:47.932063372 +0100
+@@ -1,10 +1,13 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl
+ use Getopt::Std ;
++use FindBin;
+ 
+ getopts('i:m:b:',\%opts) ;
+ 
+-$BIN ="/groups/reich/pm82/dev/ADMIXTOOLS/bin";
+- 
++#$BIN ="/groups/reich/pm82/dev/ADMIXTOOLS/bin";
++$BIN = $FindBin::RealBin;
++
+ # filename of rolloff output file, in parfile output:
+ if (defined $opts{"i"}) {
+         $pop = $opts{"i"} ;

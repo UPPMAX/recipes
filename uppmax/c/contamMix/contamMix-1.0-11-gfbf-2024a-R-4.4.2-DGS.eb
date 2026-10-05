@@ -1,0 +1,69 @@
+# Douglas G Scofield UPPMAX 6/2025
+# - depending on e.g. R-bundle-CRAN is overkill, just three additional packages are required here
+# - exposes contamMix/exec/{estimate.R,sam2mn.pl} executables
+# - EB needs fix_rscript_shebang_for
+#######################################
+
+easyblock = 'Bundle'
+
+name = 'contamMix'
+local_commit = '46c2b9c'
+version = '1.0-11'
+versionsuffix = '-R-%(rver)s'
+
+homepage = 'https://github.com/plfjohnson/contamMix'
+description = """Contamination estimation from mitochondrial ancient DNA.  This R package ("contamMix") implements a mixture-model used to estimate contamination in ancient mitochondrial DNA using MCMC. The model is detailed in supplementary information 5 ("Likelihood-based method for contamination estimation") of the following paper, which remains the best citation if using this method in a publication:
+
+Fu Q, Mittnik A, Johnson PLF, Bos K, Lari M, Bollongino R, Sun C, Giemsch L, Schmitz R, Burger J, Ronchitelli AM, Martini F, Cremonesi RG, Svoboda J, Bauer P, Caramelli D, Castellano S, Reich D, Pääbo S, and Krause J. (2013). A revised timescale for human evolution based on cient mitochondrial genomes. Curr Biol, 23:553-9."""
+
+toolchain = {'name': 'gfbf', 'version': '2024a'}
+
+dependencies = [
+    ('R', '4.4.2'),
+    ('Perl', '5.38.2'),  # used by estimate.R to run internal script exec/sam2mn.pl
+]
+
+exts_defaultclass = 'RPackage'
+exts_filter = ("R -q --no-save", "library(%(ext_name)s)")
+exts_default_options = {
+    'source_urls': [
+        'https://cran.r-project.org/src/contrib/Archive/%(name)s',  # package archive
+        'https://cran.r-project.org/src/contrib/',  # current version of packages
+        'https://cran.freestatistics.org/src/contrib',  # mirror alternative for current packages
+    ],
+    'source_tmpl': '%(name)s_%(version)s.tar.gz',
+}
+
+exts_list = [
+    ('getopt', '1.20.4', {
+        'checksums': ['87d36cbe6dba41dbc1d78d845210266cdd08c7440d977d738a6e45db14221e8b'],
+    }),
+    ('lattice', '0.22-6', {
+        'checksums': ['4b377211e472ece7872b9d6759f9b9c660b09594500462eb6146312a1d4d00f7'],
+    }),
+    ('coda', '0.19-4.1', {
+        'checksums': ['f4b451d86fbb56ff9ade043ddd6b0944368c37d0dad12d02837750ecdc708ad6'],
+    }),
+    (name, version, {
+        'source_urls': ['https://github.com/plfjohnson/%(name)s/archive/refs/tags'],
+        'sources': [{'download_filename': 'v%(version)s.tar.gz', 'filename': '%(name)s-%(version)s.tar.gz'}],
+        'checksums': ['1bfd53eca5554c957771daa51a2520306e90da17423dded39454ac8f23424a22'],
+        'postinstallcmds': [
+            "sed -i '1i#!/usr/bin/env Rscript' %(installdir)s/%(name)s/exec/estimate.R",  # because EB is missing fix_rscript_shebang_for
+        ],
+    }),
+]
+
+fix_perl_shebang_for = [ '%(name)s/exec/sam2mn.pl' ]
+
+sanity_check_paths = {
+    'files': [ '%(name)s/exec/estimate.R', '%(name)s/exec/sam2mn.pl' ],
+    'dirs':  [ name ],
+}
+
+modextrapaths = {
+    'PATH': '%(name)s/exec',
+    'R_LIBS_SITE': '',
+}
+
+moduleclass = 'bio'

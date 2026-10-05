@@ -1,0 +1,63 @@
+# Douglas Scofield UPPMAX 02/2026
+# - includes Python and R scripts so add as dependencies
+# - raise toolchain in accordance with R/4.4.2
+# - add sanity checks for Perl Python and R scripts
+#################################
+
+easyblock = 'ConfigureMake'
+
+name = 'Stacks'
+version = '2.68'
+
+homepage = 'https://catchenlab.life.illinois.edu/stacks/'
+description = """Stacks is a software pipeline for building loci from short-read sequences, such as those generated on
+ the Illumina platform. Stacks was developed to work with restriction enzyme-based data, such as RAD-seq,
+ for the purpose of building genetic maps and conducting population genomics and phylogeography.
+"""
+
+toolchain = {'name': 'gfbf', 'version': '2024a'}
+
+source_urls = ['https://catchenlab.life.illinois.edu/stacks/source/']
+sources = [SOURCELOWER_TAR_GZ]
+patches = ['%(name)s-2.68_use-external-htslib.patch']
+checksums = [
+    {'stacks-%(version)s.tar.gz': '9dc51ea356d60eb4557b0b2d1a8854aafae492aed87f974e0249cc09aa5e7650'},
+    {'Stacks-%(version)s_use-external-htslib.patch': '20d77e39719107a47e6e9620490c1210a338e3503e79b4e4122518e8404f976e'},
+]
+
+builddependencies = [
+    ('Autotools', '20231222'),
+]
+
+dependencies = [
+    ('Python', '3.12.3'),
+    ('R', '4.4.2'),
+    ('zlib', '1.3.1'),
+    ('HTSlib', '1.21.1'),
+]
+
+local_linkdependencies = [
+    ('zlib', '1.3.1'),
+    ('HTSlib', '1.21.1'),
+    toolchain,
+]
+
+preconfigopts = 'autoreconf -if && '
+configopts = '--with-htslib="$EBROOTHTSLIB"'
+
+sanity_check_paths = {
+    'files': [f'bin/{x}' for x in ['clone_filter', 'cstacks', 'gstacks', 'kmer_filter', 'phasedstacks',
+                                   'populations', 'process_radtags', 'process_shortreads', 'sstacks',
+                                   'tsv2bam', 'ustacks', 'stacks-private-alleles', 'ref_map.pl',
+                                   'stacks-hist2d-loci-samples-coverage']],
+    'dirs': [],
+}
+
+sanity_check_commands = [
+    "ustacks -h 2>&1 | grep -q 'ustacks %(version)s'",        # compiled
+    "stacks-private-alleles --help",                          # Python script
+    "ref_map.pl 2>&1 | grep -F 'ref_map.pl --samples path'",  # Perl script
+    "stacks-hist2d-loci-samples-coverage 2>&1 | grep -F 'usage: stacks-hist2d-loci-samples-coverage reads_per_sample_per_locus.tsv'",  # R script
+]
+
+moduleclass = 'bio'

@@ -1,0 +1,40 @@
+Add creation of pkgconfig file.  Submitted as cereal PR https://github.com/USCiLab/cereal/pull/844
+Author: Douglas G Scofield (UPPMAX)
+diff -ruN cereal-1.3.2_orig/CMakeLists.txt cereal-1.3.2/CMakeLists.txt
+--- cereal-1.3.2_orig/CMakeLists.txt	2022-02-28 04:46:32.000000000 +0100
++++ cereal-1.3.2/CMakeLists.txt	2024-11-22 16:48:32.821590000 +0100
+@@ -91,6 +91,11 @@
+         ${versionFile}
+         COMPATIBILITY SameMajorVersion
+     )
++    configure_file(
++        ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc.in
++        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc
++        @ONLY
++    )
+
+     install(FILES ${configFile} ${versionFile} DESTINATION ${configInstallDestination})
+     install(
+@@ -98,6 +103,10 @@
+         NAMESPACE "cereal::"
+         DESTINATION ${configInstallDestination}
+     )
++    install(
++        FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc
++        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig
++    )
+ endif()
+
+
+diff -ruN cereal-1.3.2_orig/cereal.pc.in cereal-1.3.2/cereal.pc.in
+--- cereal-1.3.2_orig/cereal.pc.in	1970-01-01 01:00:00.000000000 +0100
++++ cereal-1.3.2/cereal.pc.in	2024-11-22 16:53:44.401521000 +0100
+@@ -0,0 +1,8 @@
++prefix=@CMAKE_INSTALL_PREFIX@
++includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
++
++Name: @PROJECT_NAME@
++Description: cereal is a header-only C++11 serialization library
++URL: https://uscilab.github.io/cereal/
++Version: @PROJECT_VERSION@
++Cflags: -I"${includedir}"

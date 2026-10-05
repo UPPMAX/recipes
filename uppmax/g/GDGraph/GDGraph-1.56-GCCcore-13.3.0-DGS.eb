@@ -1,0 +1,68 @@
+# Douglas Scofield UPPMAX 03/2026
+# - backport to UPPMAX bioinfo toolchain 2024a
+# - load GD/2.77 module to provide GD 2.77 dependency, also provides ExtUtils::PkgConfig
+# - we don't need the dependencies required specifically by libgd via GD
+# - sanity check a GD::Graph file instead of a GD file, the GD::Graph.3 man page, and the GD/Graph directory
+#################################
+
+easyblock = 'PerlBundle'
+
+name = 'GDGraph'
+version = '1.56'
+
+homepage = 'https://metacpan.org/release/GDGraph'
+description = "GDGraph is a Perl package to generate charts"
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+builddependencies = [
+    ('binutils', '2.42'),
+    ('pkgconf', '2.2.0'),
+]
+
+dependencies = [
+    ('Perl', '5.38.2'),
+    ('GD', '2.77'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+exts_list = [
+    ('Capture::Tiny', '0.48', {
+        'source_tmpl': 'Capture-Tiny-%(version)s.tar.gz',
+        'source_urls': ['https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN'],
+        'checksums': ['6c23113e87bad393308c90a207013e505f659274736638d8c79bac9c67cc3e19'],
+    }),
+    ('Sub::Uplevel', '0.2800', {
+        'sources': ['Sub-Uplevel-%(version)s.tar.gz'],
+        'source_urls': ['https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/'],
+        'checksums': ['b4f3f63b80f680a421332d8851ddbe5a8e72fcaa74d5d1d98f3c8cc4a3ece293'],
+    }),
+    ('Test::Exception', '0.43', {
+        'sources': ['Test-Exception-%(version)s.tar.gz'],
+        'source_urls': ['https://cpan.metacpan.org/authors/id/E/EX/EXODIST/'],
+        'checksums': ['156b13f07764f766d8b45a43728f2439af81a3512625438deab783b7883eb533'],
+    }),
+    ('GD::Text', '0.86', {
+        'source_urls': ['https://cpan.metacpan.org/authors/id/M/MV/MVERB/'],
+        'sources': ['GDTextUtil-%(version)s.tar.gz'],
+        'checksums': ['886ecbf85cfe94f4135ee5689c4847a9ae783ecb99e6759e12c734f2dd6116bc'],
+    }),
+    ('GD::Graph', version, {
+        'source_urls': ['https://cpan.metacpan.org/authors/id/B/BP/BPS/'],
+        'sources': ['GDGraph-%(version)s.tar.gz'],
+        'checksums': ['6f49cc4e59015480db9c9b6b18afd8c50be30886687b69411513d06f38971113'],
+    }),
+]
+
+sanity_check_paths = {
+    'files': [
+                'lib/perl5/site_perl/%(perlver)s/GD/Graph.pm',
+                'man/man3/GD::Graph.3',
+            ],
+    'dirs': ['lib/perl5/site_perl/%(perlver)s/GD/Graph'],
+}
+
+moduleclass = 'bio'

@@ -1,0 +1,124 @@
+# Douglas Scofield UPPMAX 08/2026
+# - UPPMAX bioinfo toolchain 2024a
+# - include cross_match via new module Phrap
+# - additional instructions re: setting up databases
+# - define LIBDIR to %(installdir)s/Libraries
+# - fix_shebang for more scripts
+# - util/ added to PATH and script shebangs fixed
+
+
+easyblock = 'Tarball'
+
+
+# Set up RepeatMasker databases; FamDB from Dfam 3.9 is what should accompany
+# the 4.2.1 version. RepeatMasker is shipped with partition 0 (root) from
+# FamDB. We want to include all partitions, # *and* RepBase RepeatMasker
+# Edition. These are added later.
+#
+#     module load RepeatMasker/4.2.1
+#
+# So, within $EBROOTREPEATMASKER/Libraries/famdb is found on install
+#
+#     dfam39_full.0.h5
+#
+# The ./configure script run within postinstallcmds will do a little database
+# setup using this shipped partition, but we want the full Dfam as well as
+# RepBase.
+#
+# Download *.h5.gz and *.h5.gz.md5 from
+# https://www.dfam.org/releases/Dfam_3.9/families/FamDB/ Check each and unpack:
+#
+#     parallel md5sum -c ::: *.h5.gz.md5
+#     parallel gunzip ::: *.h5.gz
+#
+# Note under 'sources' below how to get RepBase RepeatMasker Edition and
+# unpack.  This produces two files which should both be placed under
+# $EBROOTREPEATMASKER/Libraries
+#
+#    -rw-r--r-- 1 douglas sw      2894 Oct 27  2018 README.RMRBSeqs
+#    -rw-r--r-- 1 douglas sw 182500518 Oct 27  2018 RMRBSeqs.embl
+#
+# Now merge this into RepeatMasker's FamDB that we fetched, checked and
+# unpacked above by using the provided addRepBase.pl script.
+#
+#     addRepBase.pl
+#
+# This will run for a while, updating all of the *.h5 files in Libraries/famdb.
+# This *should not* be done to any separate provisioning of FamDB outside of
+# RepeatMasker, which should retain only Dfam-provided content.
+#
+# Once this merge has taken place, set up new RepeatMasker.lib and database.
+# Rename existing libraries, extract fasta from FamDB, create RMBlast libraries
+# for new RepeatMasker.lib and existing RepeatPeps.lib
+#
+#     cd $EBROOTREPEATMASKER/Libraries
+#     for FILE in RepeatMasker.lib* ; do mv $F $F.orig; done
+#     famdb.py -i famdb fasta_all > RepeatMasker.lib
+#     makeblastdb -dbtype nucl -in RepeatMasker.lib
+#     makeblastdb -dbtype prot -in RepeatPeps.lib
+#
+
+name = 'RepeatMasker'
+version = '4.2.1'
+
+homepage = 'https://www.repeatmasker.org/'
+description = """RepeatMasker is a program that screens DNA sequences for interspersed repeats
+ and low complexity DNA sequences."""
+
+toolchain = {'name': 'foss', 'version': '2024a'}
+
+source_urls = ['https://www.repeatmasker.org/%(name)s']
+sources = [
+    SOURCE_TAR_GZ,
+    # optional but recommended: RepBase RepeatMasker Edition (see above)
+    # requires subscription and academic license, download from here: https://www.girinst.org/server/RepBase/index.php
+    #{
+    #    'filename': 'RepBaseRepeatMaskerEdition-20181026.tar.gz',
+    #    'extract_cmd': "tar -xzf %s -C %(builddir)s/%(name)s/Libraries --strip-components 1",
+    #},
+]
+checksums = ['e6d8260744d8f98b4e36774aa4022dbdde0c2882417925cf524dcc4878da23d0']
+
+dependencies = [
+    ('Python', '3.12.3'),
+    ('Perl', '5.38.2'),
+    ('TRF', '4.09.1'),
+    ('h5py', '3.12.1'),
+    # At least one search engine of: RMBlast, HMMER, ABBlast/WUBlast, Cross_Match
+    ('HMMER', '3.4'),
+    ('RMBlast', '2.14.1'),
+    ('Phrap', '1.090518rev'), # provides Cross_Match, see its download_instructions
+]
+
+local_default_search_engine = 'RMBlast'
+
+local_config_command = 'cd %(installdir)s &&'
+local_config_command += ' ./configure'
+local_config_command += ' -perlbin "$EBROOTPERL/bin/perl"'
+local_config_command += ' -trf_prgm "$EBROOTTRF/bin/trf"'
+local_config_command += ' -hmmer_dir "$EBROOTHMMER/bin"'
+local_config_command += ' -rmblast_dir "$EBROOTRMBLAST/bin"'
+local_config_command += ' -crossmatch_dir "$EBROOTPHRAP/bin"'  # if Phrap is a dependency
+local_config_command += ' -default_search_engine %s' % local_default_search_engine.lower()
+
+postinstallcmds = [local_config_command]
+
+fix_perl_shebang_for = [ 'DupMasker', 'ProcessRepeats', 'RepeatMasker', 'RepeatProteinMask', 'addRepBase.pl', 'configure', 'util/*.pl', 'util/trfMask' ]
+
+fix_python_shebang_for = ['famdb.py', 'util/RM2Bed.py' ]
+
+sanity_check_paths = {
+    'files': ['RepeatMasker', 'RepeatMaskerConfig.pm'],
+    'dirs': ['Libraries', 'Libraries/famdb', 'util'],
+}
+
+sanity_check_commands = ['RepeatMasker -help']
+
+modextrapaths = {
+    'PATH': 'util',
+    'PATH': '',
+    'PERL5LIB': '',
+    'LIBDIR': 'Libraries',
+}
+
+moduleclass = 'bio'

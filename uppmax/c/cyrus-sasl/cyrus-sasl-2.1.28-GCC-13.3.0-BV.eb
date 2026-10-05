@@ -1,0 +1,27 @@
+# cyrus-sasl-2.1.28-GCC-13.3.0.eb
+
+easyblock = 'ConfigureMake'
+
+name = 'cyrus-sasl'
+version = '2.1.28'
+
+homepage = 'https://www.cyrusimap.org/sasl/'
+description = """This is the Cyrus SASL API implementation. It can be used on the client or server side to provide authentication and authorization services."""
+
+toolchain = {'name': 'GCC', 'version': '13.3.0'}
+
+source_urls = ['https://github.com/cyrusimap/cyrus-sasl/releases/download/%(name)s-%(version)s/']
+sources = ['%(name)s-%(version)s.tar.gz']
+
+checksums = ['7ccfc6abd01ed67c1a0924b353e526f1b766b21f42d4562ee635a8ebfc5bb38c']
+
+sanity_check_paths = {
+    'files': ['sbin/saslauthd', 'lib/libsasl2.so'],
+    'dirs': ['lib'],
+}
+
+sanity_check_commands = [
+    'saslpasswd2 --help || true',
+]
+
+moduleclass = 'lib'

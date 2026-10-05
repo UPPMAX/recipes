@@ -1,0 +1,185 @@
+# Douglas Scofield UPPMAX 05/2026
+# - update for 5.2, reapplying changes from 5.1 patch
+#   - be consistent enclosing <gsl/...> especially important as it retains its bundled GSL source
+#   - add gsl header changes to eidos/eidos_functions_matrices.cpp
+#   - comment out target work for GSL and ZLIB
+#################################
+diff -ruN SLiM-5.2.orig/CMakeLists.txt SLiM-5.2/CMakeLists.txt
+--- SLiM-5.2.orig/CMakeLists.txt	2026-04-12 00:57:43.000000000 +0200
++++ SLiM-5.2/CMakeLists.txt	2026-05-05 10:59:27.237257625 +0200
+@@ -161,7 +161,7 @@
+ 
+ 
+ # Use the flags below for [all / Debug / Release] builds; these flags are built in to cmake
+-# Note that -fno-math-errno is deliberately set for C++ (for eidos and slim) but not for C (for gsl, eidos_zlib, kastore, tables)
++# Note that -fno-math-errno is deliberately set for C++ (for eidos and slim) but not for C (for gsl, libz.a, kastore, tables)
+ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -Wno-attributes -Wunused-label -Wimplicit -Wunused-variable -Wunused-value -Wno-pragmas -Wempty-body -Wshadow -Wparentheses -Wmissing-prototypes -Wswitch -Wpointer-sign -Wsign-compare -Wstrict-prototypes -Wno-sign-conversion -Wuninitialized")
+ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-attributes -Wunused-label -Wunused-variable -Wunused-value -Wno-pragmas -Wempty-body -Wshadow -Wparentheses -Wswitch -Wsign-compare -Wno-sign-conversion -Wuninitialized -fno-math-errno")
+ 
+@@ -367,18 +367,24 @@
+ endif()
+ 
+ # GSL - adding /usr/local/include so all targets that use GSL_INCLUDES get omp.h
+-set(TARGET_NAME_GSL gsl)
+-file(GLOB_RECURSE GSL_SOURCES ${PROJECT_SOURCE_DIR}/gsl/*.c ${PROJECT_SOURCE_DIR}/gsl/*/*.c)
+-set(GSL_INCLUDES ${PROJECT_SOURCE_DIR}/gsl ${PROJECT_SOURCE_DIR}/gsl/specfunc ${PROJECT_SOURCE_DIR}/gsl/blas ${PROJECT_SOURCE_DIR}/gsl/rng ${PROJECT_SOURCE_DIR}/gsl/cdf ${PROJECT_SOURCE_DIR}/gsl/vector ${PROJECT_SOURCE_DIR}/gsl/err ${PROJECT_SOURCE_DIR}/gsl/sys ${PROJECT_SOURCE_DIR}/gsl/randist ${PROJECT_SOURCE_DIR}/gsl/matrix ${PROJECT_SOURCE_DIR}/gsl/cblas ${PROJECT_SOURCE_DIR}/gsl/complex ${PROJECT_SOURCE_DIR}/gsl/block ${PROJECT_SOURCE_DIR}/gsl/interpolation ${PROJECT_SOURCE_DIR}/gsl/linalg ${PROJECT_SOURCE_DIR}/gsl/permutation /usr/local/include)
+-add_library(${TARGET_NAME_GSL} STATIC ${GSL_SOURCES})
+-target_include_directories(${TARGET_NAME_GSL} PUBLIC ${GSL_INCLUDES})
++#set(TARGET_NAME_GSL gsl)
++#file(GLOB_RECURSE GSL_SOURCES ${PROJECT_SOURCE_DIR}/gsl/*.c ${PROJECT_SOURCE_DIR}/gsl/*/*.c)
++#set(GSL_INCLUDES ${PROJECT_SOURCE_DIR}/gsl ${PROJECT_SOURCE_DIR}/gsl/specfunc ${PROJECT_SOURCE_DIR}/gsl/blas ${PROJECT_SOURCE_DIR}/gsl/rng ${PROJECT_SOURCE_DIR}/gsl/cdf ${PROJECT_SOURCE_DIR}/gsl/vector ${PROJECT_SOURCE_DIR}/gsl/err ${PROJECT_SOURCE_DIR}/gsl/sys ${PROJECT_SOURCE_DIR}/gsl/randist ${PROJECT_SOURCE_DIR}/gsl/matrix ${PROJECT_SOURCE_DIR}/gsl/cblas ${PROJECT_SOURCE_DIR}/gsl/complex ${PROJECT_SOURCE_DIR}/gsl/block ${PROJECT_SOURCE_DIR}/gsl/interpolation ${PROJECT_SOURCE_DIR}/gsl/linalg ${PROJECT_SOURCE_DIR}/gsl/permutation /usr/local/include)
++#add_library(${TARGET_NAME_GSL} STATIC ${GSL_SOURCES})
++#target_include_directories(${TARGET_NAME_GSL} PUBLIC ${GSL_INCLUDES})
++#
++# use GSL from EasyBuild
++find_package(GSL)
+ 
+ # ZLIB
+-set(TARGET_NAME_ZLIB eidos_zlib)
+-file(GLOB_RECURSE ZLIB_SOURCES ${PROJECT_SOURCE_DIR}/eidos_zlib/*.c)
+-set(ZLIB_INCLUDES ${PROJECT_SOURCE_DIR}/eidos_zlib)
+-add_library(${TARGET_NAME_ZLIB} STATIC ${ZLIB_SOURCES})
+-target_include_directories(${TARGET_NAME_ZLIB} PUBLIC)
++#set(TARGET_NAME_ZLIB eidos_zlib)
++#file(GLOB_RECURSE ZLIB_SOURCES ${PROJECT_SOURCE_DIR}/eidos_zlib/*.c)
++#set(ZLIB_INCLUDES ${PROJECT_SOURCE_DIR}/eidos_zlib)
++#add_library(${TARGET_NAME_ZLIB} STATIC ${ZLIB_SOURCES})
++#target_include_directories(${TARGET_NAME_ZLIB} PUBLIC)
++#
++# use ZLIB from EasyBuild
++find_package(ZLIB)
+ 
+ # KASTORE
+ set(TARGET_NAME_KASTORE kastore)
+@@ -412,7 +418,7 @@
+ 
+ add_executable(${TARGET_NAME_SLIM} ${SLIM_SOURCES})
+ target_include_directories(${TARGET_NAME_SLIM} PRIVATE ${GSL_INCLUDES} "${PROJECT_SOURCE_DIR}/core" "${PROJECT_SOURCE_DIR}/eidos")
+-target_link_libraries(${TARGET_NAME_SLIM} PUBLIC gsl eidos_zlib tables)
++target_link_libraries(${TARGET_NAME_SLIM} PUBLIC flexiblas gsl libz.a tables)
+ if(PARALLEL)
+ 	# linking in the OpenMP library is maybe automatic with gcc?
+ 	#target_link_libraries(${TARGET_NAME_SLIM} PUBLIC omp)
+@@ -434,7 +440,7 @@
+ file(GLOB_RECURSE EIDOS_SOURCES  ${PROJECT_SOURCE_DIR}/eidos/*.cpp  ${PROJECT_SOURCE_DIR}/eidostool/*.cpp)
+ add_executable(${TARGET_NAME_EIDOS} ${EIDOS_SOURCES})
+ target_include_directories(${TARGET_NAME_EIDOS} PRIVATE ${GSL_INCLUDES} "${PROJECT_SOURCE_DIR}/eidos")
+-target_link_libraries(${TARGET_NAME_EIDOS} PUBLIC gsl eidos_zlib tables)
++target_link_libraries(${TARGET_NAME_EIDOS} PUBLIC flexiblas gsl libz.a tables)
+ if(PARALLEL)
+ 	# linking in the OpenMP library is maybe automatic with gcc?
+ 	#target_link_libraries(${TARGET_NAME_EIDOS} PUBLIC omp)
+@@ -511,15 +517,15 @@
+   
+   # Operating System-specific install stuff.
+   if(APPLE)
+-    target_link_libraries( ${TARGET_NAME_SLIMGUI} PUBLIC OpenGL::GL gsl tables eidos_zlib )
++    target_link_libraries( ${TARGET_NAME_SLIMGUI} PUBLIC OpenGL::GL flexiblas gsl tables libz.a )
+   else()
+     if(WIN32)
+       set_source_files_properties(${QTSLIM_SOURCES} PROPERTIES COMPILE_FLAGS "-include config.h")
+       set_source_files_properties(${GNULIB_NAMESPACE_SOURCES} TARGET_DIRECTORY slim eidos SLiMgui PROPERTIES COMPILE_FLAGS "-include config.h -DGNULIB_NAMESPACE=gnulib")
+       target_include_directories(${TARGET_NAME_SLIMGUI} BEFORE PUBLIC ${GNU_DIR})
+-      target_link_libraries(${TARGET_NAME_SLIMGUI} PUBLIC OpenGL::GL gsl tables eidos_zlib gnu PRIVATE bcrypt)
++      target_link_libraries(${TARGET_NAME_SLIMGUI} PUBLIC OpenGL::GL flexiblas gsl tables libz.a gnu PRIVATE bcrypt)
+     else()
+-      target_link_libraries( ${TARGET_NAME_SLIMGUI} PUBLIC OpenGL::GL gsl tables eidos_zlib )
++      target_link_libraries( ${TARGET_NAME_SLIMGUI} PUBLIC OpenGL::GL flexiblas gsl tables libz.a )
+ 
+       # Install icons and desktop files to the data root directory (usually /usr/local/share, or /usr/share).
+       if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.14")
+diff -ruN SLiM-5.2.orig/core/spatial_map.cpp SLiM-5.2/core/spatial_map.cpp
+--- SLiM-5.2.orig/core/spatial_map.cpp	2026-04-12 00:57:43.000000000 +0200
++++ SLiM-5.2/core/spatial_map.cpp	2026-05-05 11:01:40.840801950 +0200
+@@ -24,10 +24,10 @@
+ #include "eidos_class_Image.h"
+ #include "eidos_simd.h"
+ 
+-#include "gsl_math.h"
+-#include "gsl_spline.h"
+-#include "gsl_interp2d.h"
+-#include "gsl_spline2d.h"
++#include <gsl/gsl_math.h>
++#include <gsl/gsl_spline.h>
++#include <gsl/gsl_interp2d.h>
++#include <gsl/gsl_spline2d.h>
+ 
+ #include <utility>
+ #include <string>
+diff -ruN SLiM-5.2.orig/eidos/eidos_functions_distributions.cpp SLiM-5.2/eidos/eidos_functions_distributions.cpp
+--- SLiM-5.2.orig/eidos/eidos_functions_distributions.cpp	2026-04-12 00:57:43.000000000 +0200
++++ SLiM-5.2/eidos/eidos_functions_distributions.cpp	2026-05-05 13:20:30.520508835 +0200
+@@ -23,9 +23,9 @@
+ 
+ #include <vector>
+ 
+-#include "gsl_linalg.h"
+-#include "gsl_errno.h"
+-#include "gsl_cdf.h"
++#include <gsl/gsl_linalg.h>
++#include <gsl/gsl_errno.h>
++#include <gsl/gsl_cdf.h>
+ #include "eidos_simd.h"
+ 
+ 
+diff -ruN SLiM-5.2.orig/eidos/eidos_functions_files.cpp SLiM-5.2/eidos/eidos_functions_files.cpp
+--- SLiM-5.2.orig/eidos/eidos_functions_files.cpp	2026-04-12 00:57:43.000000000 +0200
++++ SLiM-5.2/eidos/eidos_functions_files.cpp	2026-05-05 11:04:29.388258750 +0200
+@@ -31,7 +31,7 @@
+ #include <sys/stat.h>
+ #include <unistd.h>
+ 
+-#include "../eidos_zlib/zlib.h"
++#include <zlib.h>
+ 
+ 
+ // ************************************************************************************
+diff -ruN SLiM-5.2.orig/eidos/eidos_functions_matrices.cpp SLiM-5.2/eidos/eidos_functions_matrices.cpp
+--- SLiM-5.2.orig/eidos/eidos_functions_matrices.cpp	2026-04-12 00:57:43.000000000 +0200
++++ SLiM-5.2/eidos/eidos_functions_matrices.cpp	2026-05-05 11:05:10.986126981 +0200
+@@ -25,9 +25,9 @@
+ #include <vector>
+ #include <algorithm>
+ 
+-#include "gsl_linalg.h"
+-#include "gsl_matrix.h"
+-#include "gsl_errno.h"
++#include <gsl/gsl_linalg.h>
++#include <gsl/gsl_matrix.h>
++#include <gsl/gsl_errno.h>
+ 
+ 
+ // ************************************************************************************
+diff -ruN SLiM-5.2.orig/eidos/eidos_globals.cpp SLiM-5.2/eidos/eidos_globals.cpp
+--- SLiM-5.2.orig/eidos/eidos_globals.cpp	2026-04-12 00:57:43.000000000 +0200
++++ SLiM-5.2/eidos/eidos_globals.cpp	2026-05-05 11:06:18.708912456 +0200
+@@ -65,13 +65,13 @@
+ #endif
+ 
+ // for Eidos_WelchTTest()
+-#include "gsl_cdf.h"
++#include <gsl/gsl_cdf.h>
+ 
+ // for Eidos_calc_sha_256()
+ #include <stdint.h>
+ 
+ // for _Eidos_FlushZipBuffer()
+-#include "../eidos_zlib/zlib.h"
++#include <zlib.h>
+ 
+ // for Eidos_ColorPaletteLookup()
+ #include "eidos_tinycolormap.h"
+diff -ruN SLiM-5.2.orig/eidos/eidos_rng.h SLiM-5.2/eidos/eidos_rng.h
+--- SLiM-5.2.orig/eidos/eidos_rng.h	2026-04-12 00:57:43.000000000 +0200
++++ SLiM-5.2/eidos/eidos_rng.h	2026-05-05 11:07:16.184728486 +0200
+@@ -30,8 +30,8 @@
+ #define __Eidos__eidos_rng__
+ 
+ 
+-#include "gsl_rng.h"
+-#include "gsl_randist.h"
++#include <gsl/gsl_rng.h>
++#include <gsl/gsl_randist.h>
+ 
+ // BCH 1 November 2025: We now use the PCG random number generator.  See https://www.pcg-random.org.  This
+ // is licensed under the Apache License, Version 2.0, which is GPL 3.0 compatible, so we have included it in

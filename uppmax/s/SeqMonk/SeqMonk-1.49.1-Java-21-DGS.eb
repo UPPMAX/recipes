@@ -1,0 +1,41 @@
+# Douglas Scofield UPPMAX 12/2025
+# - new install, based on FastQC
+# - remove packaged JRE, use EB's
+# - fix shebangs without a patch
+
+easyblock = 'PackedBinary'
+
+name = 'SeqMonk'
+version = '1.49.1'
+versionsuffix = '-Java-%(javaver)s'
+
+homepage = 'https://www.bioinformatics.babraham.ac.uk/projects/seqmonk/'
+
+description = """A tool to visualise and analyse high throughput mapped sequence data"""
+
+toolchain = SYSTEM
+
+github_account = 's-andrews'
+source_urls = [ GITHUB_RELEASE ]
+sources = [ '%(namelower)s_v%(version)s_linux64.tar.gz' ]
+checksums = [ 'a0c65c0f5f3f2aeb60b628d17e84dc7b9b69c35ac5b3f9a4fa7b87ec535cf78d' ]
+
+dependencies = [
+    ('Java', '21', '', SYSTEM),
+    ('Perl', '5.38.0', '', SYSTEM),
+]
+
+postinstallcmds = [ "rm -rf %(installdir)s/jre" ]
+
+fix_perl_shebang_for = [ 'seqmonk', 'seqmonk_import' ]
+
+sanity_check_paths = {
+    'files': ['seqmonk', 'seqmonk_import',
+              'Jama-1.0.2.jar', 'htsjdk.jar', 'commons-math3-3.5.jar',
+              'INSTALL.txt', 'LICENSE', 'LICENSE.txt', 'README.md', 'README.txt', 'RELEASE_NOTES.txt'],
+    'dirs': [ 'Genomes', 'Help', 'Scripts', 'Templates', 'com', 'edu', 'net', 'uk' ],
+}
+
+sanity_check_commands = [ 'seqmonk --help' ]
+
+moduleclass = 'bio'

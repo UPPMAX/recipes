@@ -1,0 +1,32 @@
+easyblock = 'Binary'
+
+name = 'QIIME2'
+version = '2025.10'
+
+homepage = 'https://qiime2.org'
+description = """QIIME 2 is a powerful, extensible, and decentralized microbiome 
+bioinformatics platform that is free, open source, and community developed."""
+
+toolchain = SYSTEM
+
+# Include the definition file
+sources = ['QIIME2-%(version)s.def']
+
+# Build the container from the definition file (using system apptainer)
+install_cmd = ' && '.join([
+    'mkdir -p %(installdir)s/bin',
+    'apptainer build %(installdir)s/bin/QIIME2_%(version)s_amplicon_LCC_ALL.sif QIIME2-%(version)s.def',
+    'ln -s %(installdir)s/bin/QIIME2_%(version)s_amplicon_LCC_ALL.sif %(installdir)s/bin/qiime',
+])
+
+sanity_check_paths = {
+    'files': ['bin/QIIME2_%(version)s_amplicon_LCC_ALL.sif'],
+    'dirs': []
+}
+
+# Set up module to make the container easily accessible
+modextravars = {
+    'QIIME2_SIF': '%(installdir)s/bin/QIIME2_%(version)s_amplicon_LCC_ALL.sif',
+}
+
+moduleclass = 'bio'

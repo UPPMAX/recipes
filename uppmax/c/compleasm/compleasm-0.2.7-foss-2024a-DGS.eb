@@ -1,0 +1,40 @@
+# Douglas Scofield UPPMAX 12/2025
+# - update version
+# - UPPMAX bioinfo toolchain 2024a
+####################################
+
+easyblock = 'PythonPackage'
+
+name = 'compleasm'
+version = '0.2.7'
+
+homepage = 'https://github.com/huangnengCSU/compleasm'
+description = """Compleasm: a faster and more accurate reimplementation of BUSCO. A genome completeness evaluation tool
+based on miniprot"""
+
+toolchain = {'name': 'foss', 'version': '2024a'}
+
+github_account = 'huangnengCSU'
+source_urls = [GITHUB_SOURCE]
+sources = ['v%(version)s.tar.gz']
+checksums = ['7a9a49a631e01389d7620dc6a0b337adc9f04bd81008da1836720d01f24651ed']
+
+dependencies = [
+    ('miniprot', '0.18'),
+    ('HMMER', '3.4'),
+    ('SEPP', '4.5.5'),
+    ('SciPy-bundle', '2024.05'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+sanity_check_paths = {
+    'files': ['bin/compleasm'],
+    'dirs': [],
+}
+
+sanity_check_commands = ['compleasm -h']
+
+moduleclass = 'bio'

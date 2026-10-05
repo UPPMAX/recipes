@@ -1,0 +1,29 @@
+# Douglas G Scofield UPPMAX 11/2025
+# - install prebuilt linux binaries for dorado
+###################################
+
+easyblock = 'Tarball'
+
+name = 'dorado'
+version = '1.1.1'
+
+homepage = 'https://github.com/nanoporetech/dorado'
+description = """Dorado is a high-performance, easy-to-use, open source basecaller for Oxford Nanopore reads.
+This easyconfig installs the prebuilt binaries."""
+
+toolchain = SYSTEM
+
+source_urls = [ 'https://cdn.oxfordnanoportal.com/software/analysis' ]
+sources = [ '%(name)s-%(version)s-linux-x64.tar.gz' ]
+checksums = [ '08f6ef13b23867bddaa2abee292627e617ca2d2d68d9379dcae703add9940360' ]
+
+sanity_check_paths = {
+    'files': [
+        'bin/%(name)s',
+    ],
+    'dirs': [ 'lib' ],
+}
+
+sanity_check_commands = [ '%(name)s --help' ]
+
+moduleclass = 'bio'

@@ -1,0 +1,471 @@
+diff -ruN alphafold-2.3.2.orig/alphafold/model/all_atom_multimer.py alphafold-2.3.2/alphafold/model/all_atom_multimer.py
+--- alphafold-2.3.2.orig/alphafold/model/all_atom_multimer.py	2023-03-27 13:50:49.000000000 +0200
++++ alphafold-2.3.2/alphafold/model/all_atom_multimer.py	2026-04-10 13:27:00.739510291 +0200
+@@ -247,7 +247,7 @@
+   # create a mask for known groundtruth positions
+   atom14_mask *= utils.batched_gather(jnp.asarray(RESTYPE_ATOM14_MASK), aatype)
+   # gather the groundtruth positions
+-  atom14_positions = jax.tree_map(
++  atom14_positions = jax.tree_util.tree_map(
+       lambda x: utils.batched_gather(x, residx_atom14_to_atom37, batch_dims=1),
+       all_atom_pos)
+   atom14_positions = atom14_mask * atom14_positions
+@@ -261,7 +261,7 @@
+   renaming_transform = utils.batched_gather(
+       jnp.asarray(RENAMING_MATRICES), aatype)
+ 
+-  alternative_positions = jax.tree_map(
++  alternative_positions = jax.tree_util.tree_map(
+       lambda x: jnp.sum(x, axis=1), positions[:, :, None] * renaming_transform)
+ 
+   # Create the mask for the alternative ground truth (differs from the
+@@ -288,7 +288,7 @@
+   # If there is a batch axis, just flatten it away, and reshape everything
+   # back at the end of the function.
+   aatype = jnp.reshape(aatype, [-1])
+-  all_atom_positions = jax.tree_map(lambda x: jnp.reshape(x, [-1, 37]),
++  all_atom_positions = jax.tree_util.tree_map(lambda x: jnp.reshape(x, [-1, 37]),
+                                     all_atom_positions)
+   all_atom_mask = jnp.reshape(all_atom_mask, [-1, 37])
+ 
+@@ -298,7 +298,7 @@
+       RESTYPE_RIGIDGROUP_BASE_ATOM37_IDX, aatype)
+ 
+   # Gather the base atom positions for each rigid group.
+-  base_atom_pos = jax.tree_map(
++  base_atom_pos = jax.tree_util.tree_map(
+       lambda x: utils.batched_gather(  # pylint: disable=g-long-lambda
+           x, residx_rigidgroup_base_atom37_idx, batch_dims=1),
+       all_atom_positions)
+@@ -355,11 +355,11 @@
+   fix_shape = lambda x: jnp.reshape(x, aatype_in_shape + (8,))
+ 
+   # reshape back to original residue layout
+-  gt_frames = jax.tree_map(fix_shape, gt_frames)
++  gt_frames = jax.tree_util.tree_map(fix_shape, gt_frames)
+   gt_exists = fix_shape(gt_exists)
+   group_exists = fix_shape(group_exists)
+   residx_rigidgroup_is_ambiguous = fix_shape(residx_rigidgroup_is_ambiguous)
+-  alt_gt_frames = jax.tree_map(fix_shape, alt_gt_frames)
++  alt_gt_frames = jax.tree_util.tree_map(fix_shape, alt_gt_frames)
+ 
+   return {
+       'rigidgroups_gt_frames': gt_frames,  # Rigid (..., 8)
+@@ -426,7 +426,7 @@
+   chi3_frame_to_backb = chi2_frame_to_backb @ all_frames[:, 6]
+   chi4_frame_to_backb = chi3_frame_to_backb @ all_frames[:, 7]
+ 
+-  all_frames_to_backb = jax.tree_map(
++  all_frames_to_backb = jax.tree_util.tree_map(
+       lambda *x: jnp.concatenate(x, axis=-1), all_frames[:, 0:5],
+       chi2_frame_to_backb[:, None], chi3_frame_to_backb[:, None],
+       chi4_frame_to_backb[:, None])
+@@ -451,7 +451,7 @@
+       residx_to_group_idx, num_classes=8)  # shape (N, 14, 8)
+ 
+   # geometry.Rigid3Array with shape (N, 14)
+-  map_atoms_to_global = jax.tree_map(
++  map_atoms_to_global = jax.tree_util.tree_map(
+       lambda x: jnp.sum(x[:, None, :] * group_mask, axis=-1),
+       all_frames_to_global)
+ 
+@@ -916,7 +916,7 @@
+   atom_indices = utils.batched_gather(
+       params=chi_atom_indices, indices=aatype, axis=0)
+   # Gather atom positions. Shape: [num_res, chis=4, atoms=4, xyz=3].
+-  chi_angle_atoms = jax.tree_map(
++  chi_angle_atoms = jax.tree_util.tree_map(
+       lambda x: utils.batched_gather(  # pylint: disable=g-long-lambda
+           params=x, indices=atom_indices, axis=-1, batch_dims=1), positions)
+   a, b, c, d = [chi_angle_atoms[..., i] for i in range(4)]
+diff -ruN alphafold-2.3.2.orig/alphafold/model/all_atom.py alphafold-2.3.2/alphafold/model/all_atom.py
+--- alphafold-2.3.2.orig/alphafold/model/all_atom.py	2023-03-27 13:50:49.000000000 +0200
++++ alphafold-2.3.2/alphafold/model/all_atom.py	2026-04-10 13:27:00.738510293 +0200
+@@ -496,11 +496,11 @@
+ 
+   # chi2, chi3, and chi4 frames do not transform to the backbone frame but to
+   # the previous frame. So chain them up accordingly.
+-  chi2_frame_to_frame = jax.tree_map(lambda x: x[:, 5], all_frames)
+-  chi3_frame_to_frame = jax.tree_map(lambda x: x[:, 6], all_frames)
+-  chi4_frame_to_frame = jax.tree_map(lambda x: x[:, 7], all_frames)
++  chi2_frame_to_frame = jax.tree_util.tree_map(lambda x: x[:, 5], all_frames)
++  chi3_frame_to_frame = jax.tree_util.tree_map(lambda x: x[:, 6], all_frames)
++  chi4_frame_to_frame = jax.tree_util.tree_map(lambda x: x[:, 7], all_frames)
+ 
+-  chi1_frame_to_backb = jax.tree_map(lambda x: x[:, 4], all_frames)
++  chi1_frame_to_backb = jax.tree_util.tree_map(lambda x: x[:, 4], all_frames)
+   chi2_frame_to_backb = r3.rigids_mul_rigids(chi1_frame_to_backb,
+                                              chi2_frame_to_frame)
+   chi3_frame_to_backb = r3.rigids_mul_rigids(chi2_frame_to_backb,
+@@ -513,7 +513,7 @@
+     return jnp.concatenate(
+         [xall[:, 0:5], x5[:, None], x6[:, None], x7[:, None]], axis=-1)
+ 
+-  all_frames_to_backb = jax.tree_map(
++  all_frames_to_backb = jax.tree_util.tree_map(
+       _concat_frames,
+       all_frames,
+       chi2_frame_to_backb,
+@@ -523,7 +523,7 @@
+   # Create the global frames.
+   # shape (N, 8)
+   all_frames_to_global = r3.rigids_mul_rigids(
+-      jax.tree_map(lambda x: x[:, None], backb_to_global),
++      jax.tree_util.tree_map(lambda x: x[:, None], backb_to_global),
+       all_frames_to_backb)
+ 
+   return all_frames_to_global
+@@ -551,7 +551,7 @@
+       residx_to_group_idx, num_classes=8)  # shape (N, 14, 8)
+ 
+   # r3.Rigids with shape (N, 14)
+-  map_atoms_to_global = jax.tree_map(
++  map_atoms_to_global = jax.tree_util.tree_map(
+       lambda x: jnp.sum(x[:, None, :] * group_mask, axis=-1),
+       all_frames_to_global)
+ 
+@@ -567,7 +567,7 @@
+ 
+   # Mask out non-existing atoms.
+   mask = utils.batched_gather(residue_constants.restype_atom14_mask, aatype)
+-  pred_positions = jax.tree_map(lambda x: x * mask, pred_positions)
++  pred_positions = jax.tree_util.tree_map(lambda x: x * mask, pred_positions)
+ 
+   return pred_positions
+ 
+@@ -1050,14 +1050,14 @@
+   # Compute array of predicted positions in the predicted frames.
+   # r3.Vecs (num_frames, num_positions)
+   local_pred_pos = r3.rigids_mul_vecs(
+-      jax.tree_map(lambda r: r[:, None], r3.invert_rigids(pred_frames)),
+-      jax.tree_map(lambda x: x[None, :], pred_positions))
++      jax.tree_util.tree_map(lambda r: r[:, None], r3.invert_rigids(pred_frames)),
++      jax.tree_util.tree_map(lambda x: x[None, :], pred_positions))
+ 
+   # Compute array of target positions in the target frames.
+   # r3.Vecs (num_frames, num_positions)
+   local_target_pos = r3.rigids_mul_vecs(
+-      jax.tree_map(lambda r: r[:, None], r3.invert_rigids(target_frames)),
+-      jax.tree_map(lambda x: x[None, :], target_positions))
++      jax.tree_util.tree_map(lambda r: r[:, None], r3.invert_rigids(target_frames)),
++      jax.tree_util.tree_map(lambda x: x[None, :], target_positions))
+ 
+   # Compute errors between the structures.
+   # jnp.ndarray (num_frames, num_positions)
+@@ -1129,8 +1129,8 @@
+   renaming_transform = utils.batched_gather(
+       jnp.asarray(RENAMING_MATRICES), aatype)
+ 
+-  positions = jax.tree_map(lambda x: x[:, :, None], positions)
+-  alternative_positions = jax.tree_map(
++  positions = jax.tree_util.tree_map(lambda x: x[:, :, None], positions)
++  alternative_positions = jax.tree_util.tree_map(
+       lambda x: jnp.sum(x, axis=1), positions * renaming_transform)
+ 
+   # Create the mask for the alternative ground truth (differs from the
+diff -ruN alphafold-2.3.2.orig/alphafold/model/folding_multimer.py alphafold-2.3.2/alphafold/model/folding_multimer.py
+--- alphafold-2.3.2.orig/alphafold/model/folding_multimer.py	2023-03-27 13:50:49.000000000 +0200
++++ alphafold-2.3.2/alphafold/model/folding_multimer.py	2026-04-10 13:27:00.740510290 +0200
+@@ -331,7 +331,7 @@
+                               name='v_point_projection')(inputs_1d,
+                                                          rigid)
+ 
+-    result_point_global = jax.tree_map(
++    result_point_global = jax.tree_util.tree_map(
+         lambda x: jnp.sum(attn[..., None] * x, axis=-3), v_point[None])
+ 
+     # Features used in the linear output projection. Should have the size
+@@ -344,7 +344,7 @@
+     result_scalar = jnp.reshape(result_scalar, flat_shape)
+     output_features.append(result_scalar)
+ 
+-    result_point_global = jax.tree_map(lambda r: jnp.reshape(r, flat_shape),
++    result_point_global = jax.tree_util.tree_map(lambda r: jnp.reshape(r, flat_shape),
+                                        result_point_global)
+     result_point_local = rigid[..., None].apply_inverse_to_point(
+         result_point_global)
+@@ -465,7 +465,7 @@
+ 
+     outputs = {'rigid': rigid, 'sc': sc}
+ 
+-    rotation = jax.tree_map(jax.lax.stop_gradient, rigid.rotation)
++    rotation = jax.tree_util.tree_map(jax.lax.stop_gradient, rigid.rotation)
+     rigid = geometry.Rigid3Array(rotation, rigid.translation)
+ 
+     new_activations = {
+@@ -546,7 +546,7 @@
+         )
+     outputs.append(output)
+ 
+-  output = jax.tree_map(lambda *x: jnp.stack(x), *outputs)
++  output = jax.tree_util.tree_map(lambda *x: jnp.stack(x), *outputs)
+   # Pass along for LDDT-Head.
+   output['act'] = activations['act']
+ 
+@@ -823,7 +823,7 @@
+   alt_gt_frames = frames_batch['rigidgroups_alt_gt_frames']
+   use_alt = use_alt[:, None]
+ 
+-  renamed_gt_frames = jax.tree_map(
++  renamed_gt_frames = jax.tree_util.tree_map(
+       lambda x, y: (1. - use_alt) * x + use_alt * y, gt_frames, alt_gt_frames)
+ 
+   return renamed_gt_frames, frames_batch['rigidgroups_gt_exists']
+@@ -839,18 +839,18 @@
+                    ) -> Dict[str, jnp.ndarray]:
+   """Sidechain Loss using cleaned up rigids."""
+ 
+-  flat_gt_frames = jax.tree_map(jnp.ravel, gt_frames)
++  flat_gt_frames = jax.tree_util.tree_map(jnp.ravel, gt_frames)
+   flat_frames_mask = jnp.ravel(gt_frames_mask)
+ 
+-  flat_gt_positions = jax.tree_map(jnp.ravel, gt_positions)
++  flat_gt_positions = jax.tree_util.tree_map(jnp.ravel, gt_positions)
+   flat_positions_mask = jnp.ravel(gt_mask)
+ 
+   # Compute frame_aligned_point_error score for the final layer.
+   def _slice_last_layer_and_flatten(x):
+     return jnp.ravel(x[-1])
+ 
+-  flat_pred_frames = jax.tree_map(_slice_last_layer_and_flatten, pred_frames)
+-  flat_pred_positions = jax.tree_map(_slice_last_layer_and_flatten,
++  flat_pred_frames = jax.tree_util.tree_map(_slice_last_layer_and_flatten, pred_frames)
++  flat_pred_positions = jax.tree_util.tree_map(_slice_last_layer_and_flatten,
+                                      pred_positions)
+   fape = all_atom_multimer.frame_aligned_point_error(
+       pred_frames=flat_pred_frames,
+diff -ruN alphafold-2.3.2.orig/alphafold/model/folding.py alphafold-2.3.2/alphafold/model/folding.py
+--- alphafold-2.3.2.orig/alphafold/model/folding.py	2023-03-27 13:50:49.000000000 +0200
++++ alphafold-2.3.2/alphafold/model/folding.py	2026-04-10 13:27:00.744510283 +0200
+@@ -454,7 +454,7 @@
+         aatype=batch['aatype'])
+     outputs.append(output)
+ 
+-  output = jax.tree_map(lambda *x: jnp.stack(x), *outputs)
++  output = jax.tree_util.tree_map(lambda *x: jnp.stack(x), *outputs)
+   # Include the activations in the output dict for use by the LDDT-Head.
+   output['act'] = activations['act']
+ 
+@@ -694,9 +694,9 @@
+ 
+   def _slice_last_layer_and_flatten(x):
+     return jnp.reshape(x[-1], [-1])
+-  flat_pred_frames = jax.tree_map(
++  flat_pred_frames = jax.tree_util.tree_map(
+       _slice_last_layer_and_flatten, pred_frames)
+-  flat_pred_positions = jax.tree_map(
++  flat_pred_positions = jax.tree_util.tree_map(
+       _slice_last_layer_and_flatten, pred_positions)
+   # FAPE Loss on sidechains
+   fape = all_atom.frame_aligned_point_error(
+diff -ruN alphafold-2.3.2.orig/alphafold/model/geometry/rigid_matrix_vector.py alphafold-2.3.2/alphafold/model/geometry/rigid_matrix_vector.py
+--- alphafold-2.3.2.orig/alphafold/model/geometry/rigid_matrix_vector.py	2023-03-27 13:50:49.000000000 +0200
++++ alphafold-2.3.2/alphafold/model/geometry/rigid_matrix_vector.py	2026-04-10 13:27:00.743510285 +0200
+@@ -56,7 +56,7 @@
+ 
+   def compose_rotation(self, other_rotation):
+     rot = self.rotation @ other_rotation
+-    trans = jax.tree_map(lambda x: jnp.broadcast_to(x, rot.shape),
++    trans = jax.tree_util.tree_map(lambda x: jnp.broadcast_to(x, rot.shape),
+                          self.translation)
+     return Rigid3Array(rot, trans)
+ 
+diff -ruN alphafold-2.3.2.orig/alphafold/model/geometry/vector.py alphafold-2.3.2/alphafold/model/geometry/vector.py
+--- alphafold-2.3.2.orig/alphafold/model/geometry/vector.py	2023-03-27 13:50:49.000000000 +0200
++++ alphafold-2.3.2/alphafold/model/geometry/vector.py	2026-04-10 13:27:00.742510286 +0200
+@@ -53,25 +53,25 @@
+       assert all([x == z for x, z in zip(self.x.shape, self.z.shape)])
+ 
+   def __add__(self, other: Vec3Array) -> Vec3Array:
+-    return jax.tree_map(lambda x, y: x + y, self, other)
++    return jax.tree_util.tree_map(lambda x, y: x + y, self, other)
+ 
+   def __sub__(self, other: Vec3Array) -> Vec3Array:
+-    return jax.tree_map(lambda x, y: x - y, self, other)
++    return jax.tree_util.tree_map(lambda x, y: x - y, self, other)
+ 
+   def __mul__(self, other: Float) -> Vec3Array:
+-    return jax.tree_map(lambda x: x * other, self)
++    return jax.tree_util.tree_map(lambda x: x * other, self)
+ 
+   def __rmul__(self, other: Float) -> Vec3Array:
+     return self * other
+ 
+   def __truediv__(self, other: Float) -> Vec3Array:
+-    return jax.tree_map(lambda x: x / other, self)
++    return jax.tree_util.tree_map(lambda x: x / other, self)
+ 
+   def __neg__(self) -> Vec3Array:
+-    return jax.tree_map(lambda x: -x, self)
++    return jax.tree_util.tree_map(lambda x: -x, self)
+ 
+   def __pos__(self) -> Vec3Array:
+-    return jax.tree_map(lambda x: x, self)
++    return jax.tree_util.tree_map(lambda x: x, self)
+ 
+   def cross(self, other: Vec3Array) -> Vec3Array:
+     """Compute cross product between 'self' and 'other'."""
+diff -ruN alphafold-2.3.2.orig/alphafold/model/layer_stack_test.py alphafold-2.3.2/alphafold/model/layer_stack_test.py
+--- alphafold-2.3.2.orig/alphafold/model/layer_stack_test.py	2023-03-27 13:50:49.000000000 +0200
++++ alphafold-2.3.2/alphafold/model/layer_stack_test.py	2026-04-10 13:27:00.742510286 +0200
+@@ -198,7 +198,7 @@
+     assert_fn = functools.partial(
+         np.testing.assert_allclose, atol=1e-4, rtol=1e-4)
+ 
+-    jax.tree_map(assert_fn, unrolled_grad,
++    jax.tree_util.tree_map(assert_fn, unrolled_grad,
+                  _slice_layers_params(layer_stack_grad))
+ 
+   def test_random(self):
+diff -ruN alphafold-2.3.2.orig/alphafold/model/mapping.py alphafold-2.3.2/alphafold/model/mapping.py
+--- alphafold-2.3.2.orig/alphafold/model/mapping.py	2023-03-27 13:50:49.000000000 +0200
++++ alphafold-2.3.2/alphafold/model/mapping.py	2026-04-10 13:27:00.740510290 +0200
+@@ -125,7 +125,7 @@
+     # Expand in axes and Determine Loop range
+     in_axes_ = _expand_axes(in_axes, args)
+ 
+-    in_sizes = jax.tree_map(_maybe_get_size, args, in_axes_)
++    in_sizes = jax.tree_util.tree_map(_maybe_get_size, args, in_axes_)
+     flat_sizes = jax.tree_util.tree_flatten(in_sizes)[0]
+     in_size = max(flat_sizes)
+     assert all(i in {in_size, -1} for i in flat_sizes)
+@@ -137,28 +137,28 @@
+     last_shard_size = shard_size if last_shard_size == 0 else last_shard_size
+ 
+     def apply_fun_to_slice(slice_start, slice_size):
+-      input_slice = jax.tree_map(
++      input_slice = jax.tree_util.tree_map(
+           lambda array, axis: _maybe_slice(array, slice_start, slice_size, axis
+                                           ), args, in_axes_)
+       return fun(*input_slice)
+ 
+     remainder_shape_dtype = hk.eval_shape(
+         partial(apply_fun_to_slice, 0, last_shard_size))
+-    out_dtypes = jax.tree_map(lambda x: x.dtype, remainder_shape_dtype)
+-    out_shapes = jax.tree_map(lambda x: x.shape, remainder_shape_dtype)
++    out_dtypes = jax.tree_util.tree_map(lambda x: x.dtype, remainder_shape_dtype)
++    out_shapes = jax.tree_util.tree_map(lambda x: x.shape, remainder_shape_dtype)
+     out_axes_ = _expand_axes(out_axes, remainder_shape_dtype)
+ 
+     if num_extra_shards > 0:
+       regular_shard_shape_dtype = hk.eval_shape(
+           partial(apply_fun_to_slice, 0, shard_size))
+-      shard_shapes = jax.tree_map(lambda x: x.shape, regular_shard_shape_dtype)
++      shard_shapes = jax.tree_util.tree_map(lambda x: x.shape, regular_shard_shape_dtype)
+ 
+       def make_output_shape(axis, shard_shape, remainder_shape):
+         return shard_shape[:axis] + (
+             shard_shape[axis] * num_extra_shards +
+             remainder_shape[axis],) + shard_shape[axis + 1:]
+ 
+-      out_shapes = jax.tree_map(make_output_shape, out_axes_, shard_shapes,
++      out_shapes = jax.tree_util.tree_map(make_output_shape, out_axes_, shard_shapes,
+                                 out_shapes)
+ 
+     # Calls dynamic Update slice with different argument order
+@@ -170,7 +170,7 @@
+       slice_out = apply_fun_to_slice(slice_start, slice_size)
+       update_slice = partial(
+           dynamic_update_slice_in_dim, i=slice_start)
+-      return jax.tree_map(update_slice, outputs, slice_out, out_axes_)
++      return jax.tree_util.tree_map(update_slice, outputs, slice_out, out_axes_)
+ 
+     def scan_iteration(outputs, i):
+       new_outputs = compute_shard(outputs, i, shard_size)
+@@ -181,7 +181,7 @@
+     def allocate_buffer(dtype, shape):
+       return jnp.zeros(shape, dtype=dtype)
+ 
+-    outputs = jax.tree_map(allocate_buffer, out_dtypes, out_shapes)
++    outputs = jax.tree_util.tree_map(allocate_buffer, out_dtypes, out_shapes)
+ 
+     if slice_starts.shape[0] > 0:
+       outputs, _ = hk.scan(scan_iteration, outputs, slice_starts)
+diff -ruN alphafold-2.3.2.orig/alphafold/model/model.py alphafold-2.3.2/alphafold/model/model.py
+--- alphafold-2.3.2.orig/alphafold/model/model.py	2023-03-27 13:50:49.000000000 +0200
++++ alphafold-2.3.2/alphafold/model/model.py	2026-04-10 13:27:00.744510283 +0200
+@@ -169,7 +169,7 @@
+     # This block is to ensure benchmark timings are accurate. Some blocking is
+     # already happening when computing get_confidence_metrics, and this ensures
+     # all outputs are blocked on.
+-    jax.tree_map(lambda x: x.block_until_ready(), result)
++    jax.tree_util.tree_map(lambda x: x.block_until_ready(), result)
+     result.update(
+         get_confidence_metrics(result, multimer_mode=self.multimer_mode))
+     logging.info('Output shape was %s',
+diff -ruN alphafold-2.3.2.orig/alphafold/model/modules_multimer.py alphafold-2.3.2/alphafold/model/modules_multimer.py
+--- alphafold-2.3.2.orig/alphafold/model/modules_multimer.py	2023-03-27 13:50:49.000000000 +0200
++++ alphafold-2.3.2/alphafold/model/modules_multimer.py	2026-04-10 13:27:00.741510288 +0200
+@@ -442,7 +442,7 @@
+           'prev_msa_first_row': ret['representations']['msa_first_row'],
+           'prev_pair': ret['representations']['pair'],
+       }
+-      return jax.tree_map(jax.lax.stop_gradient, new_prev)
++      return jax.tree_util.tree_map(jax.lax.stop_gradient, new_prev)
+ 
+     def apply_network(prev, safe_key):
+       recycled_batch = {**batch, **prev}
+diff -ruN alphafold-2.3.2.orig/alphafold/model/modules.py alphafold-2.3.2/alphafold/model/modules.py
+--- alphafold-2.3.2.orig/alphafold/model/modules.py	2023-03-27 13:50:49.000000000 +0200
++++ alphafold-2.3.2/alphafold/model/modules.py	2026-04-10 13:27:00.745510281 +0200
+@@ -322,7 +322,7 @@
+           'prev_msa_first_row': ret['representations']['msa_first_row'],
+           'prev_pair': ret['representations']['pair'],
+       }
+-      return jax.tree_map(jax.lax.stop_gradient, new_prev)
++      return jax.tree_util.tree_map(jax.lax.stop_gradient, new_prev)
+ 
+     def do_call(prev,
+                 recycle_idx,
+@@ -333,12 +333,12 @@
+           start = recycle_idx * num_ensemble
+           size = num_ensemble
+           return jax.lax.dynamic_slice_in_dim(x, start, size, axis=0)
+-        ensembled_batch = jax.tree_map(slice_recycle_idx, batch)
++        ensembled_batch = jax.tree_util.tree_map(slice_recycle_idx, batch)
+       else:
+         num_ensemble = batch_size
+         ensembled_batch = batch
+ 
+-      non_ensembled_batch = jax.tree_map(lambda x: x, prev)
++      non_ensembled_batch = jax.tree_util.tree_map(lambda x: x, prev)
+ 
+       return impl(
+           ensembled_batch=ensembled_batch,
+diff -ruN alphafold-2.3.2.orig/alphafold/model/prng.py alphafold-2.3.2/alphafold/model/prng.py
+--- alphafold-2.3.2.orig/alphafold/model/prng.py	2023-03-27 13:50:49.000000000 +0200
++++ alphafold-2.3.2/alphafold/model/prng.py	2026-04-10 13:27:00.739510291 +0200
+@@ -45,7 +45,7 @@
+     self._assert_not_used()
+     self._used = True
+     new_keys = jax.random.split(self._key, num_keys)
+-    return jax.tree_map(SafeKey, tuple(new_keys))
++    return jax.tree_util.tree_map(SafeKey, tuple(new_keys))
+ 
+   def duplicate(self, num_keys=2):
+     self._assert_not_used()
+diff -ruN alphafold-2.3.2.orig/alphafold/model/quat_affine.py alphafold-2.3.2/alphafold/model/quat_affine.py
+--- alphafold-2.3.2.orig/alphafold/model/quat_affine.py	2023-03-27 13:50:49.000000000 +0200
++++ alphafold-2.3.2/alphafold/model/quat_affine.py	2026-04-10 13:27:00.741510288 +0200
+@@ -301,8 +301,8 @@
+     translation = self.translation
+     for _ in range(extra_dims):
+       expand_fn = functools.partial(jnp.expand_dims, axis=-1)
+-      rotation = jax.tree_map(expand_fn, rotation)
+-      translation = jax.tree_map(expand_fn, translation)
++      rotation = jax.tree_util.tree_map(expand_fn, rotation)
++      translation = jax.tree_util.tree_map(expand_fn, translation)
+ 
+     rot_point = apply_rot_to_vec(rotation, point)
+     return [
+@@ -327,8 +327,8 @@
+     translation = self.translation
+     for _ in range(extra_dims):
+       expand_fn = functools.partial(jnp.expand_dims, axis=-1)
+-      rotation = jax.tree_map(expand_fn, rotation)
+-      translation = jax.tree_map(expand_fn, translation)
++      rotation = jax.tree_util.tree_map(expand_fn, rotation)
++      translation = jax.tree_util.tree_map(expand_fn, translation)
+ 
+     rot_point = [
+         transformed_point[0] - translation[0],

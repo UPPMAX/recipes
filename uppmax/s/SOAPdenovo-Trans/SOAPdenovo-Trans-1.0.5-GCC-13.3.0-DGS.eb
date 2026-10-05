@@ -1,0 +1,52 @@
+# Douglas Scofield UPPMAX 03/2026
+# - correct versioning
+# - update homepage
+# - use templates in filenames
+# - add sanity_check_cmds
+# - UPPMAX bioinfo toolchain 2024a
+#################################
+
+easyblock = 'MakeCp'
+
+name = 'SOAPdenovo-Trans'
+version = '1.0.5'
+
+homepage = 'https://github.com/aquaskyline/SOAPdenovo-Trans'
+description = """SOAPdenovo-Trans is a de novo transcriptome assembler basing on the SOAPdenovo framework,
+adapt to alternative splicing and different expression level among transcripts.
+"""
+
+toolchain = {'name': 'GCC', 'version': '13.3.0'}
+
+source_urls = ['https://github.com/aquaskyline/SOAPdenovo-Trans/archive/']
+sources = ['%(version)s.tar.gz']
+patches = ['%(name)s-%(version)s-fix-makefiles.patch']
+checksums = [
+    {'%(version)s.tar.gz': 'c1903c0d81142270db95916e2833400f72c4841b5c9194f182c19ebda418936f'},
+    {'%(name)s-%(version)s-fix-makefiles.patch': '15c420a5e2c2a5a5837dbb1223a6b02b78f059b162e82952c7ceee83fdfdcffb'},
+]
+
+max_parallel = 1
+
+start_dir = 'src'
+
+prebuildopts  = "sed -i 's/1\.04/%(version)s/' main.c && "
+prebuildopts += "sed -i 's/1\.04/%(version)s/' ../VERSION &&"
+
+buildopts = ' && make 127mer=1'
+
+files_to_copy = [(['../SOAPdenovo-Trans-127mer', '../SOAPdenovo-Trans-31mer'], 'bin'), '../LICENSE',
+                 '../README.md', '../VERSION']
+
+sanity_check_paths = {
+    'files': ['bin/SOAPdenovo-Trans-127mer', 'bin/SOAPdenovo-Trans-31mer'],
+    'dirs': []
+}
+
+sanity_check_cmds = [
+    'SOAPdenovo-Trans-127mer | grep -F "%(version)s"',
+    'SOAPdenovo-Trans-31mer | grep -F "%(version)s"',
+    'grep -F "%(version)s" $EBROOTSOAPDENOVOMINTRANS/VERSION',
+]
+
+moduleclass = 'bio'

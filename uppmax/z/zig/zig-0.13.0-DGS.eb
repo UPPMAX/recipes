@@ -1,0 +1,35 @@
+# Douglas Scofield UPPMAX 01/2026
+# - older version, required for building vcflib/1.0.14
+#####################################
+
+easyblock = 'Tarball'
+
+name = 'zig'
+version = '0.13.0'
+
+homepage = 'https://ziglang.org/'
+description = """Zig is a general-purpose programming language and toolchain for maintaining robust,
+optimal and reusable software."""
+
+toolchain = SYSTEM
+
+source_urls = ['https://ziglang.org/download/%(version)s/']
+sources = ['zig-linux-%s-%%(version)s.tar.xz' % ARCH]
+checksums = [{
+    'zig-linux-x86_64-%(version)s.tar.xz': 'd45312e61ebcc48032b77bc4cf7fd6915c11fa16e4aad116b66c9468211230ea',
+    'zig-linux-aarch64-%(version)s.tar.xz': '041ac42323837eb5624068acd8b00cd5777dac4cf91179e8dad7a7e90dd0c556',
+    'zig-linux-armv7a-%(version)s.tar.xz': '4b0550239c2cd884cc03ddeb2b9934708f4b073ad59a96fccbfe09f7e4f54233',
+    'zig-linux-riscv64-%(version)s.tar.xz': '9f7f3c685894ff80f43eaf3cad1598f4844ac46f4308374237c7f912f7907bb3',
+    'zig-linux-powerpc64le-%(version)s.tar.xz': '6a467622448e830e8f85d20cabed151498af2b0a62f87b8c083b2fe127e60417',
+}]
+
+sanity_check_paths = {
+    'files': ['zig', 'LICENSE'],
+    'dirs': ['doc', 'lib'],
+}
+
+sanity_check_commands = ["zig version | grep -F '%(version)s'"]
+
+modextrapaths = {'PATH': ''}
+
+moduleclass = 'compiler'

@@ -1,0 +1,46 @@
+# Douglas Scofield UPPMAX 12/2025
+# - update version
+# - UPPMAX bioinfo toolchain 2024a
+####################################
+
+easyblock = "CMakeMake"
+
+name = 'HyPhy'
+version = '2.5.91'
+
+homepage = 'https://veg.github.io/hyphy-site/'
+description = """HyPhy (Hypothesis Testing using Phylogenies) is an open-source software package
+ for the analysis of genetic sequences (in particular the inference of natural selection)
+ using techniques in phylogenetics, molecular evolution, and machine learning"""
+
+toolchain = {'name': 'gompi', 'version': '2024a'}
+toolchainopts = {'openmp': True, 'usempi': True}
+
+source_urls = ['https://github.com/veg/hyphy/archive/']
+sources = ['%(version)s.tar.gz']
+checksums = ['b3faa25b26f4e0b04c801df27ca5400256579d1acdbed24c66625d32f1904b2b']
+
+builddependencies = [
+    ('CMake', '3.29.3'),
+]
+
+dependencies = [
+    ('cURL', '8.7.1'),
+]
+
+local_linkdependencies = [
+    ('cURL', '8.7.1'),
+    toolchain,
+]
+
+buildopts = [
+    'hyphy',
+    'HYPHYMPI',
+]
+
+sanity_check_paths = {
+    'files': ['bin/hyphy', 'bin/HYPHYMPI'],
+    'dirs': [],
+}
+
+moduleclass = 'bio'

@@ -1,0 +1,44 @@
+# Douglas G Scofield UPPMAX 12/2025
+# - download prebuilt binaries (source written in D)
+# - place in bin/ and symlink namelower to download name
+####################################################
+
+easyblock = 'Binary'
+
+name = 'skani'
+version = '0.3.1'
+
+
+homepage = 'https://github.com/bluenote-1577/skani'
+description = "skani - accurate, fast nucleotide identity calculation for MAGs, genomes, and databases"
+
+toolchain = SYSTEM
+
+github_account = 'bluenote-1577'
+
+_source = '%(namelower)s'
+_source_version = '%(namelower)s-%(version)s'
+checksums = [ 'd4bbb1c09e94b12d638d82373566d678629b8ca6adc2f2a2b99e99f7a6918aaa' ]  # if this checksum doesn't match, likely a new version has been released in the 'latest' tag
+
+sources = [{
+    'source_urls': [ 'https://github.com/bluenote-1577/skani/releases/download/latest' ],
+    'filename': _source_version,
+    'download_filename': _source,
+    'extract_cmd': 'cp %s %(builddir)s/',
+}]
+
+extract_sources = False
+
+install_cmd =  'mkdir %(installdir)s/bin && '
+install_cmd += 'cp ' + _source_version + ' %(installdir)s/bin/' + _source + ' && '
+install_cmd += 'cd %(installdir)s/bin && '
+install_cmd += 'chmod +x ' + _source
+
+sanity_check_paths = {
+    'files': [ 'bin/%(namelower)s' ],
+    'dirs' : [ ]
+}
+
+sanity_check_commands = [ '%(namelower)s --version | grep "%(namelower)s %(version)s"' ]
+
+moduleclass = 'bio'

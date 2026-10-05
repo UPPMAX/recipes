@@ -1,0 +1,49 @@
+# This file is an EasyBuild reciPY as per https://github.com/easybuilders/easybuild
+# Author: Pablo Escobar Lopez
+# Swiss Institute of Bioinformatics
+# Biozentrum - University of Basel
+#
+# Douglas Scofield UPPMAX 03/2026
+# - resurrected from 4.9.4
+# - patches for compile errors
+# - required by Kraken/1.1.1 when building databases
+#################################
+
+easyblock = 'ConfigureMake'
+
+name = 'Jellyfish'
+version = '1.1.12'
+
+homepage = 'http://www.cbcb.umd.edu/software/%(namelower)s/'
+description = "Jellyfish is a tool for fast, memory-efficient counting of k-mers in DNA."
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+toolchainopts = {'pic': True, 'cstd': 'c++11'}
+
+github_account = 'gmarcais'
+source_urls = [GITHUB_LOWER_SOURCE]
+sources = ['v%(version)s.tar.gz']
+patches = [ '%(name)s-%(version)s_correct-compile-errors.patch' ]
+
+checksums = [{
+    'v%(version)s.tar.gz': '1ae32d3775e551272a757608671dc1d69d0659d253b174e393b6cb24f6a7e181',
+    '%(name)s-%(version)s_correct-compile-errors.patch': 'd7de6da40ef3f1ea5c2ad490ced420d91088eb9a689b89a28c20f7f731dc57c9',
+}]
+
+builddependencies = [
+    ('Autotools', '20180311'),
+    ('binutils', '2.42'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+preconfigopts = "autoreconf -i && "
+
+sanity_check_paths = {
+    'files': ['bin/%(namelower)s'],
+    'dirs': []
+}
+
+moduleclass = 'bio'

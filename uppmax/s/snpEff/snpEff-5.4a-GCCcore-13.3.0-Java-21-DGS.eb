@@ -1,0 +1,111 @@
+# Douglas Scofield UPPMAX 12/2025
+# - update version
+# - UPPMAX bioinfo toolchain 2024a
+# - use of snpEff_data/5.4a
+####################################
+
+easyblock = 'Tarball'
+
+name = 'snpEff'
+version = '5.4a'
+_dataversion = '5.4a'
+versionsuffix = '-Java-%(javaver)s'
+
+homepage = 'https://pcingola.github.io/SnpEff/'
+description = """SnpEff is a variant annotation and effect prediction tool.
+ It annotates and predicts the effects of genetic variants (such as amino acid changes)."""
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+source_urls = [ 'https://snpeff-public.s3.amazonaws.com/versions/' ]
+sources = [ '%(name)s_latest_core.zip' ]
+checksums = [ '4f6ad2bf00300c2c19c01807741c4e36dbd893d4ed79a07b2054b9637da78a2a' ]  # for 5.4a specifically
+
+# wget https://snpeff-public.s3.amazonaws.com/versions/versions.txt
+# cat versions.txt
+#
+# This will also show exactly what version is in the snpEff_latest.core.zip zipfile. As of this writing, it shows:
+#
+#     SNPEFF	5.4A	2025-11-25	https://snpeff-public.s3.amazonaws.com/versions/snpEff_latest_core.zip
+#
+# I would prefer to download this and double check its version, but the checksum will also do that for me.
+# 
+# After installing this module, download snpEff 5.4a data.
+#
+#     cd /sw/data/snpEff_data/
+#     mkdir 5.4a/
+#     cd 5.4a/
+#     mkdir data
+#     screen -S snpEff_data
+#     ml snpEff/5.4a
+#     cd /sw/data/snpEff_data/5.4a
+# 
+#     snpEff databases -dataDir $PWD/data >databases_list
+#     tail -n +3 databases_list | grep -P '\tOK ' > databases_list.installed
+#     tail -n +3 databases_list | grep -P -v '\tOK ' > databases_list.missing
+# 
+#     for G in $(cut -f1 databases_list.missing) ; do snpEff download -dataDir $PWD/data  $G; done
+# 
+#     snpEff databases -dataDir $PWD/data >databases_list
+#     tail -n +3 databases_list | grep -P '\tOK ' > databases_list.installed
+#     tail -n +3 databases_list | grep -P -v '\tOK ' > databases_list.missing
+#     wc -l databases_list.installed databases_list.missing
+#
+# and update the config file.
+#
+#     vi /sw/arch/eb/software/snpEff/5.4a-GCCcore-13.3.0-Java-21/snpEff.config
+#
+# edit the data.dir line:
+#
+#     ### data.dir = ~/.snpeff_data/
+#     data.dir = /sw/data/snpEff_data/5.4a/data/
+#
+# Note the proposed edits to the module load message below if you do this.
+#
+
+
+dependencies = [
+    ('Java', '21', '', SYSTEM),
+    ('Python', '3.12.3'),
+    ('Perl', '5.38.2'),
+]
+
+fix_perl_shebang_for = ['scripts/*.pl']
+fix_python_shebang_for = ['scripts/*.py']
+
+#_snpeff_data_dir = "~/.%(namelower)s_data"
+_snpeff_data_dir = '/sw/data/local/snpEff_data/%s/data/' % _dataversion
+postinstallcmds = [
+    # default location of downloaded DBs is in installation directory, change to custom writable folder per user
+    "sed -i 's|^data.dir = ./data|data.dir = %s|' %%(installdir)s/snpEff.config" % _snpeff_data_dir,
+]
+
+sanity_check_paths = {
+    'files': ['%(name)s.jar', 'SnpSift.jar', 'scripts/%(name)s'],
+    'dirs': [],
+}
+
+sanity_check_commands = ["%(name)s -version"]
+
+modextrapaths = {'PATH': 'scripts'}
+
+#modloadmsg  = "%(name)s/%(version)s: This installation is configured to automatically download DBs into the folder:\n"
+#modloadmsg += "                 " + _snpeff_data_dir + "\n"
+#modloadmsg += "             Make sure enough space is available in it. You can link this folder to any other folder with the command:\n"
+#modloadmsg += "                 ln -sf /path/to/data/folder " + _snpeff_data_dir + "\n"j
+
+# Following the above to download databases, the module load message should be changed to:
+#
+modloadmsg = """%(name)s/%(version)s: This installation of %(name)s has downloaded all of the annotation
+             databases available (76812 in total) and is configured to use these by default.
+
+             If you wish to download your own databases for your project, or wish to create
+             additional database(s) using other data sources, use the '-dataDir DIRECTORY'
+             option to specify an alternative location for these databases.
+
+             Alternatively, you may provide your own configuration file and specify it using
+             the '-config CONFIGFILE' option.  The current config file is located at
+             $EBROOTSNPEFF/snpEff.config
+"""
+
+moduleclass = 'bio'

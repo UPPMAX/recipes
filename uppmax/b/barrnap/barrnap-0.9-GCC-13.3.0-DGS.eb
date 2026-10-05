@@ -1,0 +1,37 @@
+# Douglas G Scofield UPPMAX 8/2025
+# - create both GCC and gompi versions for HMMER with both toolchains
+easyblock = 'Tarball'
+
+name = 'barrnap'
+version = '0.9'
+
+homepage = 'https://github.com/tseemann/barrnap'
+description = "Barrnap (BAsic Rapid Ribosomal RNA Predictor) predicts the location of ribosomal RNA genes in genomes."
+
+toolchain = {'name': 'GCC', 'version': '13.3.0'}
+
+github_account = 'tseemann'
+source_urls = [ GITHUB_SOURCE ]
+sources = ['%(version)s.tar.gz']
+checksums = ['36c27cd4350531d98b3b2fb7d294a2d35c15b7365771476456d7873ba33cce15']
+
+dependencies = [
+    ('Perl',     '5.38.2'),
+    ('HMMER',    '3.4'),
+    ('BEDTools', '2.31.1'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+preinstall_cmd = 'rm -r binaries'  # dispose of prepackaged dependency binaries
+
+sanity_check_paths = {
+    'files': ['bin/barrnap'],
+    'dirs': [],
+}
+
+sanity_check_commands = ["barrnap --help"]
+
+moduleclass = 'bio'

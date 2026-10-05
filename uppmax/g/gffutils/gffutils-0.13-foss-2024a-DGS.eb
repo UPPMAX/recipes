@@ -1,0 +1,52 @@
+# Douglas Scofield UPPMAX 05/2026
+# - UPPMAX bioinfo toolchain 2024a
+#################################
+
+easyblock = 'PythonBundle'
+
+name = 'gffutils'
+version = '0.13'
+
+homepage = 'https://github.com/daler/gffutils'
+description = """Gffutils is a Python package for working with and manipulating
+ the GFF and GTF format files typically used for genomic annotations."""
+
+toolchain = {'name': 'foss', 'version': '2024a'}
+
+dependencies = [
+    ('Python', '3.12.3'),
+    ('pyfaidx', '0.8.1.2'),
+    ('Biopython', '1.84'),
+    ('pybedtools', '0.12.0'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+exts_list = [
+    ('six', '1.16.0', {
+        'checksums': ['1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926'],
+    }),
+    ('argh', '0.31.3', {
+        'source_tmpl': SOURCE_PY3_WHL,
+        'checksums': ['2edac856ff50126f6e47d884751328c9f466bacbbb6cbfdac322053d94705494'],
+    }),
+    ('argcomplete', '3.5.0', {
+        'source_tmpl': SOURCE_PY3_WHL,
+        'checksums': ['d4bcf3ff544f51e16e54228a7ac7f486ed70ebf2ecfe49a63a91171c76bf029b'],
+    }),
+    ('simplejson', '3.19.2', {
+        'checksums': ['9eb442a2442ce417801c912df68e1f6ccfcd41577ae7274953ab3ad24ef7d82c'],
+    }),
+    (name, version, {
+        'source_tmpl': SOURCE_PY3_WHL,
+        'checksums': ['58e7bb579796fff70e728380ef2d8ffd4a3bc895e53e6529855a0cf87ba6a77a'],
+    }),
+]
+
+sanity_check_commands = [
+    "python -c 'from gffutils import helpers'"
+]
+
+moduleclass = 'bio'

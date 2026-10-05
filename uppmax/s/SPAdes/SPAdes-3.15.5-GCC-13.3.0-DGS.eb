@@ -1,0 +1,62 @@
+# This file is an EasyBuild reciPY as per https://easybuilders.github.io/easybuild/
+# Author: Pablo Escobar Lopez
+# sciCORE - University of Basel
+# SIB Swiss Institute of Bioinformatics
+# 3.9.0:
+# Modified by:
+# Adam Huffman
+# The Francis Crick Institute
+# Updated by:
+# Filip Kružík (INUITS)
+#
+# Douglas Scofield UPPMAX 01/2026
+# - UPPMAX bioinfo toolchain 2024a
+######################################
+
+easyblock = 'CMakeMake'
+
+name = 'SPAdes'
+version = '3.15.5'
+
+homepage = 'https://github.com/ablab/spades'
+description = "Genome assembler for single-cell and isolates data sets"
+
+toolchain = {'name': 'GCC', 'version': '13.3.0'}
+
+source_urls = ['https://github.com/ablab/spades/releases/download/v%(version)s/']
+sources = [SOURCE_TAR_GZ]
+checksums = ['155c3640d571f2e7b19a05031d1fd0d19bd82df785d38870fb93bd241b12bbfa']
+
+builddependencies = [
+    ('CMake', '3.29.3'),
+]
+dependencies = [
+    ('Python', '3.12.3'),
+    ('zlib', '1.3.1'),
+    ('bzip2', '1.0.8'),
+    ('libreadline', '8.2'),
+]
+
+local_linkdependencies = [
+    ('zlib', '1.3.1'),
+    ('bzip2', '1.0.8'),
+    toolchain,
+]
+
+start_dir = 'src'
+
+configopts = " -DBoost_NO_BOOST_CMAKE=ON"
+
+prebuildopts  = "sed -i '18i#include <cstdint>' %(start_dir)s/../ext/include/llvm/Support/Signals.h && "
+prebuildopts += "sed -i '11i#include <cstdint>' %(start_dir)s/common/pipeline/library_data.hpp && "
+prebuildopts += "sed -i '11i#include <cstdint>' %(start_dir)s/common/sequence/nucl.hpp && "
+
+sanity_check_paths = {
+    'files': ['bin/%s' % x for x in ['spades-bwa', 'spades-core', 'spades-gbuilder', 'spades-hammer',
+                                     'spades-ionhammer', 'spades-kmercount', 'spades.py']],
+    'dirs': [],
+}
+
+sanity_check_commands = [('%(namelower)s.py', '--test')]
+
+moduleclass = 'bio'

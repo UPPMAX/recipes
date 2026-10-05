@@ -1,0 +1,43 @@
+Douglas Scofield UPPMAX 01/2026
+- path lengths exceeded what strncpy_s() would handle with large PATH variables
+===============================
+diff -ruN bwa-mem2-2.2.1.orig/src/runsimd.cpp bwa-mem2-2.2.1/src/runsimd.cpp
+--- bwa-mem2-2.2.1.orig/src/runsimd.cpp	2024-05-08 20:49:51.000000000 +0200
++++ bwa-mem2-2.2.1/src/runsimd.cpp	2026-01-30 17:19:44.353961455 +0100
+@@ -120,17 +120,22 @@
+ 		//buf[abs_len + last_slash + 2] = 0;
+ 	} else {
+ 		char *env, *p, *q, *tmp;
+-		int env_len, found = 0;
++		//int env_len, found = 0;
++		int found = 0;
+ 		struct stat st;
+ 		env = getenv("PATH");
+         assert(env != NULL);
+-		env_len = strlen(env);
+-		if ((tmp = (char*)malloc(env_len + len + 2)) == NULL) { fprintf( stderr, "ERROR: out of memory %s", __func__); exit(EXIT_FAILURE);}
++        //env_len = strlen(env);
++        // the size of PATH can exceed PATH_MAX, but any individual component of PATH + len + 2 cannot
++        // the path length math here is not completely robust, but will cause problems only when the
++        // length of a path component is close to PATH_MAX
++		if ((tmp = (char*)malloc(PATH_MAX)) == NULL) { fprintf( stderr, "ERROR: out of memory %s", __func__); exit(EXIT_FAILURE);}
+ 		for (p = q = env;; ++p) {
+ 			if (*p == ':' || *p == 0) {
+-				strncpy_s(tmp, env_len + len + 2, q, p - q);
++                if ((p - q) + len + 2 > PATH_MAX) { fprintf( stderr, "ERROR: path will be longer than PATH_MAX"); exit(EXIT_FAILURE);}
++				strncpy_s(tmp, PATH_MAX, q, p - q);
+ 				tmp[p - q] = '/';
+-				strcpy_s(tmp + (p - q + 1), env_len + len + 2 - (p - q + 1), exe);
++				strcpy_s(tmp + (p - q + 1), PATH_MAX - (p - q + 1), exe);
+ 				if (stat(tmp, &st) == 0 && (st.st_mode & S_IXUSR)) {
+ 					found = 1;
+ 					break;
+@@ -143,7 +148,7 @@
+ 			free(tmp);
+ 			return -2; // shouldn't happen!
+ 		}
+-		ret = exe_path(tmp, max, buf, 0);
++		ret = exe_path(tmp, PATH_MAX, buf, 0);
+ 		free(tmp);
+ 	}
+ 	return ret;

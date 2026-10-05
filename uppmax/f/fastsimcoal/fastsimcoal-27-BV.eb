@@ -1,0 +1,32 @@
+# This file is an EasyBuild reciPY as per https://github.com/easybuilders/easybuild
+# Author: Your name
+easyblock = 'BinariesTarball'
+
+name = 'fastsimcoal'
+version = '27'
+
+homepage = 'https://cmpg.unibe.ch/software/fastsimcoal2/'
+description = """fast sequential Markov coalescent simulation of genomic data under complex evolutionary models."""
+
+toolchain = SYSTEM
+
+source_urls = ['https://cmpg.unibe.ch/software/fastsimcoal%(version)s/downloads/']
+sources = ['fsc%(version)s_linux64.zip']
+
+checksums = ['6fcedbccc696b25ab5141d81d83a1c2625e54e917949e06d301c0700838e3557']  # SHA256 checksum
+
+sanity_check_paths = {
+  'files': ['bin/fsc%(version)s'],  # test for binary executable
+  'dirs': [],
+}
+
+# Make the binary executable and create symbolic links.
+postinstallcmds = [
+    "chmod +x %(installdir)s/bin/fsc%(version)s093",
+    "ln -s %(installdir)s/bin/fsc%(version)s093 %(installdir)s/bin/fsc",
+    "ln -s %(installdir)s/bin/fsc%(version)s093 %(installdir)s/bin/fsc2",
+    "ln -s %(installdir)s/bin/fsc%(version)s093 %(installdir)s/bin/fsc27",
+    "ln -s %(installdir)s/bin/fsc%(version)s093 %(installdir)s/bin/fsc2709",
+]
+
+moduleclass = 'bio'

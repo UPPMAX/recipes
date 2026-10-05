@@ -1,0 +1,55 @@
+easyblock = 'PythonBundle'
+
+name = 'CONCOCT'
+version = '1.1.0'
+_javasuffix = '-Java-%(javaver)s'
+
+homepage = 'https://concoct.readthedocs.io'
+description = """Clustering cONtigs with COverage and ComposiTion (CONCOCT) is a
+program for unsupervised binning of metagenomic contigs by using nucleotide
+composition, coverage data in multiple samples and linkage data from paired end
+reads."""
+
+toolchain = {'name': 'gfbf', 'version': '2024a'}
+
+builddependencies = [
+    ('Java', '17', '', SYSTEM),
+]
+
+dependencies = [
+    ('Python', '3.12.3'),
+    ('Cython', '3.0.10'),
+    ('BEDTools', '2.31.1'),
+    ('Biopython', '1.84'),     # -gfbf-2024a
+    ('Bowtie2', '2.5.4'),
+    ('CheckM', '1.2.4'),       # -gfbf-2024a
+    ('GSL', '2.8'),
+    ('MEGAHIT', '1.2.9'),      # -GCCcore-13.3.0
+    ('parallel', '20240722'),
+    ('picard', '2.27.5', _javasuffix, SYSTEM),
+    ('Pysam', '0.22.1'),       # -GCCcore-13.3.0
+    ('SAMtools', '1.21.1'),
+    ('MUMmer', '3.23'),
+    ('scikit-learn', '1.5.2'), # -gfbf-2024a
+]
+
+exts_list = [
+    (name, version, {
+        'source_urls': ['https://github.com/BinPro/CONCOCT/archive/'],
+        'sources': ['%(version)s.tar.gz'],
+        'patches': ['%(name)s-%(version)s_remove-nose.patch'],
+        'checksums': [{
+            '%(version)s.tar.gz': '00aecacb4b720ac123a63e65072c61e0b5a8690d844c869aaee4dbf287c82888',
+            '%(name)s-%(version)s_remove-nose.patch': '0d3d229a311302bf6fd08c36877fa3ef9294809f1b7d6efbb423fb11ea6a1fe5',
+        }],
+    }),
+]
+
+sanity_check_paths = {
+    'files': ['bin/concoct'],
+    'dirs': ['lib/python%(pyshortver)s/site-packages'],
+}
+
+sanity_check_commands = ["concoct --help"]
+
+moduleclass = 'bio'

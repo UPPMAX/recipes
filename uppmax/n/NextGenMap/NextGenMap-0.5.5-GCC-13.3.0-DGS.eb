@@ -1,0 +1,62 @@
+# Douglas Scofield UPPMAX 01/2026
+# - UPPMAX bioinfo toolchain 2024a
+# - switch from sed to patch to use EB deps
+#################################
+
+easyblock = 'CMakeMake'
+
+name = 'NextGenMap'
+version = '0.5.5'
+
+homepage = 'http://cibiv.github.io/%(name)s/'
+description = """NextGenMap is a flexible highly sensitive short read mapping tool that
+ handles much higher mismatch rates than comparable algorithms while still outperforming
+ them in terms of runtime."""
+
+toolchain = {'name': 'GCC', 'version': '13.3.0'}
+toolchainopts = {'pic': True}
+
+source_urls = ['https://github.com/Cibiv/%(namelower)s/archive/']
+sources = ['v%(version)s.tar.gz']
+patches = ['NextGenMap-%(version)s_use-EB-deps.patch']
+checksums = [{
+    'v%(version)s.tar.gz': 'c205e6cb312d2f495106435f10fb446e6fb073dd1474f4f74ab5980ba9803661',
+    'NextGenMap-%(version)s_use-EB-deps.patch': 'a12df29cdffdc9453a1e20619d1e615bb142daaff9bd481359562732464f0530',
+}]
+
+builddependencies = [
+    ('CMake', '3.29.3'),
+]
+
+dependencies = [
+    ('BamTools', '2.5.2'),
+]
+
+local_linkdependencies = [
+    ('BamTools', '2.5.2'),
+    toolchain,
+]
+
+skipsteps = ['install']
+
+buildopts = ' && cp -r ../%(name)s-%(version)s/bin/ngm-%(version)s/. %(installdir)s/bin/'
+
+postinstallcmds = [
+    # avoid hard overwriting of $LD_LIBRARY_PATH in ngm wrapper script
+    r"sed -i 's/\(LD_LIBRARY_PATH=[^ ]*\)\"/\1:$LD_LIBRARY_PATH\"/g' %(installdir)s/bin/ngm",
+    # fix execution permissions for ngm* binaries/scripts
+    "chmod a+x %(installdir)s/bin/ngm*",
+    # link `libOpenCL.so.1` to the `lib` directory (required when using RPATH linking)
+    'cd %(installdir)s && mkdir -p lib && ln -rfs bin/opencl/lib/libOpenCL.so.1 lib/libOpenCL.so.1',
+]
+
+sanity_check_paths = {
+    'files': ['lib/libOpenCL.so.1'] + ['bin/%s' % x for x in ['ngm', 'ngm-core', 'ngm-log', 'ngm-utils', 'oclTool']],
+    'dirs': ['bin/opencl']
+}
+
+sanity_check_commands = [
+    "ngm --help 2>&1 | grep 'Usage:[ ]*ngm'",
+]
+
+moduleclass = 'bio'

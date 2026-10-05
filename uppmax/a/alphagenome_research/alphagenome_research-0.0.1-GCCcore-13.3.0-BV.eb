@@ -1,0 +1,56 @@
+easyblock = 'Bundle'
+
+name = 'alphagenome_research'
+version = '0.0.1'
+
+homepage = 'https://github.com/google-deepmind/alphagenome_research'
+description = """AlphaGenome research code from Google DeepMind for genomics research."""
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+dependencies = [
+    ('Python', '3.12.3'),
+    ('CUDA', '12.9.1', '', SYSTEM),
+    ('cuDNN', '9.15.0.57', '-CUDA-%(cudaver)s', SYSTEM),
+]
+
+postinstallcmds = [
+    # Create directory first
+    'mkdir -p %(installdir)s/lib/python%(pyshortver)s/site-packages',
+    
+    # Set PYTHONPATH so pip installs to correct location
+    'export PYTHONPATH=%(installdir)s/lib/python%(pyshortver)s/site-packages:$PYTHONPATH && '
+    'pip install --prefix=%(installdir)s "jax[cuda12_local]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html',
+
+	# requests and aiohttp
+	'export PYTHONPATH=%(installdir)s/lib/python%(pyshortver)s/site-packages:$PYTHONPATH && '
+	'pip install --prefix=%(installdir)s requests aiohttp',
+
+	# alphagenome_research from GitHub
+	'export PYTHONPATH=%(installdir)s/lib/python%(pyshortver)s/site-packages:$PYTHONPATH && '
+	'pip install --prefix=%(installdir)s git+https://github.com/google-deepmind/alphagenome_research.git@v%(version)s',
+
+]
+
+modextrapaths = {
+    'PYTHONPATH': 'lib/python%(pyshortver)s/site-packages',
+}
+
+modextravars = {
+    'CUDA_HOME': '$EBROOTCUDA',
+    'XLA_FLAGS': '--xla_gpu_cuda_data_dir=$EBROOTCUDA',
+    'ALPHAGENOME_DATA_DIR': '/sw/data/AlphaGenome_data',
+}
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ['lib/python%(pyshortver)s/site-packages'],
+}
+
+sanity_check_commands = [
+    "python -c 'import jax; print(jax.devices())'",
+    "python -c 'import requests'",
+	"python -c 'import alphagenome_research'",
+]
+
+moduleclass = 'bio'

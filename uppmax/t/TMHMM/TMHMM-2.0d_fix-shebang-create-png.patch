@@ -1,0 +1,48 @@
+# Douglas Scofield UPPMAX 09/2026
+# - fix shebangs
+# - remove hardcoded paths to tools
+# - avoid use of netpbm by creating PNG instead of GIF
+######################################################
+diff -ruN tmhmm-2.0d.orig/bin/tmhmm tmhmm-2.0d/bin/tmhmm
+--- tmhmm-2.0d.orig/bin/tmhmm	2025-11-28 13:48:51.000000000 +0100
++++ tmhmm-2.0d/bin/tmhmm	2026-08-26 13:30:03.353098620 +0200
+@@ -1,4 +1,4 @@
+-#!/usr/local/bin/perl
++#!/usr/bin/env perl
+ 
+ # This is version 2.0d of tmhmm
+ 
+diff -ruN tmhmm-2.0d.orig/bin/tmhmmformat.pl tmhmm-2.0d/bin/tmhmmformat.pl
+--- tmhmm-2.0d.orig/bin/tmhmmformat.pl	2025-11-28 13:49:30.000000000 +0100
++++ tmhmm-2.0d/bin/tmhmmformat.pl	2026-09-03 15:34:33.069159581 +0200
+@@ -1,4 +1,4 @@
+-#!/usr/local/bin/perl -w
++#!/usr/bin/env perl
+ 
+ # This is version 2.0d of tmhmmformat.pl
+ 
+@@ -8,9 +8,9 @@
+ # Flush immediately
+ $| = 1;
+ 
+-$gnuplot = "/usr/local/bin/gnuplot-3.7 ";
+-$epsmove = "/sbin/grep -v \'translate\$\' ";
+-$ps2gif = "/usr/local/bin/gs -dNOPAUSE -q -sDEVICE=ppm -g710x350 -r72 -sOutputFile=- - -c quit | /usr/freeware/bin/ppmtogif - ";
++$gnuplot = "gnuplot ";
++$epsmove = "grep -v \'translate\$\' ";
++$ps2png = "gs -dNOPAUSE -q -sDEVICE=png16m -g710x350 -r72 -sOutputFile=- - -c quit ";
+ 
+ 
+ # OPTION PARSING ##########################################
+@@ -199,9 +199,9 @@
+ 	    system("$gnuplot $opt_workdir$fn.gnuplot");
+ 	    if ($opt_html) {
+ 		# Make gif file
+-		system("$epsmove $opt_workdir$fn.eps | $ps2gif > $opt_workdir$fn.gif");
++		system("$epsmove $opt_workdir$fn.eps | $ps2png > $opt_workdir$fn.png");
+ 		$file = "$opt_wwwdir$fn";
+-		print "<IMG SRC=\"$file.gif\"><P>\n";
++		print "<IMG SRC=\"$file.png\"><P>\n";
+ 		print "# <A HREF=\"$file.eps\">plot</A> in postscript, \n";
+ 		print "<A HREF=\"$file.gnuplot\">script</A> for making the plot in gnuplot, \n";
+ 		print "<A HREF=\"$file.plp\">data</A> for plot<br>\n";

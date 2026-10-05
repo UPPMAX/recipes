@@ -1,0 +1,38 @@
+# Douglas G Scofield UPPMAX 10/2025
+# - initial EB
+
+easyblock = 'Binary'
+
+name = 'tinyutils'
+version = '1.5'
+
+homepage = 'https://github.com/douglasgscofield/tinyutils'
+description = "Collection of tiny awk utilities for working on data streams"
+
+toolchain = SYSTEM
+
+github_account = 'douglasgscofield'
+
+source_urls = [ GITHUB_SOURCE + '/refs/tags' ]
+sources = [ '%(version)s.tar.gz' ]
+checksums = ['bc4c8d65299d3d27a86c77a0cb1abd09905fb1f16ae8aa7953565499c20df186']
+
+extract_sources = True
+
+local_tools = [ 'boolify', 'cumsum', 'diffs', 'div', 'exp', 'exp10', 'exp2',
+                'hist', 'histbin', 'inrange', 'len', 'line', 'log', 'log10',
+                'log2', 'lwhich', 'max', 'mean', 'median', 'min', 'mult', 'ncol',
+                'range', 'round', 'showcol', 'stripfilt', 'sum', 'table' ]
+
+install_cmd = 'mkdir %(installdir)s/bin && '
+install_cmd += ''.join(f'mv {x} %(installdir)s/bin/{x} && ' for x in local_tools)
+install_cmd += 'cd %(installdir)s/bin && chmod +x *'
+
+sanity_check_paths = {
+    'files': ['bin/%s' % x for x in local_tools],
+    'dirs': [],
+}
+
+sanity_check_commands = ['echo 1 2 3 4 5 | ncol']
+
+moduleclass = 'tools'

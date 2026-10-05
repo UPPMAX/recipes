@@ -1,0 +1,239 @@
+# Douglas Scofield UPPMAX 03/2026
+# - depend on EB dependencies SAMtools, BEDTools Kent_tools, R being already loaded
+# - clean up usage messages
+#################################
+diff -ruN merqury.orig/best_k.sh merqury/best_k.sh
+--- merqury.orig/best_k.sh	2026-03-02 11:36:34.788255582 +0100
++++ merqury/best_k.sh	2026-03-02 13:08:20.997507317 +0100
+@@ -1,7 +1,7 @@
+ #!/usr/bin/env bash
+ 
+ if [ -z $1 ]; then
+-  echo "Usage: ./best_k.sh [-c] <genome_size> [tolerable_collision_rate]"
++  echo "Usage: best_k.sh [-c] <genome_size> [tolerable_collision_rate]"
+   echo -e "  -c         : [OPTIONAL] evaluation will be on homopolymer compressed genome. EXPERIMENTAL"
+   echo -e "  genome_size: Haploid genome size or diploid genome size, depending on what we evaluate. In bp."
+   echo -e "  tolerable_collision_rate: [OPTIONAL] Error rate in the read set. DEFAULT=0.001 for illumina WGS"
+diff -ruN merqury.orig/eval/asm_multiplicity.sh merqury/eval/asm_multiplicity.sh
+--- merqury.orig/eval/asm_multiplicity.sh	2026-03-02 11:36:34.792255564 +0100
++++ merqury/eval/asm_multiplicity.sh	2026-03-02 13:14:50.780802621 +0100
+@@ -13,8 +13,8 @@
+ out=$3
+ 
+ # Requirements: samtools, ucsc kent utils
+-module load samtools
+-module load ucsc/396
++#module load samtools
++#module load ucsc/396
+ 
+ if [[ ! -e $asm_fa ]]; then
+ 	samtools faidx $asm_fa
+diff -ruN merqury.orig/eval/read_multiplicity.sh merqury/eval/read_multiplicity.sh
+--- merqury.orig/eval/read_multiplicity.sh	2026-03-02 11:36:34.794255555 +0100
++++ merqury/eval/read_multiplicity.sh	2026-03-02 13:14:44.920753067 +0100
+@@ -13,8 +13,8 @@
+ out=$3
+ asm=`echo $asm_fa | sed 's/.gz$//g' | sed 's/.fasta$//g' | sed 's/.fa$//g'`
+ 
+-module load samtools
+-module load ucsc/396
++#module load samtools
++#module load ucsc/396
+ 
+ if [[ ! -e $asm_fa.fai ]]; then
+ 	samtools faidx $asm_fa
+diff -ruN merqury.orig/eval/spectra-cn.sh merqury/eval/spectra-cn.sh
+--- merqury.orig/eval/spectra-cn.sh	2026-03-02 11:36:34.794255555 +0100
++++ merqury/eval/spectra-cn.sh	2026-03-02 13:15:02.569902311 +0100
+@@ -51,12 +51,12 @@
+ fi
+ 
+ 
+-has_module=$(check_module)
+-if [[ $has_module -gt 0 ]]; then
+-  echo "No modules available.."
+-else
+-  module load R
+-fi
++#has_module=$(check_module)
++#if [[ $has_module -gt 0 ]]; then
++#  echo "No modules available.."
++#else
++#  module load R
++#fi
+ 
+ 
+ asm1=`echo $asm1_fa | sed 's/.fa$//g' | sed 's/.fasta$//g' | sed 's/.fasta.gz$//g' | sed 's/.fa.gz$//g'`
+diff -ruN merqury.orig/merqury-mash.sh merqury/merqury-mash.sh
+--- merqury.orig/merqury-mash.sh	2026-03-02 11:36:34.826255414 +0100
++++ merqury/merqury-mash.sh	2026-03-02 13:07:43.313189151 +0100
+@@ -1,7 +1,7 @@
+ #!/usr/bin/env bash
+ 
+ if [[ "$#" -lt 4 ]]; then
+-echo "Usage: ./merqury-mash.sh <k-size> <asm.fasta> <input_fofn> <cpus>"
++echo "Usage: merqury-mash.sh <k-size> <asm.fasta> <input_fofn> <cpus>"
+ echo
+ echo "This is the fast version of QV estimates using mash."
+ echo "The QVs are not completely agreeing with the one obtained with the full merqury run,"
+@@ -18,12 +18,12 @@
+ 
+ source $MERQURY/util/util.sh
+ 
+-has_module=$(check_module)
+-if [[ $has_module -gt 0 ]]; then
+-        echo "No modules available.."
+-else
+-        module load mash
+-fi
++#has_module=$(check_module)
++#if [[ $has_module -gt 0 ]]; then
++#        echo "No modules available.."
++#else
++#        module load mash
++#fi
+ 
+ mash sketch -s 1000000 -k $k $asm
+ mash screen -p $cpus $asm.msh `cat $input_fofn | tr '\n' ' '` > $name.msh.idy
+diff -ruN merqury.orig/trio/block_n_stats.sh merqury/trio/block_n_stats.sh
+--- merqury.orig/trio/block_n_stats.sh	2026-03-02 11:36:34.828255405 +0100
++++ merqury/trio/block_n_stats.sh	2026-03-02 13:13:30.324122267 +0100
+@@ -33,14 +33,14 @@
+ 
+ source $MERQURY/util/util.sh
+ 
+-has_module=$(check_module)
+-if [[ $has_module -gt 0 ]]; then
+-        echo "No modules available.."
+-else
+-	module load bedtools
+-	module load samtools
+-	module load R
+-fi
++#has_module=$(check_module)
++#if [[ $has_module -gt 0 ]]; then
++#        echo "No modules available.."
++#else
++#	module load bedtools
++#	module load samtools
++#	module load R
++#fi
+ 
+ for asm in $asm1 $asm2
+ do
+diff -ruN merqury.orig/trio/hap_blob.sh merqury/trio/hap_blob.sh
+--- merqury.orig/trio/hap_blob.sh	2026-03-02 11:36:34.829255401 +0100
++++ merqury/trio/hap_blob.sh	2026-03-02 13:14:34.417664251 +0100
+@@ -57,12 +57,12 @@
+ echo "
+ Plot hap-mer blob plots"
+ 
+-has_module=$(check_module)
+-if [[ $has_module -gt 0 ]]; then
+-        echo "No modules available.."
+-else
+-  module load R
+-fi
++#has_module=$(check_module)
++#if [[ $has_module -gt 0 ]]; then
++#        echo "No modules available.."
++#else
++#  module load R
++#fi
+ 
+ echo "
+ Rscript $MERQURY/plot/plot_blob.R -f $count -o $out.hapmers.blob"
+diff -ruN merqury.orig/trio/hapmers.sh merqury/trio/hapmers.sh
+--- merqury.orig/trio/hapmers.sh	2026-03-02 11:36:34.829255401 +0100
++++ merqury/trio/hapmers.sh	2026-03-02 13:13:51.040297446 +0100
+@@ -122,13 +122,13 @@
+ echo "# Plot $hist"
+ source $MERQURY/util/util.sh
+ 
+-has_module=$(check_module)
+-if [[ $has_module -gt 0 ]]; then
+-        echo "No modules available.."
+-else
+-	module load R
+-fi
+-echo
++#has_module=$(check_module)
++#if [[ $has_module -gt 0 ]]; then
++#        echo "No modules available.."
++#else
++#	module load R
++#fi
++#echo
+ 
+ echo "Rscript $MERQURY/plot/plot_spectra_cn.R -f $hist -o ${hist/.hist/} -l cutoffs.txt"
+ Rscript $MERQURY/plot/plot_spectra_cn.R -f $hist -o ${hist/.hist/} -l cutoffs.txt
+diff -ruN merqury.orig/trio/hapmers_to_bigwig.sh merqury/trio/hapmers_to_bigwig.sh
+--- merqury.orig/trio/hapmers_to_bigwig.sh	2026-03-02 11:36:34.829255401 +0100
++++ merqury/trio/hapmers_to_bigwig.sh	2026-03-02 13:14:08.708446850 +0100
+@@ -10,7 +10,7 @@
+ wig=$1
+ fai=$2
+ 
+-module load ucsc
++#module load ucsc
+ 
+ bw=${wig/.wig/.bw}
+ wigToBigWig $wig $fai $bw
+diff -ruN merqury.orig/trio/spectra-hap.sh merqury/trio/spectra-hap.sh
+--- merqury.orig/trio/spectra-hap.sh	2026-03-02 11:36:34.835255374 +0100
++++ merqury/trio/spectra-hap.sh	2026-03-02 13:14:20.584547276 +0100
+@@ -40,12 +40,12 @@
+ ## Remove this line if R is properly installed ##
+ source $MERQURY/util/util.sh
+ 
+-has_module=$(check_module)
+-if [[ $has_module -gt 0 ]]; then
+-        echo "No modules available.."
+-else
+-	module load R
+-fi
++#has_module=$(check_module)
++#if [[ $has_module -gt 0 ]]; then
++#        echo "No modules available.."
++#else
++#	module load R
++#fi
+ 
+ read=${read/.meryl/}		  # all read counts
+ read_hap1=${read_hap1/.meryl/}    # pat specific mers with read counts
+diff -ruN merqury.orig/trio/switch_error.sh merqury/trio/switch_error.sh
+--- merqury.orig/trio/switch_error.sh	2026-03-02 11:36:34.835255374 +0100
++++ merqury/trio/switch_error.sh	2026-03-02 13:14:26.746599384 +0100
+@@ -50,12 +50,12 @@
+ 
+ source $MERQURY/util/util.sh
+ 
+-has_module=$(check_module)
+-if [[ $has_module -gt 0 ]]; then
+-        echo "No modules available.."
+-else
+-	module load R
+-fi
++#has_module=$(check_module)
++#if [[ $has_module -gt 0 ]]; then
++#        echo "No modules available.."
++#else
++#	module load R
++#fi
+ 
+ echo "
+ Rscript $MERQURY/plot/plot_blob.R -f $count -o $out.phased_block.blob"
+diff -ruN merqury.orig/util/bed_to_bigwig.sh merqury/util/bed_to_bigwig.sh
+--- merqury.orig/util/bed_to_bigwig.sh	2026-03-02 11:36:34.835255374 +0100
++++ merqury/util/bed_to_bigwig.sh	2026-03-02 13:12:38.511684135 +0100
+@@ -12,8 +12,8 @@
+ fai=$2
+ convert=$3
+ 
+-module load bedtools
+-module load ucsc/406
++#module load bedtools
++#module load ucsc/406
+ 
+ bg=${bed/.bed/.bg}
+ sizes=${fai/.fai/.sizes}

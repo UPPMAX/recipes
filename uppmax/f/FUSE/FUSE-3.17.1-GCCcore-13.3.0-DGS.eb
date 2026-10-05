@@ -1,0 +1,32 @@
+easyblock = 'MesonNinja'
+
+name = 'FUSE'
+version = '3.17.1'
+
+homepage = 'https://github.com/libfuse/libfuse'
+description = "The reference implementation of the Linux FUSE (Filesystem in Userspace) interface"
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+source_urls = ['https://github.com/libfuse/libfuse/archive/']
+sources = ['fuse-%(version)s.tar.gz']
+checksums = ['b81027fc8f444fb574de7f13edf0cf9810643d2935670c4fe19f140354241208']
+
+builddependencies = [
+    ('Meson', '1.4.0'),
+    ('Ninja', '1.12.1'),
+    ('binutils', '2.42'),
+]
+
+# avoid that root permissions are required when installing utils (like fusermount)
+configopts = "-Dinitscriptdir=%(installdir)s/etc/init.d -Dudevrulesdir=%(installdir)s/udev/rules.d -Duseroot=false"
+
+sanity_check_paths = {
+    'files': ['bin/fusermount3', 'etc/fuse.conf', 'lib/libfuse%%(version_major)s.%s' % SHLIB_EXT,
+              'lib/pkgconfig/fuse%(version_major)s.pc'],
+    'dirs': ['include/fuse%(version_major)s', 'share/man'],
+}
+
+sanity_check_commands = ["fusermount3 -h | grep '^fusermount3'"]
+
+moduleclass = 'lib'

@@ -1,0 +1,35 @@
+easyblock = 'PythonBundle'
+
+name = 'build'
+version = '1.2.2'
+
+homepage = 'https://github.com/pypa/build'
+description = """A simple, correct Python build frontend."""
+
+toolchain = {'name': 'foss', 'version': '2024a'}
+
+dependencies = [
+    ('Python', '3.12.3'),
+]
+
+exts_list = [
+    ('packaging', '24.1', {
+        'checksums': ['026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002'],
+    }),
+    ('pyproject_hooks', '1.1.0', {
+        'checksums': ['4b37730834edbd6bd37f26ece6b44802fb1c1ee2ece0e54ddff8bfc06db86965'],
+    }),
+    (name, version, {
+        'checksums': ['119b2fb462adef986483438377a13b2f42064a2a3a4161f24a0cca698a07ac8c'],
+    }),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+sanity_check_commands = [
+    "python3 -m build -V",
+]
+
+moduleclass = 'devel'

@@ -1,0 +1,12 @@
+diff -ruN tf-local-exec.orig/tensorflow/tensorflow.bzl tf-local-exec.work/tensorflow/tensorflow.bzl
+--- tf-local-exec.orig/tensorflow/tensorflow.bzl	2026-04-13 16:24:49.151291767 +0200
++++ tf-local-exec.work/tensorflow/tensorflow.bzl	2026-04-13 16:25:55.657047312 +0200
+@@ -2926,7 +2926,7 @@
+         "out": attr.output(),
+         "exec_tool": attr.label(
+             executable = True,
+-            cfg = _local_exec_transition,
++            cfg = "exec",
+             allow_files = True,
+         ),
+         "arguments": attr.string(),

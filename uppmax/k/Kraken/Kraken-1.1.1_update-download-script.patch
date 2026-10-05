@@ -1,0 +1,57 @@
+diff -ruN kraken-1.1.1.orig/scripts/download_genomic_library.sh kraken-1.1.1/scripts/download_genomic_library.sh
+--- kraken-1.1.1.orig/scripts/download_genomic_library.sh	2019-05-04 03:49:55.000000000 +0200
++++ kraken-1.1.1/scripts/download_genomic_library.sh	2026-03-17 12:57:40.283955016 +0100
+@@ -30,7 +30,7 @@
+ 
+ LIBRARY_DIR="$KRAKEN_DB_NAME/library"
+ NCBI_SERVER="ftp.ncbi.nlm.nih.gov"
+-FTP_SERVER="ftp://$NCBI_SERVER"
++FTP_SERVER="https://$NCBI_SERVER"
+ RSYNC_SERVER="rsync://$NCBI_SERVER"
+ THIS_DIR=$PWD
+ 
+diff -ruN kraken-1.1.1.orig/scripts/download_taxonomy.sh kraken-1.1.1/scripts/download_taxonomy.sh
+--- kraken-1.1.1.orig/scripts/download_taxonomy.sh	2019-05-04 03:49:55.000000000 +0200
++++ kraken-1.1.1/scripts/download_taxonomy.sh	2026-03-17 12:56:44.035244365 +0100
+@@ -12,7 +12,7 @@
+ 
+ TAXONOMY_DIR="$KRAKEN_DB_NAME/taxonomy"
+ NCBI_SERVER="ftp.ncbi.nlm.nih.gov"
+-FTP_SERVER="ftp://$NCBI_SERVER"
++FTP_SERVER="https://$NCBI_SERVER"
+ 
+ mkdir -p "$TAXONOMY_DIR"
+ cd "$TAXONOMY_DIR"
+diff -ruN kraken-1.1.1.orig/scripts/rsync_from_ncbi.pl kraken-1.1.1/scripts/rsync_from_ncbi.pl
+--- kraken-1.1.1.orig/scripts/rsync_from_ncbi.pl	2019-05-04 03:49:55.000000000 +0200
++++ kraken-1.1.1/scripts/rsync_from_ncbi.pl	2026-03-17 14:40:14.034304248 +0100
+@@ -16,7 +16,7 @@
+ 
+ my $PROG = basename $0;
+ my $SERVER = "ftp.ncbi.nlm.nih.gov";
+-my $use_wget = $ENV{"KRAKEN_USE_WGET"};
++my $use_wget = 1; #$ENV{"KRAKEN_USE_WGET"};
+ my $suffix = "_genomic.fna.gz";
+ 
+ # Manifest hash maps filenames (keys) to taxids (values)
+@@ -34,7 +34,10 @@
+   my $base_path = basename($ftp_path) . $suffix;
+   # strip off server/leading dir name to allow --files-from= to work w/ rsync
+   # also allows filenames to just start with "all/", which is nice
+-  if (! ($full_path =~ s#^ftp://ftp\.ncbi\.nlm\.nih\.gov/genomes/##)) {
++  if ( $full_path =~ /^na/){
++  next
++  }
++  if (! ($full_path =~ s#^https://ftp\.ncbi\.nlm\.nih\.gov/genomes/##)) {
+     die "$PROG: unexpected FTP path (new server?) for $ftp_path\n";
+   }
+   $manifest{$full_path} = $taxid;
+@@ -52,7 +55,7 @@
+     open my $in_manifest, "<", "manifest.txt"
+         or die "$PROG: can't read manifest: $!\n";
+     while(<$in_manifest>){
+-        s/^/ftp:\/\/ftp.ncbi.nlm.nih.gov\/genomes\//;
++        s/^/https:\/\/ftp.ncbi.nlm.nih.gov\/genomes\//;
+         print $manifest2 $_;
+     }
+     close $in_manifest;

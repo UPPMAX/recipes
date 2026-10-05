@@ -1,0 +1,112 @@
+# Douglas Scofield UPPMAX 01/2026
+# - UPPMAX bioinfo toolchain 2024a
+
+# - Almost all users of this tool will also require an indexed database for
+#   human genome release hg38 to enable contamination filtering. This database
+#   totals about 35GB in size.  The recommended installation of this follows the
+#   recommendations from metaWRAP.
+#
+#       https://github.com/bxlab/metaWRAP/blob/master/installation/database_installation.md#making-host-genome-index-for-bmtagger
+#
+#   module load bmtagger/VERSION
+#   cd $EBROOTBMTAGGER
+#   mkdir BMTAGGER_DB
+#   cd BMTAGGER_DB
+#   wget ftp://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/*fa.gz
+#   gunzip *fa.gz
+#   cat *fa > hg38.fa
+#   rm -f chr*.fa
+#   bmtool -d hg38.fa -o hg38.bitmask
+#   srprism mkindex -i hg38.fa -o hg38.srprism -M 100000
+#
+# The -M 100000 option limits RAM usage during the build to 100GB.
+# 
+# After the database is generated, in this easyconfig, uncomment usage and the definitions of
+# modextravars and modloadmsg
+# 
+# Finally, rebuilt the module file:
+#
+#    eb --force --module-only  bmtagger...eb
+#
+# Once this is completed, in the metaWRAP module, its config-metawrap file should
+# have its line substituted:
+#
+#     sed -i 's/^BMTAGGER_DB.*$/BMTAGGER_DB=${BMTAGGER_DB}/' %(installdir)/bin/config-metawrap
+#
+# This will set its config variable using the BMTAGGER_DB variable defined by
+# loading this bmtagger module as a prerequisite.
+#
+#################################
+
+easyblock = 'MakeCp'
+
+name = 'bmtagger'
+version = '3.101'
+versionsuffix = '-Java-%(javaver)s'
+
+homepage = 'ftp://ftp.ncbi.nlm.nih.gov/pub/agarwala/bmtagger/'
+description = """Best Match Tagger for removing human reads from metagenomics datasets.
+This provides the tools: bmtagger.sh bmfilter bmtool extract_fullseq"""
+usage = """
+
+The prebuilt index database for hg38 is available in the directory location
+indicated by the BMTAGGER_DB environment variable.  Provide this location to
+the wrapper script bmtagger.sh as part of the -b and -x options:
+
+    bmtagger.sh -b $BMTAGGER_DB/hg38.bitmask -x $BMTAGGER_DB/hg38.srprism ...
+
+These become options to the following tools:
+
+    bmfilter ... -b $BMTAGGER_DB/hg38.bitmask ...
+    srprism search -I $BMTAGGER_DB/hg38.srprism ...
+"""
+
+toolchain = {'name': 'gompi', 'version': '2024a'}
+toolchainopts = {'cstd': 'c++98'}
+
+source_urls = ['ftp://ftp.ncbi.nlm.nih.gov/pub/agarwala/bmtagger/']
+sources = [{'download_filename': 'bmtools.tar.gz', 'filename': 'bmtools-%(version)s.tar.gz'}]
+patches = [
+    'bmtagger-%(version)s_fix-hardcoding.patch',
+    'bmtagger-%(version)s_fix-templates.patch',
+]
+checksums = [
+    '81ac6d47aa478c2e0ef760f15b9c71e1c52430c96a2c8d064667ebbef148e873',  # bmtools-3.101.tar.gz
+    '8779edd4dab6c0a3bc1bbcc5f265d61ccfd685972a0570bc3a84f5a131972195',  # bmtagger-3.101_fix-hardcoding.patch
+    '3832e4b4573e0fd8cb567069614f25a9ac51cb31135dd9c97329bf4eb15b1feb',  # bmtagger-3.101_fix-templates.patch
+]
+
+dependencies = [
+    ('Java', '17', '', SYSTEM),
+    ('BLAST+', '2.16.0'),
+    ('SRPRISM', '3.3.2', versionsuffix),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+prebuildopts = "sed -i 's/#include <unistd.h>/#include <unistd.h>\\n"
+prebuildopts += "#include <ctime>/g' general/cprogressindicator.hpp && "
+prebuildopts += "sed -i 's/m_good = std::getline( \\*m_fin, m_buffer );"
+prebuildopts += "/m_good = static_cast<bool>(std::getline( \\*m_fin, m_buffer ));/g' "
+prebuildopts += "general/cfareader.hpp && "
+
+files_to_copy = [(['bmtagger/bmfilter', 'bmtagger/bmtagger.sh', 'bmtagger/bmtool', 'bmtagger/extract_fullseq'], 'bin')]
+
+sanity_check_paths = {
+    'files': ['bin/bmfilter', 'bin/bmtagger.sh', 'bin/bmtool', 'bin/extract_fullseq'],
+    'dirs': [],
+}
+
+sanity_check_commands = [
+    "bmtool -h",
+    "bmfilter -h",
+]
+
+modextravars = {
+    'BMTAGGER_DB': '%(installdir)s/BMTAGGER_DB',
+}
+modloadmsg = "A prebuilt index database for hg38 is available.  See 'module help %(name)s/%(version)s'"
+
+moduleclass = 'bio'

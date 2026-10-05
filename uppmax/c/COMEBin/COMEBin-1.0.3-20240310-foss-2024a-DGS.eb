@@ -1,0 +1,80 @@
+# Douglas Scofield UPPMAX 03/2026
+# - UPPMAX bioinfo toolchain 2024a
+#################################
+
+easyblock = 'Tarball'
+
+name = 'COMEBin'
+local_commit = '987db95'
+version = '1.0.3-20240310'
+
+homepage = 'https://github.com/ziyewang/COMEBin'
+description = "Effective binning of metagenomic contigs using COntrastive Multi-viEw representation learning"
+
+toolchain = {'name': 'foss', 'version': '2024a'}
+
+source_urls = ['https://github.com/ziyewang/COMEBin/archive/']
+sources = [{'download_filename': '%s.tar.gz' % local_commit, 'filename': SOURCE_TAR_GZ}]
+patches = ['COMEBin-1.0.3_fix-run-script.patch']
+checksums = [
+    {'COMEBin-1.0.3-20240310.tar.gz': 'aa9c9e98d0cd121b2be60cae85d735527f510ad07df1a84ed6405cbc66eea684'},
+    {'COMEBin-1.0.3_fix-run-script.patch': 'e9ac578667d4f7233cf716cc98b134b8bd7cb7bcc70a06322500319d84b67773'},
+]
+
+dependencies = [
+    ('Python', '3.12.3'),
+    ('SciPy-bundle', '2024.05'),
+    ('matplotlib', '3.9.2'),
+    ('PyTorch', '2.6.0'),
+    ('tensorboard', '2.18.0'),
+    ('Biopython', '1.84'),
+    ('scikit-learn', '1.5.2'),
+    ('tqdm', '4.66.5'),
+    ('leidenalg', '0.10.2'),
+    ('BEDTools', '2.31.1'),
+    ('BWA', '0.7.17'),
+    ('CheckM', '1.2.4', '', {'name': 'gfbf', 'version': '2024a'}),
+    ('FragGeneScan', '1.32'),
+    ('HMMER', '3.4'),
+    ('pplacer', '1.1.alpha19', '', SYSTEM),
+    ('prodigal', '2.6.3'),
+    ('SAMtools', '1.21.1'),
+    ('python-igraph', '0.11.9'),
+    ('PyYAML', '6.0.2'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+exts_defaultclass = 'PythonPackage'
+
+exts_default_options = {
+    'source_urls': [PYPI_SOURCE],
+}
+
+exts_list = [
+    ('fastjsonschema', '2.21.1', {
+        'checksums': ['794d4f0a58f848961ba16af7b9c85a3e88cd360df008c59aac6fc5ae9323b5d4'],
+    }),
+    ('hnswlib', '0.8.0', {
+        'checksums': ['cb6d037eedebb34a7134e7dc78966441dfd04c9cf5ee93911be911ced951c44c'],
+    }),
+    ('biolib', '0.1.9', {
+        'checksums': ['bc9ae68c6d76d46e4295fe0b1df5a48b575fe96374bd96d624c3330feb94856f'],
+    }),
+]
+
+postinstallcmds = ["chmod a+x %(installdir)s/bin/run_comebin.sh"]
+
+sanity_check_paths = {
+    'files': ['bin/run_comebin.sh', 'COMEBin/main.py'],
+    'dirs': ['COMEBin/models', 'COMEBin/scripts'],
+}
+
+sanity_check_commands = [
+    "run_comebin.sh | grep '^Usage: bash run_comebin.sh'"
+    "python %(installdir)s/COMEBin/main.py --help",
+]
+
+moduleclass = 'bio'

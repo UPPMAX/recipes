@@ -1,0 +1,67 @@
+# Douglas Scofield UPPMAX 01/2026
+# - harmonise SPAdes version with UPPMAX bioinfo toolchain 2024a
+# - add definition of GETORG_PATH for the local dataset
+#################################
+
+easyblock = 'PythonPackage'
+
+name = 'GetOrganelle'
+version = '1.7.7.1'
+
+_dataset_name = 'GetOrganelleDB'
+_dataset_version = '0.0.1'
+_dataset_path = '/sw/data/local/{}/{}/'.format(_dataset_name, _dataset_version)
+
+homepage = 'https://github.com/Kinggerm/GetOrganelle'
+description = """This toolkit assemblies organelle genome from genomic skimming data.
+You can see the available local databases with
+
+    get_organelle_config.py --list
+
+"""
+
+toolchain = {'name': 'foss', 'version': '2024a'}
+
+source_urls = ['https://github.com/Kinggerm/GetOrganelle/archive/']
+sources = ['%(version)s.tar.gz']
+checksums = ['cf8e14766de43967182be839de20c9d1709b60fae38a0b3d175742dfad7a5d44']
+
+dependencies = [
+    ('Python', '3.12.3'),
+    ('Bandage', '0.9.0'),
+    ('SciPy-bundle', '2024.05'),
+    ('sympy', '1.13.3'),
+    ('SPAdes', '4.2.0'),
+    ('Bowtie2', '2.5.4'),
+    ('BLAST+', '2.16.0'),
+    ('Perl', '5.38.2'),
+    ('matplotlib', '3.9.2')
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+options = {'modulename': False}
+
+modextravars = {
+    'GETORG_PATH' : _dataset_path,
+}
+
+fix_python_shebang_for = ['bin/*.py']
+
+sanity_check_commands = [
+    'get_organelle_from_reads.py -h',
+    "get_organelle_config.py --version | grep -F '%(name)s v%(version)s'",
+]
+
+sanity_check_paths = {
+    'files': ['bin/check_annotations.py', 'bin/get_organelle_from_reads.py', 'bin/slim_graph.py'],
+    'dirs': [
+             'lib/python%(pyshortver)s/site-packages',
+             '%s/LabelDatabase' % _dataset_path,
+             '%s/SeedDatabase' % _dataset_path,
+            ],
+}
+
+moduleclass = 'bio'

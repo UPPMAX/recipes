@@ -1,0 +1,127 @@
+easyblock = 'Bundle'
+
+name = 'alphagenome_research'
+version = '0.1.0'
+
+homepage = 'https://github.com/google-deepmind/alphagenome_research'
+description = """AlphaGenome research code from Google DeepMind for genomics research.
+
+Models available at $ALPHAGENOME_DATA_DIR:
+	all_folds-v1
+	fold_0-v1
+	fold_1-v1
+	fold_2-v1
+	fold_3-v1
+
+Example:
+    # Start python
+    python
+
+    # Test run 
+	from alphagenome_research.model import dna_model
+	from alphagenome.visualization import plot_components
+	from alphagenome.data import genome
+	import matplotlib.pyplot as plt
+	import jax
+	import os
+
+
+	data_dir = os.getenv('ALPHAGENOME_DATA_DIR')
+	model = dna_model.create(
+		checkpoint_path=f'{data_dir}/all_folds-v1/',
+	)
+
+	interval = genome.Interval(chromosome='chr22', start=35677410, end=36725986)
+	variant = genome.Variant(
+		chromosome='chr22',
+		position=36201698,
+		reference_bases='A',
+		alternate_bases='C',
+	)
+
+	outputs = model.predict_variant(
+		interval=interval,
+		variant=variant,
+		ontology_terms=['UBERON:0001157'],
+		requested_outputs=[dna_model.OutputType.RNA_SEQ],
+	)
+
+	plot_components.plot(
+		[
+			plot_components.OverlaidTracks(
+				tdata={
+					'REF': outputs.reference.rna_seq,
+					'ALT': outputs.alternate.rna_seq,
+				},
+				colors={'REF': 'dimgrey', 'ALT': 'red'},
+			),
+		],
+		interval=outputs.reference.rna_seq.interval.resize(2**15),
+		# Annotate the location of the variant as a vertical line.
+		annotations=[plot_components.VariantAnnotation([variant], alpha=0.8)],
+	)
+	plt.savefig('test_output_plot.png', dpi=300, bbox_inches='tight')
+
+
+
+"""
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+dependencies = [
+    ('Python', '3.12.3'),
+    ('CUDA', '12.9.1', '', SYSTEM),
+    ('cuDNN', '9.15.0.57', '-CUDA-%(cudaver)s', SYSTEM),
+]
+
+postinstallcmds = [
+    # Create directory first
+    'mkdir -p %(installdir)s/lib/python%(pyshortver)s/site-packages',
+    
+    # Set PYTHONPATH so pip installs to correct location
+    'export PYTHONPATH=%(installdir)s/lib/python%(pyshortver)s/site-packages:$PYTHONPATH && '
+    'pip install --prefix=%(installdir)s "jax[cuda12_local]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html',
+
+	# requests and aiohttp
+	'export PYTHONPATH=%(installdir)s/lib/python%(pyshortver)s/site-packages:$PYTHONPATH && '
+	'pip install --prefix=%(installdir)s requests aiohttp',
+
+	# alphagenome_research from GitHub
+	'export PYTHONPATH=%(installdir)s/lib/python%(pyshortver)s/site-packages:$PYTHONPATH && '
+	'pip install --prefix=%(installdir)s git+https://github.com/google-deepmind/alphagenome_research.git@v%(version)s',
+
+]
+
+modextrapaths = {
+    'PYTHONPATH': 'lib/python%(pyshortver)s/site-packages',
+}
+
+
+modluafooter = """
+local cuda_root = os.getenv("EBROOTCUDA")
+if cuda_root then
+    setenv("CUDA_HOME", cuda_root)
+    setenv("XLA_FLAGS", "--xla_gpu_cuda_data_dir=" .. cuda_root)
+end
+setenv("ALPHAGENOME_DATA_DIR", "/sw/data/AlphaGenome_data")
+"""
+
+modloadmsg = """
+AlphaGenome does not work on the haswell nodes with NVidia T4 gpus.
+
+Please look at "module help %(name)s/%(version)s" to get an example
+"""
+
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ['lib/python%(pyshortver)s/site-packages'],
+}
+
+sanity_check_commands = [
+    "python -c 'import jax; print(jax.devices())'",
+    "python -c 'import requests'",
+	"python -c 'import alphagenome_research'",
+]
+
+moduleclass = 'bio'

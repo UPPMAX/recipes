@@ -1,0 +1,392 @@
+# Douglas Scofield UPPMAX 02/2026
+# - includes changes from earlier patchfile AUGUSTUS-3.2.3_fix-hardcoding.patch
+# - use more EB deps
+# - clean before building src
+# - build all auxprogs and clean beforehand
+# - load SAMtools/0.1.20 before building checkTargetSortedness and rearrange its Makefile
+# - consistently install auxprogs into local bin/ and on 'all' target
+# - get rid of uses of LINK.cc
+# - add -fpermissive to src/Makefile
+# - add <cstdint> where necessary
+#################################
+diff -ruN augustus-3.2.3.orig/Makefile augustus-3.2.3/Makefile
+--- augustus-3.2.3.orig/Makefile	2016-09-28 11:56:08.000000000 +0200
++++ augustus-3.2.3/Makefile	2026-02-17 17:09:13.411701869 +0100
+@@ -5,8 +5,8 @@
+ 
+ all:
+ 	mkdir -p bin
+-	cd src && ${MAKE}
+-	cd auxprogs && ${MAKE}
++	cd src && ${MAKE} clean && ${MAKE}
++	cd auxprogs && ${MAKE} clean && ${MAKE}
+ 
+ clean:
+ 	cd src && ${MAKE} clean
+@@ -17,13 +17,13 @@
+ install:
+ 	install -d $(INSTALLDIR)
+ 	cp -a config bin scripts $(INSTALLDIR)
+-	ln -sf $(INSTALLDIR)/bin/augustus /usr/local/bin/augustus
+-	ln -sf $(INSTALLDIR)/bin/etraining /usr/local/bin/etraining
+-	ln -sf $(INSTALLDIR)/bin/prepareAlign /usr/local/bin/prepareAlign
+-	ln -sf $(INSTALLDIR)/bin/fastBlockSearch /usr/local/bin/fastBlockSearch
+-	ln -sf $(INSTALLDIR)/bin/load2db /usr/local/bin/load2db
+-	ln -sf $(INSTALLDIR)/bin/getSeq /usr/local/bin/getSeq
+-	ln -sf $(INSTALLDIR)/bin/espoca /usr/local/bin/espoca
++	#ln -sf $(INSTALLDIR)/bin/augustus /usr/local/bin/augustus
++	#ln -sf $(INSTALLDIR)/bin/etraining /usr/local/bin/etraining
++	#ln -sf $(INSTALLDIR)/bin/prepareAlign /usr/local/bin/prepareAlign
++	#ln -sf $(INSTALLDIR)/bin/fastBlockSearch /usr/local/bin/fastBlockSearch
++	#ln -sf $(INSTALLDIR)/bin/load2db /usr/local/bin/load2db
++	#ln -sf $(INSTALLDIR)/bin/getSeq /usr/local/bin/getSeq
++	#ln -sf $(INSTALLDIR)/bin/espoca /usr/local/bin/espoca
+ 
+ # for internal purposes:
+ release:
+diff -ruN augustus-3.2.3.orig/auxprogs/Makefile augustus-3.2.3/auxprogs/Makefile
+--- augustus-3.2.3.orig/auxprogs/Makefile	2016-03-30 17:50:59.000000000 +0200
++++ augustus-3.2.3/auxprogs/Makefile	2026-02-17 16:41:40.051591352 +0100
+@@ -4,13 +4,19 @@
+ # Last modified on: 16-October-2016 by Katharina Hoff (katharina.hoff@gmail.com)
+ 
+ all:
++	cd aln2wig; make;
+ 	cd bam2hints; make;
++	cd bam2wig; make;
++	cd checkTargetSortedness; module load SAMtools/0.1.20@TOOLCHAIN@; make;
+ 	cd compileSpliceCands; make;
+ 	cd filterBam; make;
+ 	cd homGeneMapping; make;
+ 	cd joingenes; make;
+ clean:
++	cd aln2wig; make clean;
+ 	cd bam2hints; make clean;
++	cd bam2wig; make clean;
++	cd checkTargetSortedness; make clean;
+ 	cd compileSpliceCands; make clean;
+ 	cd filterBam; make clean;
+ 	cd homGeneMapping; make clean;
+diff -ruN augustus-3.2.3.orig/auxprogs/aln2wig/Makefile augustus-3.2.3/auxprogs/aln2wig/Makefile
+--- augustus-3.2.3.orig/auxprogs/aln2wig/Makefile	2016-03-30 15:59:06.000000000 +0200
++++ augustus-3.2.3/auxprogs/aln2wig/Makefile	2026-02-17 13:41:48.195459812 +0100
+@@ -1,12 +1,13 @@
+-CFLAGS := -Wall -Wno-sign-compare -ansi -pedantic -O2 -ggdb ${CFLAGS}
++CFLAGS := -Wall -Wno-sign-compare -ansi -pedantic -O2 ${CFLAGS}
++
++all : aln2wig
++	cp aln2wig ../../bin/
+ 
+ aln2wig : aln2wig.o
+-	gcc $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o aln2wig aln2wig.o;
+-	cp aln2wig ../../bin
+-aln2wig.o : aln2wig.c
+-	gcc $(CPPFLAGS) $(CXXFLAGS) $(CFLAGS) $(LDFLAGS) -c aln2wig.c
++	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o aln2wig aln2wig.o;
+ 
+-all : aln2wig
++aln2wig.o : aln2wig.c
++	$(CC) $(CPPFLAGS) $(CXXFLAGS) $(CFLAGS) $(LDFLAGS) -c aln2wig.c
+ 
+ clean :
+ 	rm -f aln2wig aln2wig.o; rm -f ../../bin/aln2wig 
+diff -ruN augustus-3.2.3.orig/auxprogs/bam2hints/Makefile augustus-3.2.3/auxprogs/bam2hints/Makefile
+--- augustus-3.2.3.orig/auxprogs/bam2hints/Makefile	2016-03-30 15:25:23.000000000 +0200
++++ augustus-3.2.3/auxprogs/bam2hints/Makefile	2026-02-17 13:40:57.702716880 +0100
+@@ -8,25 +8,24 @@
+ #	Last modified:  09-October-2015 by Katharina J. Hoff
+ 
+ # Variable definition
+-INCLUDES = /usr/include/bamtools
+-LIBS = -lbamtools -lz
++INCLUDES = $(EBROOTBAMTOOLS)/include/bamtools
++LIBS = $(EBROOTBAMTOOLS)/lib/libbamtools.a -lz
+ SOURCES = bam2hints.cc 
+ OBJECTS = $(SOURCES:.cc=.o)
+ CXXFLAGS += -Wall -O2 # -g -p -g -ggdb 
+-
+-LINK.cc = g++
++CC = $(CXX)
+ 
+ # Recipe(s)
+ # $@: full target name of current target. 
+ # $<: .c file of target. 
+ bam2hints : $(OBJECTS) 
+-	$(LINK.cc) $(CXXFLAGS) $(LDFLAGS) -o $@ $(OBJECTS) $(LIBS) 
+-	cp bam2hints ../../bin
++	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(OBJECTS) $(LIBS) 
++	cp bam2hints ../../bin/
+ 
+ all:$(OBJECTS) # Compiles each foo.cc into foo.o
+ 
+ bam2hints.o : $(SOURCES)
+-	$(LINK.cc) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) -c $< -o $@ -I$(INCLUDES) 
++	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) -c $< -o $@ -I$(INCLUDES) 
+ 
+ clean:
+ 	rm -f bam2hints.o bam2hints ../../bin/bam2hints
+diff -ruN augustus-3.2.3.orig/auxprogs/bam2wig/Makefile augustus-3.2.3/auxprogs/bam2wig/Makefile
+--- augustus-3.2.3.orig/auxprogs/bam2wig/Makefile	2016-12-06 17:06:53.000000000 +0100
++++ augustus-3.2.3/auxprogs/bam2wig/Makefile	2026-02-17 13:40:20.686905337 +0100
+@@ -9,22 +9,17 @@
+ PROGRAM = bam2wig
+ SOURCES = $(PROGRAM)
+ OBJECTS = $(SOURCES:.c=.o)
+-TOOLDIR=/home/mario/tools
+-SAMTOOLS=$(TOOLDIR)/samtools/
+-HTSLIB=$(TOOLDIR)/htslib/
+-BCFTOOLS=$(TOOLDIR)/bcftools-1.2/
+-TABIX=$(TOOLDIR)/tabix/
+-INCLUDES=-I$(SAMTOOLS) -I. -I$(HTSLIB) -I$(BCFTOOLS) -I$(TABIX)
+-VPATH=$(SAMTOOLS)
+-LIBS=$(SAMTOOLS)/libbam.a $(HTSLIB)/libhts.a -lcurses -lm -lz -lpthread
++INCLUDES=-I$(EBROOTSAMTOOLS)/include/bam -I. -I$(EBROOTHTSLIB)/include/htslib
++LIBS=$(EBROOTSAMTOOLS)/lib/libbam.a $(EBROOTHTSLIB)/lib/libhts.a -lcurses -lm -lz -lpthread
+ CFLAGS=-Wall -O2 $(INCLUDES)
+ CC=gcc
+ 
+ $(PROGRAM) : bam2wig.o
+ 	$(CC) $(CFLAGS) $^ -o $@ $(LIBS)
++	cp $@ ../../bin/
+ 
+ bam2wig.o : bam2wig.c
+ 	$(CC) $(CFLAGS) -c $^ -o $@ $(INCLUDES)
+ 
+ clean:
+-	rm -f $(OBJECTS) bam2wig.o
++	rm -f $(OBJECTS) bam2wig.o ../../bin/$(PROGRAM)
+diff -ruN augustus-3.2.3.orig/auxprogs/checkTargetSortedness/Makefile augustus-3.2.3/auxprogs/checkTargetSortedness/Makefile
+--- augustus-3.2.3.orig/auxprogs/checkTargetSortedness/Makefile	2016-03-30 15:39:33.000000000 +0200
++++ augustus-3.2.3/auxprogs/checkTargetSortedness/Makefile	2026-02-17 16:54:49.190328835 +0100
+@@ -8,25 +8,27 @@
+ # Created: 11-April-2012
+ # Last modified:  9-July-2012
+ #
++# requires SAMtools/0.1.20
++#
+ 
+ SOURCES = checkTargetSortedness.c
+ PROGRAM = checkTargetSortedness
+ OBJECTS = $(SOURCES:.c=.o) 
+ CFLAGS := -g -Wall -O2 ${CFLAGS}
+ # Change variable below so that it points to your SAMTOOLS folder...
+-SAMTOOLS = /usr/include/samtools
+-INCLUDES = -I$(SAMTOOLS) -I.
++INCLUDES = -I$(EBROOTSAMTOOLS)/include/bam -I.
+ # replace -lbam with the following in case you have your own samtools library: $(SAMTOOLS)/libbam.a
+-LIBS=-lbam -lcurses -lm -lz -lpthread
++LIBS=$(EBROOTSAMTOOLS)/lib/libbam.a -lcurses -lm -lz -lpthread
+ CC=gcc
+ 
+ all:$(PROGRAM) $(OBJECTS)
++	cp $(PROGRAM) ../../bin/
+ 
+ $(PROGRAM):$(OBJECTS)
+-	$(CC) $(CFLAGS)	$(CPPFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS) 
++	$(CC) $(CFLAGS)	$(CPPFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
+ 
+ $(OBJECTS):%.o:%.c
+-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -c $^ -o $@ $(INCLUDES)
++	$(CC) $(INCLUDES) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -c $^ -o $@
+ 
+ clean:
+ 	rm -f *.o checkTargetSortedness
+diff -ruN augustus-3.2.3.orig/auxprogs/compileSpliceCands/Makefile augustus-3.2.3/auxprogs/compileSpliceCands/Makefile
+--- augustus-3.2.3.orig/auxprogs/compileSpliceCands/Makefile	2016-03-14 17:26:49.000000000 +0100
++++ augustus-3.2.3/auxprogs/compileSpliceCands/Makefile	2026-02-17 15:32:06.418988755 +0100
+@@ -1,10 +1,11 @@
++all : compileSpliceCands
++	cp $< ../../bin/
++
+ compileSpliceCands : compileSpliceCands.o list.h list.o
+-	gcc $(LDFLAGS) -o compileSpliceCands compileSpliceCands.o list.o;
+-#	cp compileSpliceCands ../../bin
+-compileSpliceCands.o : compileSpliceCands.c 
+-	gcc -Wall -pedantic -ansi $(CPPFLAGS) -c compileSpliceCands.c 
++	$(CC) $(LDFLAGS) -o compileSpliceCands compileSpliceCands.o list.o;
+ 
+-all : compileSpliceCands
++compileSpliceCands.o : compileSpliceCands.c 
++	$(CC) -Wall -pedantic -ansi $(CPPFLAGS) -c compileSpliceCands.c 
+ 
+ clean : 
+ 	rm -f compileSpliceCands compileSpliceCands.o ../../bin/compileSpliceCands list.o
+diff -ruN augustus-3.2.3.orig/auxprogs/filterBam/src/Makefile augustus-3.2.3/auxprogs/filterBam/src/Makefile
+--- augustus-3.2.3.orig/auxprogs/filterBam/src/Makefile	2016-03-30 16:35:01.000000000 +0200
++++ augustus-3.2.3/auxprogs/filterBam/src/Makefile	2026-02-17 15:00:38.483884309 +0100
+@@ -8,30 +8,21 @@
+ 			printElapsedTime.cc sumMandIOperations.cc sumDandIOperations.cc PairednessCoverage.cc
+ PROGRAM = filterBam
+ OBJECTS = $(SOURCES:.cc=.o)
+-BAMTOOLS = /usr/include/bamtools
+-INCLUDES = -I$(BAMTOOLS) -Iheaders -I./bamtools
+-LIBS = -lbamtools -lz
++INCLUDES = -I$(EBROOTBAMTOOLS)/include/bamtools -Iheaders -I./bamtools
++LIBS = $(EBROOTBAMTOOLS)/lib/libbamtools.a -lz
+ CFLAGS = -std=c++0x
+ VPATH = functions
+ 
+-all : $(PROGRAM) $(OBJECTS) CHECKBAM BIN
++all : $(PROGRAM) $(OBJECTS) BIN
+ 
+-BIN : $(PROGRAM) CHECKBAM
++BIN : $(PROGRAM)
+ 	cp filterBam ../../../bin/filterBam
+ 
+-CHECKBAM:
+-	@if [ -z "${BAMTOOLS}" ]; then \
+-		echo '[Makefile]: $${BAMTOOLS} has not been set.'; \
+-		exit 101; \
+-	elif [ "${BAMTOOLS}" ]; then \
+-		echo "filterBam compiled with BAMTOOLS=${BAMTOOLS}"; \
+-	fi
+-
+ $(PROGRAM) : $(OBJECTS)
+-	$(LINK.cc) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS) 
++	$(CXX) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS) 
+ 
+ $(OBJECTS) : %.o:%.cc
+-	$(LINK.cc) $(CFLAGS) $(CPPFLAGS) -c $^ -o $@ $(INCLUDES)
++	$(CXX) $(CFLAGS) $(CPPFLAGS) -c $^ -o $@ $(INCLUDES)
+ 
+ 
+ clean:
+diff -ruN augustus-3.2.3.orig/auxprogs/homGeneMapping/include/projectio.hh augustus-3.2.3/auxprogs/homGeneMapping/include/projectio.hh
+--- augustus-3.2.3.orig/auxprogs/homGeneMapping/include/projectio.hh	2016-09-28 11:56:08.000000000 +0200
++++ augustus-3.2.3/auxprogs/homGeneMapping/include/projectio.hh	2026-02-17 13:54:49.023410853 +0100
+@@ -14,6 +14,8 @@
+ #include <sys/stat.h> // creating directories
+ #include <sstream>
+ #include <fstream>
++#include <cstdint>
++typedef uint64_t uint64_fast64_t;
+ 
+ class ProjectError : public std::exception {
+ 
+diff -ruN augustus-3.2.3.orig/auxprogs/homGeneMapping/include/sqliteDB.hh augustus-3.2.3/auxprogs/homGeneMapping/include/sqliteDB.hh
+--- augustus-3.2.3.orig/auxprogs/homGeneMapping/include/sqliteDB.hh	2016-09-28 11:56:08.000000000 +0200
++++ augustus-3.2.3/auxprogs/homGeneMapping/include/sqliteDB.hh	2026-02-17 14:06:50.495660326 +0100
+@@ -13,6 +13,7 @@
+ #include <string>
+ #include <vector>
+ #include <sqlite3.h>
++#include <cstdint>
+ 
+ using namespace std;
+ 
+diff -ruN augustus-3.2.3.orig/auxprogs/homGeneMapping/src/Makefile augustus-3.2.3/auxprogs/homGeneMapping/src/Makefile
+--- augustus-3.2.3.orig/auxprogs/homGeneMapping/src/Makefile	2016-09-28 11:56:08.000000000 +0200
++++ augustus-3.2.3/auxprogs/homGeneMapping/src/Makefile	2026-02-17 14:04:59.865236768 +0100
+@@ -1,13 +1,13 @@
+ #
+ # Makefile for homGeneMapping
+ #
+-# BOOST = true
++BOOST = true
+ 
+ # set this flag to enable
+ # database access for retrieval of hints
+-# SQLITE = true
++SQLITE = true
+ 
+-CC      = g++
++CC      = $(CXX)
+ 
+ # Notes: - "-Wno-sign-compare" eliminates a high number of warnings (see footnote below). Please adopt
+ #          a strict signed-only usage strategy to avoid mistakes since we are not warned about this.
+@@ -20,12 +20,12 @@
+ 
+ ifdef BOOST
+ 	CFLAGS += -DBOOST
+-	INCLS +=  # add the boost include path here, if boost ist not installed system-wide
++	INCLS += -I$(EBROOTBOOST)/include
+ endif
+ 
+ ifdef SQLITE
+-INCLS	+=           # add the sqlite include path here, if sqlite is not installed system-wide
+-LIBS    += -lsqlite3 # add the sqlite library path here, if sqlite is not install system-wide
++INCLS	+= -I$(EBROOTSQLITE)/include          # add the sqlite include path here, if sqlite is not installed system-wide
++LIBS    += $(EBROOTSQLITE)/lib/libsqlite3.a # add the sqlite library path here, if sqlite is not install system-wide
+ OBJS    += sqliteDB.o
+ CFLAGS  += -DSQLITE
+ endif
+diff -ruN augustus-3.2.3.orig/auxprogs/homGeneMapping/src/genome.cc augustus-3.2.3/auxprogs/homGeneMapping/src/genome.cc
+--- augustus-3.2.3.orig/auxprogs/homGeneMapping/src/genome.cc	2016-12-05 15:13:04.000000000 +0100
++++ augustus-3.2.3/auxprogs/homGeneMapping/src/genome.cc	2026-02-17 13:55:20.299248588 +0100
+@@ -11,8 +11,8 @@
+  **********************************************************************/
+ 
+ // project includes
+-#include "genome.hh"
+ #include "bitmasking.hh"
++#include "genome.hh"
+ 
+ #include <iostream>
+ #include <iomanip>      // std::setprecision
+diff -ruN augustus-3.2.3.orig/auxprogs/joingenes/Makefile augustus-3.2.3/auxprogs/joingenes/Makefile
+--- augustus-3.2.3.orig/auxprogs/joingenes/Makefile	2016-03-30 15:54:51.000000000 +0200
++++ augustus-3.2.3/auxprogs/joingenes/Makefile	2026-02-17 12:05:46.794782577 +0100
+@@ -1,4 +1,4 @@
+-CC=g++
++CC=$(CXX)
+ CFLAGS=-Wall -std=gnu++0x
+ 
+ all: joingenes
+diff -ruN augustus-3.2.3.orig/common.mk augustus-3.2.3/common.mk
+--- augustus-3.2.3.orig/common.mk	2016-12-06 15:50:17.000000000 +0100
++++ augustus-3.2.3/common.mk	2026-02-17 14:15:31.149941298 +0100
+@@ -4,14 +4,14 @@
+ 
+ # make this a comment if you get compilation errors about the boost iostreams library
+ # cannot install this library and do not need to input gzipped input genome files
+-#ZIPINPUT = true
++ZIPINPUT = true
+ 
+ # uncomment this line to enable comparative gene finding (requires compiler which supports C++11 standard)
+-#COMPGENEPRED = true
++COMPGENEPRED = true
+ 
+ # uncomment this line when you need MySQL access to sequences (most users don't)
+ #MYSQL = true
+ 
+ # uncomment this line to enable access to SQLite databases that store
+ # file offsets of sequence data in flat files and hints
+-#SQLITE = true
++SQLITE = true
+diff -ruN augustus-3.2.3.orig/include/sqliteDB.hh augustus-3.2.3/include/sqliteDB.hh
+--- augustus-3.2.3.orig/include/sqliteDB.hh	2016-09-28 11:56:08.000000000 +0200
++++ augustus-3.2.3/include/sqliteDB.hh	2026-02-17 15:04:04.753788049 +0100
+@@ -13,6 +13,7 @@
+ #include <string>
+ #include <vector>
+ #include <sqlite3.h>
++#include <cstdint>
+ 
+ using namespace std;
+ 
+diff -ruN augustus-3.2.3.orig/src/Makefile augustus-3.2.3/src/Makefile
+--- augustus-3.2.3.orig/src/Makefile	2016-12-06 16:16:45.000000000 +0100
++++ augustus-3.2.3/src/Makefile	2026-02-17 15:12:58.369987896 +0100
+@@ -7,7 +7,7 @@
+ # Notes: - "-Wno-sign-compare" eliminates a high number of warnings (see footnote below). Please adopt
+ #          a strict signed-only usage strategy to avoid mistakes since we are not warned about this.
+ #        - The order of object files in $(OBJS) IS IMPORTANT (see lldouble.hh)
+-CXXFLAGS := -Wall -Wno-sign-compare -Wno-strict-overflow -ansi -pedantic -O3 ${CXXFLAGS} # -DDEBUG -g -ggdb -pg -DDEBUG_STATES -DDEBUG 
++CXXFLAGS := -Wall -Wno-sign-compare -Wno-strict-overflow -fpermissive -ansi -pedantic -O3 ${CXXFLAGS} # -DDEBUG -g -ggdb -pg -DDEBUG_STATES -DDEBUG 
+ ifdef SQLITE
+ 	COMPGENEPRED = true
+ endif
+@@ -34,7 +34,6 @@
+ 	OBJS += parser/parse.o scanner/lex.o genomicMSA.o geneMSA.o contTimeMC.o compgenepred.o phylotree.o orthograph.o orthoexon.o alignment.o speciesgraph.o codonMSA.o
+ 	LIBS += -lgsl -lgslcblas # for matrix exponentiation that is required in comparative gene finding
+ 	LIBS += -llpsolve55 -lcolamd -ldl # for mixed integer linear programming (alignment.cc)
+-	INCLS += -I/usr/include/lpsolve
+ endif
+ DUMOBJS = dummy.o
+ TOBJS	= commontrain.o igenictrain.o introntrain.o exontrain.o utrtrain.o # contentmodel.o baumwelch.o
+diff -ruN augustus-3.2.3.orig/src/cxxflags augustus-3.2.3/src/cxxflags
+--- augustus-3.2.3.orig/src/cxxflags	2016-12-06 17:10:46.000000000 +0100
++++ augustus-3.2.3/src/cxxflags	2026-02-17 15:24:23.583379713 +0100
+@@ -1 +1 @@
+--Wall -Wno-sign-compare -Wno-strict-overflow -ansi -pedantic -O3  
++-Wall -Wno-sign-compare -Wno-strict-overflow -fpermissive -ansi -pedantic -O3   -DZIPINPUT -std=c++0x -DCOMPGENEPRED -DSQLITE

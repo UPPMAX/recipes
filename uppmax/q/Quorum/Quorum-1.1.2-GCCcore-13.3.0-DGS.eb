@@ -1,0 +1,42 @@
+# Douglas Scofield UPPMAX 02/2026
+# - new tool
+# - UPPMAX bioinfo toolchain 2024a
+#################################
+
+easyblock = 'ConfigureMake'
+
+name = 'Quorum'
+version = '1.1.2'
+
+homepage = 'https://github.com/gmarcais/Quorum'
+description = "QUality Optimized Reads from the University of Maryland : Read correction for Illumina reads"
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+github_account = 'gmarcais'
+source_urls = [ GITHUB_RELEASE ]
+sources = [ '%(namelower)s-%(version)s.tar.gz' ]
+checksums = [ 'bfa2ac8b756242028f37979f91ac2a805d311e9c84fb04c73d9136a8b129992f' ]
+
+builddependencies = [
+    ('binutils', '2.42'),
+]
+
+dependencies = [
+    ('Jellyfish', '2.3.1'),
+    ('Perl',      '5.38.2'),
+]
+
+local_linkdependencies = [
+    ('Jellyfish', '2.3.1'),
+    toolchain,
+]
+
+sanity_check_paths = {
+    'files': [ 'bin/quorum', 'bin/merge_mate_pairs', 'bin/quorum_create_database', 'bin/quorum_error_correct_reads', 'bin/split_mate_pairs', 'share/adapter.jf' ],
+    'dirs': []
+}
+
+sanity_check_commands = [ 'quorum --version | grep -F "%(version)s"' ]
+
+moduleclass = 'bio'

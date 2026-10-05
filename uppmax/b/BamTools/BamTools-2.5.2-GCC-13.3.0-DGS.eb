@@ -1,0 +1,51 @@
+# This file is an EasyBuild reciPY as per https://github.com/easybuilders/easybuild
+#
+# Douglas G Scofield UPPMAX 8/2025
+# - local_linkdependencies
+# - enable building shared library along with static library and sanity checking them
+###################################
+
+easyblock = 'CMakeMake'
+
+name = 'BamTools'
+version = '2.5.2'
+
+homepage = 'https://github.com/pezmaster31/bamtools'
+description = "BamTools provides both a programmer's API and an end-user's toolkit for handling BAM files."
+
+toolchain = {'name': 'GCC', 'version': '13.3.0'}
+toolchainopts = {'pic': True}
+
+# https://github.com/pezmaster31/bamtools
+github_account = 'pezmaster31'
+source_urls = [GITHUB_LOWER_SOURCE]
+sources = ['v%(version)s.tar.gz']
+checksums = ['4d8b84bd07b673d0ed41031348f10ca98dd6fa6a4460f9b9668d6f1d4084dfc8']
+
+builddependencies = [
+    ('CMake', '3.29.3'),
+]
+
+dependencies = [
+    ('JsonCpp', '1.9.5'),
+]
+
+local_linkdependencies = [
+    ('JsonCpp', '1.9.5'),
+    toolchain,
+]
+
+configopts = ['-DBUILD_SHARED_LIBS=ON', '-DBUILD_SHARED_LIBS=OFF']
+
+sanity_check_paths = {
+    'files': ['bin/bamtools',
+              'include/bamtools/shared/bamtools_global.h',
+              'lib/libbamtools.%s' % SHLIB_EXT,
+              'lib/libbamtools.a',
+              'lib/pkgconfig/bamtools-1.pc'],
+    'dirs':  ['include/bamtools/api', 'lib/pkgconfig'],
+}
+
+sanity_check_commands = ["bamtools --help"]
+
+moduleclass = 'bio'

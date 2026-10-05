@@ -1,0 +1,98 @@
+# Douglas G Scofield UPPMAX 3/2026
+# - new tool
+# - depending on e.g. R-bundle-CRAN is overkill, install just packages required
+# - the second sanity-check command will fail unless X is available:
+#   'Error in .External2(C_X11, paste0("png::", filename), g$width, g$height,  : unable to start device PNG'
+#######################################
+
+easyblock = 'Bundle'
+
+name = 'GenomeScope2.0'
+_packagename = 'genomescope'  # name of the R package installed
+version = '2.1.0'
+
+homepage = 'https://github.com/plfjohnson/contamMix'
+description = """
+GenomeScope2.0 applies classical insights from combinatorial theory to establish
+a detailed mathematical model of how k-mer frequencies will be distributed in
+heterozygous and polyploid genomes. GenomeScope 2.0 employs a polyploid-aware
+mixture model that, within seconds, accurately infers genome properties from
+unassembled sequencing data.
+
+GenomeScope2.0 uses the k-mer count distribution, e.g. from KMC or Jellyfish;
+both are loaded here as dependencies.  GenomeScope2 produces a report and
+several informative plots describing the genome properties.
+
+See 'genomescope.R --help' for more.
+"""
+
+
+toolchain = {'name': 'gfbf', 'version': '2024a'}
+
+builddependencies = [
+    ('wget', '1.25.0'),  # to download kmer .hist file for sanity check
+]
+
+dependencies = [
+    ('Jellyfish', '2.3.1', '', {'name': 'GCCcore', 'version': '13.3.0'}),  # annoyingly needed to keep from building -GCC-13.3.0 version
+    ('KMC', '3.2.4'),
+    ('R', '4.4.2'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+exts_defaultclass = 'RPackage'
+exts_filter = ("R -q --no-save", "library(%(ext_name)s)")
+exts_default_options = {
+    'source_urls': [
+        'https://cran.r-project.org/src/contrib/Archive/%(name)s',  # package archive
+        'https://cran.r-project.org/src/contrib/',  # current version of packages
+        'https://cran.freestatistics.org/src/contrib',  # mirror alternative for current packages
+    ],
+    'source_tmpl': '%(name)s_%(version)s.tar.gz',
+}
+
+exts_list = [
+    ('minpack.lm', '1.2-4', {
+        'checksums': ['e30fa4fe353cf00d266839d3c5db83ec9548a660f31d447ad9a69f556d56e731'],
+    }),
+    ('findpython', '1.0.9', {
+        'checksums': ['b6a15e0cdfcdd4b1cfc76f7e4eaad0125d4d52889711200075280e9b2a2cb7cb'],
+    }),
+    ('argparse', '2.2.4', {
+        'checksums': ['1d4efd137b8c3760f5beea2e0ba71293ce26a9d5533223adef0ffc5b816a1e47'],
+    }),
+    ('jsonlite', '1.8.9', {
+        'checksums': ['89f130e0e1163328c01decd54e7712b5ebf3d0a667da0052833722cb9a6e90b0'],
+    }),
+    (_packagename, version, {
+        'source_urls': [ 'https://github.com/tbenavi1/%(namelower)s/archive/refs/tags'],
+        'sources': [{'download_filename': 'v%(version)s.tar.gz', 'filename': '%(name)s-%(version)s.tar.gz'}],
+        'checksums': ['40d310c0024f67d880e9f072d4fbf1c75c644e63ea5699f57ea9e71a52e3a6b2'],
+        'postinstallcmds': [
+            "cp genomescope.R %(installdir)s/",  # in the repository tarball but not in the package
+        ],
+    }),
+]
+
+sanity_check_paths = {
+    'files': [ 'genomescope.R' ],
+    'dirs':  [ ],
+}
+
+sanity_check_cmds = [
+    'genomescope.R --help',
+    #'wget --quiet https://raw.githubusercontent.com/schatzlab/genomescope/master/analysis/real_data/ara_F1_21.hist && ' +
+    #    'genomescope.R -i ara_F1_21.hist -k 21 -o output | grep -F "Model converged het:0.0104 kcov:22.2"'
+]
+
+modextrapaths = {
+    'PATH': '',
+    'R_LIBS_SITE': '',
+}
+
+moduleclass = 'bio'
+
+

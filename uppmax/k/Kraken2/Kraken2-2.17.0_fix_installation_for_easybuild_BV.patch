@@ -1,0 +1,124 @@
+diff -ruN kraken2-2.17.0.orig/scripts/k2 kraken2-2.17.0/scripts/k2
+--- kraken2-2.17.0.orig/scripts/k2	2025-11-05 03:53:38.000000000 +0100
++++ kraken2-2.17.0/scripts/k2	2025-11-20 13:48:26.302774000 +0100
+@@ -431,7 +431,7 @@
+     ) as pool:
+         with open("manifest.txt", "r") as in_file:
+             tarballs = in_file.readlines()
+-        f = functools.partial(
++        wrapped_func = functools.partial(
+             wrap_with_globals, extract_blast_db_files,
+             LOG.get_queue(), LOG.get_level(),
+             SCRIPT_PATHNAME
+@@ -442,7 +442,7 @@
+         )
+         for tarball in tarballs:
+             tarball = os.path.abspath(tarball)
+-            f = pool.submit(extract_blast_db_files, tarball.strip())
++            f = pool.submit(wrapped_func, tarball.strip())
+             extraction_futures.append(f)
+         for future in concurrent.futures.as_completed(extraction_futures):
+             result = future.result()
+@@ -4214,12 +4214,17 @@
+         input = list(zip(file1.readlines(), file2.readlines()))
+     input_len = len(input)
+     partition_ranges = list(range(0, input_len, int(input_len / args.threads)))
+-    partition_ranges[-1] = input_len
++    partition_ranges.append(input_len)
+     job_number = 0
+     futures = []
++    wrapped_func = functools.partial(
++        wrap_with_globals, merge_classification_output2,
++        LOG.get_queue(), LOG.get_level(),
++        SCRIPT_PATHNAME
++    )
+     for start, end in zip(partition_ranges, partition_ranges[1:]):
+         future = pool.submit(
+-            merge_classification_output2, taxonomy_pathname,
++            wrapped_func, taxonomy_pathname,
+             input[start:end], job_number, use_names, args,
+             save_seq_names, final
+         )
+Binary files kraken2-2.17.0.orig/src/aa_translate.o and kraken2-2.17.0/src/aa_translate.o differ
+Binary files kraken2-2.17.0.orig/src/blast_defline.o and kraken2-2.17.0/src/blast_defline.o differ
+Binary files kraken2-2.17.0.orig/src/blast_to_fasta and kraken2-2.17.0/src/blast_to_fasta differ
+Binary files kraken2-2.17.0.orig/src/blast_to_fasta.o and kraken2-2.17.0/src/blast_to_fasta.o differ
+Binary files kraken2-2.17.0.orig/src/blast_utils.o and kraken2-2.17.0/src/blast_utils.o differ
+Binary files kraken2-2.17.0.orig/src/build_db and kraken2-2.17.0/src/build_db differ
+Binary files kraken2-2.17.0.orig/src/build_db.o and kraken2-2.17.0/src/build_db.o differ
+Binary files kraken2-2.17.0.orig/src/classify and kraken2-2.17.0/src/classify differ
+Binary files kraken2-2.17.0.orig/src/classify.o and kraken2-2.17.0/src/classify.o differ
+Binary files kraken2-2.17.0.orig/src/compact_hash.o and kraken2-2.17.0/src/compact_hash.o differ
+Binary files kraken2-2.17.0.orig/src/dump_table and kraken2-2.17.0/src/dump_table differ
+Binary files kraken2-2.17.0.orig/src/dump_table.o and kraken2-2.17.0/src/dump_table.o differ
+Binary files kraken2-2.17.0.orig/src/estimate_capacity and kraken2-2.17.0/src/estimate_capacity differ
+Binary files kraken2-2.17.0.orig/src/estimate_capacity.o and kraken2-2.17.0/src/estimate_capacity.o differ
+Binary files kraken2-2.17.0.orig/src/hyperloglogplus.o and kraken2-2.17.0/src/hyperloglogplus.o differ
+Binary files kraken2-2.17.0.orig/src/k2mask and kraken2-2.17.0/src/k2mask differ
+Binary files kraken2-2.17.0.orig/src/k2mask.o and kraken2-2.17.0/src/k2mask.o differ
+Binary files kraken2-2.17.0.orig/src/libtax.o and kraken2-2.17.0/src/libtax.o differ
+Binary files kraken2-2.17.0.orig/src/libtax.so and kraken2-2.17.0/src/libtax.so differ
+Binary files kraken2-2.17.0.orig/src/lookup_accession_numbers and kraken2-2.17.0/src/lookup_accession_numbers differ
+Binary files kraken2-2.17.0.orig/src/lookup_accession_numbers.o and kraken2-2.17.0/src/lookup_accession_numbers.o differ
+diff -ruN kraken2-2.17.0.orig/src/Makefile kraken2-2.17.0/src/Makefile
+--- kraken2-2.17.0.orig/src/Makefile	2025-11-05 03:53:38.000000000 +0100
++++ kraken2-2.17.0/src/Makefile	2025-11-20 15:44:23.038271000 +0100
+@@ -1,12 +1,12 @@
+ CXX ?= g++
+ KRAKEN2_SKIP_FOPENMP ?= -fopenmp
+-CXXFLAGS = $(KRAKEN2_SKIP_FOPENMP) -Wall -std=c++11 -O3 -fPIC
++CXXFLAGS ?= $(KRAKEN2_SKIP_FOPENMP) -Wall -std=c++11 -O3 -fPIC
+ CXXFLAGS += -DLINEAR_PROBING
+ CFLAGS = -Wall -std=c99 -O0 -g3
+ 
+ .PHONY: all clean install
+ 
+-PROGS = estimate_capacity build_db classify dump_table lookup_accession_numbers k2mask blast_to_fasta libtax
++PROGS = estimate_capacity build_db classify dump_table lookup_accession_numbers k2mask blast_to_fasta libtax.so
+ 
+ all: $(PROGS)
+ 
+@@ -39,27 +39,27 @@
+ blast_utils.o: blast_utils.c
+ 
+ build_db: build_db.o mmap_file.o compact_hash.o taxonomy.o seqreader.o mmscanner.o omp_hack.o utilities.o
+-	$(CXX) $(CXXFLAGS) -o $@ build_db.o mmap_file.o compact_hash.o taxonomy.o seqreader.o mmscanner.o omp_hack.o utilities.o
++	$(CXX) $(CXXFLAGS) -o $@ build_db.o mmap_file.o compact_hash.o taxonomy.o seqreader.o mmscanner.o omp_hack.o utilities.o $(LDFLAGS)
+ 
+ classify: classify.o reports.o hyperloglogplus.o mmap_file.o compact_hash.o taxonomy.o seqreader.o mmscanner.o omp_hack.o aa_translate.o utilities.o
+-	$(CXX) $(CXXFLAGS) -o $@ classify.o reports.o hyperloglogplus.o mmap_file.o compact_hash.o taxonomy.o seqreader.o mmscanner.o omp_hack.o aa_translate.o utilities.o
++	$(CXX) $(CXXFLAGS) -o $@ classify.o reports.o hyperloglogplus.o mmap_file.o compact_hash.o taxonomy.o seqreader.o mmscanner.o omp_hack.o aa_translate.o utilities.o $(LDFLAGS)
+ 
+ estimate_capacity: estimate_capacity.o seqreader.o mmscanner.o omp_hack.o utilities.o
+-	$(CXX) $(CXXFLAGS) -o $@ estimate_capacity.o seqreader.o mmscanner.o omp_hack.o utilities.o
++	$(CXX) $(CXXFLAGS) -o $@ estimate_capacity.o seqreader.o mmscanner.o omp_hack.o utilities.o $(LDFLAGS)
+ 
+ dump_table: dump_table.o mmap_file.o compact_hash.o omp_hack.o taxonomy.o reports.o hyperloglogplus.o
+-	$(CXX) $(CXXFLAGS) -o $@ dump_table.o mmap_file.o compact_hash.o omp_hack.o taxonomy.o reports.o hyperloglogplus.o
++	$(CXX) $(CXXFLAGS) -o $@ dump_table.o mmap_file.o compact_hash.o omp_hack.o taxonomy.o reports.o hyperloglogplus.o $(LDFLAGS)
+ 
+ lookup_accession_numbers: lookup_accession_numbers.o mmap_file.o omp_hack.o utilities.o
+-	$(CXX) $(CXXFLAGS) -o $@ lookup_accession_numbers.o mmap_file.o omp_hack.o utilities.o
++	$(CXX) $(CXXFLAGS) -o $@ lookup_accession_numbers.o mmap_file.o omp_hack.o utilities.o $(LDFLAGS)
+ 
+ k2mask: k2mask.o seqreader.o
+-	$(CXX) $(CXXFLAGS) -o $@ k2mask.o seqreader.o -lz -pthread -L/usr/local/lib -lprofiler
++	$(CXX) $(CXXFLAGS) -o $@ k2mask.o seqreader.o $(LDFLAGS) -lz -pthread
+ 
+ blast_to_fasta: blast_to_fasta.o blast_defline.o blast_utils.o
+-	$(CC) $(CFLAGS) -o  $@  blast_to_fasta.o blast_utils.o blast_defline.o -lm -lc
++	$(CC) $(CFLAGS) -o  $@  blast_to_fasta.o blast_utils.o blast_defline.o $(LDFLAGS) -lm -lc
+ 
+ libtax.o: libtax.cc
+ 
+-libtax: taxonomy.o mmap_file.o libtax.o
+-	$(CXX) $(CXXFLAGS) -shared -o libtax.so taxonomy.o mmap_file.o libtax.o
++libtax.so: taxonomy.o mmap_file.o libtax.o
++	$(CXX) $(CXXFLAGS) -shared -o libtax.so taxonomy.o mmap_file.o libtax.o $(LDFLAGS)
+Binary files kraken2-2.17.0.orig/src/mmap_file.o and kraken2-2.17.0/src/mmap_file.o differ
+Binary files kraken2-2.17.0.orig/src/mmscanner.o and kraken2-2.17.0/src/mmscanner.o differ
+Binary files kraken2-2.17.0.orig/src/omp_hack.o and kraken2-2.17.0/src/omp_hack.o differ
+Binary files kraken2-2.17.0.orig/src/reports.o and kraken2-2.17.0/src/reports.o differ
+Binary files kraken2-2.17.0.orig/src/seqreader.o and kraken2-2.17.0/src/seqreader.o differ
+Binary files kraken2-2.17.0.orig/src/taxonomy.o and kraken2-2.17.0/src/taxonomy.o differ
+Binary files kraken2-2.17.0.orig/src/utilities.o and kraken2-2.17.0/src/utilities.o differ

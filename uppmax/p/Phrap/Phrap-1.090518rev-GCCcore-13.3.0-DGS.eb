@@ -1,0 +1,88 @@
+easyblock = "MakeCp"
+
+name = 'Phrap'
+version = '1.090518rev'
+
+homepage = 'http://www.phrap.org/phredphrapconsed.html#block_phrap'
+
+_executables = [ 'calf_merge', 'cluster', 'cross_match', 'loco', 'phrap', 'phrapview', 'swat', ]
+_matrices    = [ 'PAM250', 'BLOSUM62', 'BLOSUM50', 'mat50', 'mat70', 'mb_matrix', 'penalty2', ] # scoring matrices
+_seqs        = [ 'vector.seq', ]  # vector sequences
+_doc         = [ 'phrap.doc', 'general.doc', 'swat.doc', ]
+
+description = f"""
+Phrap is a program for assembling shotgun DNA sequence data.  Cross_match compares pairs
+of DNA sequences. Swat searches a DNA sequence against a database.
+
+Available executables are
+
+   {' '.join(_executables)}
+
+Scoring matrices are available in %(installdir)s/data/ and include 
+
+   {' '.join(_matrices)}
+
+Vector sequences are available in %(installdir)s/data/{_seqs[0]}
+
+Documentation is available in %(installdir)s/doc/ and at the website
+
+"""
+
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+toolchainopts = { 'opt' : True, 'cstd': 'c89'}
+
+download_instructions = """
+For academic/non-profit sites, obtaining the source code for %(name)s requires emailing an
+agreement to request the latest version of this software.  For commercial installations, a
+licence fee must be paid.
+
+    http://www.phrap.org/consed/consed.html#howToGet
+
+For %(name)s, the agreement is filled out as instructed there, and emailed to phg (at) u.washington.edu.
+A tarball containing the course code will be emailed back as an attachment named distrib.tar.gz.
+The version of the software will be included in the response email.
+
+Rename distrib.tar.gz to %(name)s-%(version)s-distrib.tar.gz prior to installing with this easyconfig.
+
+Note that a requirement of the license is that the permissions for the executables include o-r so that
+the executables can be run but not copied.
+"""
+
+sources = [ '%(name)s-%(version)s-distrib.tar.gz' ]
+checksums = [
+    { '%(name)s-%(version)s-distrib.tar.gz' : 'a0f16e02fb9c817f9b043d43c10bb66a9866fb0e46ad18888e8ac17e6617b23a' },
+]
+
+builddependencies = [
+    ('binutils', '2.42'),
+]
+
+dependencies = [
+    ('Perl', '5.38.2'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+fix_perl_shebang_for = [ 'phrapview' ]  # I assume this is before the copy?
+
+files_to_copy = [
+	(_executables, 'bin'),
+	(_matrices,    'data'),
+	(_seqs,        'data'),
+	(_doc,         'doc'),
+]
+
+postinstallcmds = [ 'chmod o-r %%(installdir)s/bin/%s' % x for x in _executables ]
+
+sanity_check_paths = {
+    'files': [ 'bin/%s' % x for x in [ 'phrap', 'cross_match', 'swat' ] ],
+    'dirs': [ 'doc', 'data']
+}
+
+sanity_check_commands = [ "cross_match | grep -F '%(version)s'", ]
+
+moduleclass = 'bio'
+

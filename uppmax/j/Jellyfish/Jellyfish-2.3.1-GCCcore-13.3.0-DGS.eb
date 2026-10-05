@@ -1,0 +1,56 @@
+##
+# This is a contribution from DeepThought HPC Service, Flinders University, Adelaide, Australia
+# Homepage:     https://staff.flinders.edu.au/research/deep-thought
+#
+# Authors::     Robert Qiao <rob.qiao@flinders.edu.au>
+# License::     GPLv3.0
+#
+#################################
+# Douglas Scofield UPPMAX 02/2026
+# - check for libraries
+# - MANPATH set (automatically)
+# - lower toolchain
+#################################
+
+easyblock = 'ConfigureMake'
+
+name = 'Jellyfish'
+version = '2.3.1'
+
+homepage = 'http://www.genome.umd.edu/jellyfish.html'
+description = "Jellyfish is a tool for fast, memory-efficient counting of k-mers in DNA."
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+source_urls = ['https://github.com/gmarcais/Jellyfish/releases/download/v%(version)s']
+sources = [SOURCELOWER_TAR_GZ]
+checksums = ['ee032b57257948ca0f0610883099267572c91a635eecbd88ae5d8974c2430fcd']
+
+builddependencies = [
+    ('binutils', '2.42'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+maxparallel = 1
+
+# The tests for the Bloom filter are statistical tests and can randomly fail,
+# they actually don't make a lot of sense
+runtest = "check GTEST_FILTER=-'*Bloom*'"
+
+postinstallcmds = ["cp config.h %(installdir)s/include/%(namelower)s-%(version)s/%(namelower)s/"]
+
+sanity_check_paths = {
+    'files': [ 'bin/jellyfish', 'lib/libjellyfish-2.0.a', 'lib/libjellyfish-2.0.la',
+               'lib/libjellyfish-2.0.%s' % SHLIB_EXT, ],
+    'dirs': [ 'lib/pkgconfig' ]
+}
+
+modextrapaths = {
+    MODULE_LOAD_ENV_HEADERS: 'include/%(namelower)s-%(version)s',
+    #'MANPATH': 'share/man',  # unneeded, EB detects the presence of share/man/man1/jellyfish.1
+}
+
+moduleclass = 'bio'

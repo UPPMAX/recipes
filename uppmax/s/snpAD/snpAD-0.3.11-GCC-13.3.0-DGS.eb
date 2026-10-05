@@ -1,0 +1,75 @@
+# Douglas Scofield UPPMAX 03/2026
+# - new tool
+# - UPPMAX bioinfo toolchain 2024a
+#
+# NOTE: Source needs to be fetched with 'eb --insecure-download'
+#################################
+
+easyblock = "ConfigureMake"
+
+name = 'snpAD'
+version = '0.3.11'
+
+homepage = 'https://github.com/szpiech/selscan'
+homepage = 'https://bioinf.eva.mpg.de/snpAD/'
+description = """snpAD - an ancient-DNA aware genotyper
+
+snpAD implements an iterative method to jointly estimate error rates and
+genotypes frequencies from the data. These estimates are used in a second step
+to calculate the posterior probabilities for each genotype and produce a VCF
+file.
+"""
+
+toolchain = {'name': 'GCC', 'version': '13.3.0'}
+toolchainopts = {'opt': True, 'cstd': 'c++11'}
+
+source_urls = [ 'https://bioinf.eva.mpg.de/snpAD' ]
+sources = [ '%(name)s-%(version)s.tar.gz' ]
+patches = [ '%(name)s-%(version)s_use-EB-dependencies-etc.patch' ]
+checksums = [{
+    '%(name)s-%(version)s.tar.gz': '9f068b5bfccd5f10b579d57ef56336e60e504b8304564d8808e9ca7b5802d371',
+    '%(name)s-%(version)s_use-EB-dependencies-etc.patch': 'e324f0e90194be905bf87d6e7e22c929adbc42b4ec78d06fde0806ce371fb545',
+}]
+
+dependencies = [
+    ('zlib', '1.3.1'),
+    ('BamTools', '2.5.2'),
+    ('popt', '1.19'),
+    ('NLopt', '2.7.1'),
+]
+
+local_linkdependencies = [
+    #('zlib', '1.3.1'),  # gunzip must remain in PATH
+    ('BamTools', '2.5.2'),
+    ('popt', '1.19'),
+    ('NLopt', '2.7.1'),
+    toolchain,
+]
+
+skipsteps = [ 'configure' ]
+
+install_cmd = 'make PREFIX=%(install_dir)s install'
+
+modextrapaths = {
+    'MANPATH': 'share/man',
+}
+
+_scripts = [ 'reservoir_sampling.pl', 'run_windows.pl', ]
+_bins = [ 'Bam2snpAD', 'snpAD', 'snpADCall', 'snpADci', 'snpADjoin', 'snpADll', ]
+
+sanity_check_paths = {
+    'files': [ 'bin/%s' % x for x in _scripts + _bins ],
+    'dirs': [ 'share/man/man1' ]
+}
+
+sanity_check_commands = [
+    "snpAD --version | grep -F '%(name)s %(version)s'",
+    "snpADCall --version | grep -F '%(name)s %(version)s'",
+    'snpADci --usage',
+    'snpADll --usage',
+    "Bam2snpAD --version | grep -F '%(name)s %(version)s'",
+    'snpADjoin',
+    'run_windows.pl --help',
+]
+
+moduleclass = 'bio'

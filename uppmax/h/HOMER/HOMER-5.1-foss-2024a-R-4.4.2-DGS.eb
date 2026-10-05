@@ -1,0 +1,68 @@
+# Douglas Scofield UPPMAX 02/2026
+# - make the configureHomer.pl script available to users
+# - install several datasets by default
+# - let users know about them
+#################################
+
+easyblock = 'Binary'
+
+name = 'HOMER'
+version = '5.1'
+versionsuffix = '-R-%(rver)s'
+
+homepage = "http://homer.ucsd.edu/homer/"
+description = """HOMER (Hypergeometric Optimization of Motif EnRichment) is a suite of tools for Motif Discovery and
+ next-gen sequencing analysis.  It is a collection of command line programs for unix-style operating systems written
+ in Perl and C++. HOMER was primarily written as a de novo motif discovery algorithm and is well suited for finding
+ 8-20 bp motifs in large scale genomics data.  HOMER contains many useful tools for analyzing ChIP-Seq, GRO-Seq,
+ RNA-Seq, DNase-Seq, Hi-C and numerous other types of functional genomics sequencing data sets."""
+
+toolchain = {'name': 'foss', 'version': '2024a'}
+
+source_urls = ['http://homer.ucsd.edu/homer']
+sources = ['configureHomer.pl']
+checksums = ['ccdaa3004a0e0df0882634671d4a1acc88364761e0e6c7ea329ebbf1eb729537']
+
+builddependencies = [
+    ('wget', '1.25.0'),
+    ('Zip', '3.0'),
+    ('UnZip', '6.0'),
+]
+
+dependencies = [
+    ('Perl', '5.38.2'),
+    ('R', '4.4.2'),
+    ('SAMtools', '1.21.1'),
+    ('R-bundle-Bioconductor', '3.20', versionsuffix)
+]
+
+postinstallcmds = [
+    "cd %(installdir)s && chmod +x configureHomer.pl && ./configureHomer.pl -install homer -version v%(version)s",
+    "cd %(installdir)s && chmod +x configureHomer.pl",
+]
+
+modextrapaths = {
+    'PATH': '',  # so users can pick up the configureHomer.pl script
+}
+
+modloadmsg = "%(name)s/%(version)s: to see locally available datasets, do 'configureHomer.pl -list'"
+
+sanity_check_paths = {
+    'files': [
+        'bin/homer',
+        'bin/getGenomeTilingPeaks',
+        'config.txt',
+        'DoughnutDocumentation.pdf',
+        'data/accession/homologene.data',
+        'motifs/hnf1b.motif',
+    ],
+    'dirs': ['bin', 'data', 'motifs', 'update'],
+}
+
+sanity_check_commands = [
+    "%(namelower)s --help",
+    "configureHomer.pl -install hg38 hg19 mm9 mm10 rice.IRGSP-1.0 AGPv3 tair10 mouse-p arabidopsis-p human-p selaginella tomato volvox arabidopsis-o corn patens rice chlamy mushroom ncrassa ascomycetes pseudonana zebrafish-o zebrafish-p patens.ASM242v1 corn.AGPv3 ce10 ce11 ce6 worm-p worm-o canFam3 canFam6 dog rat-o rhesus rat-p fly-p fly-o rn6 rn7 danRer10 danRer11 dm6",
+]
+
+moduleclass = 'bio'
+

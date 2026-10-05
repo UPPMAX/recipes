@@ -1,0 +1,31 @@
+# Douglas G Scofield UPPMAX 8/2025
+# - new tool
+###################################
+
+easyblock = 'Tarball'
+
+name = 'ATSAS'
+version = '3.2.1-1'
+
+homepage = 'https://www.embl-hamburg.de/biosaxs/software.html'
+description = """A program suite for small-angle scattering data analysis from biological macromolecules."""
+
+toolchain = SYSTEM
+
+# Academic users can get permission to download the tarball from https://www.embl-hamburg.de/biosaxs/download.html
+
+local_osrelease = 'el8'  # also CentOS 7, Debian, Ubuntu, MacOS, Windows releases, see above download website
+
+sources = [ '%%(name)s-%%(version)s.%s.x86_64.tar.gz' % local_osrelease ]
+checksums = [ '148812cf291a5a8626ced2dc1beb5be388785f46b62c6ecfa2a8d070e5421017' ]
+
+sanity_check_paths = {
+    'files': [
+        'bin/%s' % x for x in ['bodies', 'dammix', 'glycosylation', 'oligomer', 'primus']
+    ],
+    'dirs': [ 'lib64/atsas', 'pymolplugins', 'share' ],
+}
+
+sanity_check_commands = [ 'bodies --help' ]
+
+moduleclass = 'bio'

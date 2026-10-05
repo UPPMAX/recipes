@@ -1,0 +1,123 @@
+# Douglas G Scofield UPPMAX 02/2026
+# - resurrect for BUSCO/3.0.2a
+# - UPPMAX bioinfo toolchain 2024a
+# - lower toolchain to gfbf-2024a since that's what SuiteSparse really needs, which is also lowered
+# - no need for python
+# - install man pages
+# - note about user-settable config directory
+# - new patch to clean up builds, build additional tools, etc, see AUGUSTUS-3.2.3_enable-older-tools-use-EB-deps.patch
+#   - replaces previous patch file AUGUSTUS-3.2.3_fix-hardcoding.patch
+# - note that checkTargetSortedness requires SAMtools/0.1.20, see prebuildopts
+###################################
+
+easyblock = 'ConfigureMake'
+
+name = 'AUGUSTUS'
+version = '3.2.3'
+
+homepage = 'http://bioinf.uni-greifswald.de/augustus/'
+description = "AUGUSTUS is a program that predicts genes in eukaryotic genomic sequences"
+
+toolchain = {'name': 'gfbf', 'version': '2024a'}
+
+_gcctoolchain = '-GCC-13.3.0' # the appropriate toolchain for SAMtools/0.1.20-TOOLCHAIN, must be fully specified in module load below
+
+usage = """The default %(name)s config path is %(installdir)s/config and is also
+provided in the AUGUSTUS_CONFIG_PATH environment variable.
+
+To make your own writable copy of the config/ in the current directory, which is required to train
+a new species or augment existing models, copy the directory and make the copy writable with:
+
+    cp -dR --preserve=mode,timestamps --no-preserve=ownership $AUGUSTUS_CONFIG_PATH %(name)s_config
+    chmod -R +w %(name)s_config
+
+and set the AUGUSTUS_CONFIG_PATH environment variable to this location:
+
+    export AUGUSTUS_CONFIG_PATH=$PWD/%(name)s_config
+
+The config directory contains precomputed training data as well as your own de novo training results.
+So, you probably do not want to recreate this each time you use %(name)s.  However, do ensure that
+AUGUSTUS_CONFIG_PATH is set to this location each time:
+
+    export AUGUSTUS_CONFIG_PATH=<my AUGUSTUS config location>/%(name)s_config
+"""
+
+source_urls = [
+    'http://bioinf.uni-greifswald.de/augustus/binaries/',
+    'http://bioinf.uni-greifswald.de/augustus/binaries/old/',
+]
+sources = [SOURCELOWER_TAR_GZ]
+patches = [ 'AUGUSTUS-%(version)s_enable-older-tools-use-EB-deps.patch' ]
+checksums = [{
+    'augustus-%(version)s.tar.gz': 'a1af128aefd228dea0c46d6f5234910fdf068a2b9133175ca8da3af639cb4514',
+    'AUGUSTUS-%(version)s_enable-older-tools-use-EB-deps.patch': 'b7e4ae2e207a886da872c993aeb754a4040d688594fa74ad5cac298d93016634',
+}]
+
+builddependencies = [
+    ('SAMtools', '1.3.1'),  # links to static library libbam.a
+    ('HTSlib', '1.3.2'),    # links to static library libhts.a
+    ('BamTools', '2.5.2'),  # links to static library libbamtools.a
+]
+
+dependencies = [
+    ('Perl', '5.38.2'),              # scripts/
+    ('Perl-bundle-CPAN', '5.38.2'),  # scripts/
+    ('zlib', '1.3.1'),
+    ('SQLite', '3.45.3'),
+    ('GSL', '2.8'),
+    ('Boost', '1.85.0'),
+    ('SuiteSparse', '7.10.1'),
+    ('lpsolve', '5.5.2.11'),
+]
+
+local_linkdependencies = [
+    ('zlib', '1.3.1'),
+    ('SQLite', '3.45.3'),
+    ('GSL', '2.8'),
+    ('Boost', '1.85.0'),
+    ('SuiteSparse', '7.10.1'),
+    ('lpsolve', '5.5.2.11'),
+    toolchain,
+]
+
+skipsteps = ['configure']
+
+# one of the auxiliary programs needs to be built against SAMtools/0.1.20 and links with its static libbam.a
+prebuildopts = "unset LDFLAGS && unset LIBS && sed -i 's/@TOOLCHAIN@/" + _gcctoolchain + "/' auxprogs/Makefile && "
+buildopts = 'COMPGENEPRED=true SQLITE=true ZIPINPUT=true CXX="$CXX"'
+installopts = 'INSTALLDIR=%(installdir)s'
+postinstallcmds = [
+    # read-protect the config directory
+    "chmod -R -w %(installdir)s/config",
+    # install the man pages
+    "mkdir -p %(installdir)s/share/man/man1 && cp -r %(builddir)s/%(namelower)s-%(version)s/mansrc/*.1 %(installdir)s/share/man/man1/",
+]
+
+_allbin = ( 'aln2wig', 'augustus', 'bam2hints', 'bam2wig', 'checkTargetSortedness',
+         'compileSpliceCands', 'espoca', 'etraining', 'fastBlockSearch', 'filterBam',
+         'getSeq', 'homGeneMapping', 'joingenes', 'load2sqlitedb', 'prepareAlign', )
+_somescripts = ( 'filterGenes.pl', 'gtf2gff.pl', 'joinPeptides.pl', )
+
+fix_perl_shebang_for = [ 'scripts/*.pl' ]
+
+sanity_check_paths = {
+    'files': [ 'bin/%s' % x for x in _allbin ] + [ 'scripts/%s' % x for x in _somescripts ],
+    'dirs': ['config', 'scripts'],
+}
+
+sanity_check_commands = [ "augustus --version 2>&1 | grep -F '%(name)s (%(version)s) is a gene prediction tool'" ]
+
+modextrapaths = {
+    'PATH': 'scripts',
+    'MANPATH': 'share/man',
+}
+modextravars = {
+    'AUGUSTUS_BIN_PATH': '%(installdir)s/bin',
+    'AUGUSTUS_CONFIG_PATH': '%(installdir)s/config',
+    'AUGUSTUS_SCRIPTS_PATH': '%(installdir)s/scripts',
+}
+
+modloadmsg  = "%(name)s/%(version)s: A read-only config directory is at $AUGUSTUS_CONFIG_PATH. See"
+modloadmsg += " 'module help %(name)s/%(version)s' for guidance to create your own writable copy."
+
+moduleclass = 'bio'

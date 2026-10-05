@@ -1,0 +1,88 @@
+# Douglas G Scofield UPPMAX 8/2025
+# - update purge_dups version
+# - use gfbf toolchain because matplotlib uses gfbf
+# - upgrade dependencies; zlib unnecessary provided by gfbf
+# - update PATCH version from 5 to 6 in its src/version.h and sanity-check the version
+# - KMC and runner versions are already the latest and remain the same
+# - KMC
+#   - contains older pybind11 include files which access internal structures hidden
+#     in Python >= 3.11 so point its build at pybind11/2.13.6 files instead which fix this
+#   - remove -static
+#######################################
+easyblock = 'PythonBundle'
+
+name = 'purge_dups'
+version = '1.2.6'
+
+homepage = 'https://github.com/dfguan/purge_dups'
+description = """purge_dups is designed to remove haplotigs and contig overlaps in a de novo assembly based on read depth."""
+
+toolchain = {'name': 'gfbf', 'version': '2024a'}
+
+builddependencies = [
+    ('pybind11',   '2.13.6'),  # must be this version to fix API calls vs python 3.12
+]
+
+dependencies = [
+    ('Python',     '3.12.3'),
+    ('matplotlib', '3.9.2'),
+    ('minimap2',   '2.29'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+default_easyblock = 'MakeCp'
+
+components = [
+    (name, version, {
+        'source_urls': ['https://github.com/dfguan/purge_dups/archive/refs/tags/'],
+        'sources': [{'download_filename': 'v%(version)s.tar.gz', 'filename': SOURCE_TAR_GZ}],
+        'checksums': ['75b20df834d28410858ccd4e2d65b6c70849f3cbe5fc05959f38bfc2d041c704'],
+        'start_dir': 'purge_dups-%(version)s',
+        'prebuildopts': "cd src && sed -i 's/define PATCH 5/define PATCH 6/' version.h && ",
+        'buildopts': 'CC="$CC" CFLAGS="$CFLAGS"',
+        'files_to_copy': ['bin', 'scripts'],
+    }),
+    ('KMC', '20190629', {
+        'source_urls': ['https://github.com/dfguan/KMC/archive/'],
+        'sources': [{'download_filename': 'c05a5f9.tar.gz', 'filename': SOURCE_TAR_GZ}],
+        'checksums': ['7251941f4b1913bfdd68759d9292b419d95fe7c63815056e15ecb097a12a0bc4'],
+        'prebuildopts': "cd KMC-* && sed -i -e 's@-I $(PY_KMC_API_DIR)/libs/pybind11/include@-I ${EBROOTPYBIND11}/include@' -e 's/ -static / /g' makefile && ",
+        'buildopts': 'CC="$CXX"',
+        'files_to_copy': [(['KMC-*/bin/*kmc*'], 'bin'), 'KMC-*/spectra.py'],
+    }),
+]
+
+exts_list = [
+    ('runner', '20191220', {
+        'sources': [{
+            'git_config': {
+                'url': 'https://github.com/dfguan/',
+                'repo_name': 'runner',
+                'commit': '73a4d11',
+            },
+            'filename': 'runner-%(version)s.tar.gz',
+        }],
+        'checksums': [None],
+        'preinstallopts': "sed -i 's/0.0.0/%(version)s/g' setup.py && "
+    }),
+]
+
+sanity_check_paths = {
+    'files': ['bin/kmc', 'bin/purge_dups'],
+    'dirs': ['scripts'],
+}
+
+sanity_check_commands = [
+    "purge_dups -h 2>&1 | grep 'Program: purge_dups'",
+    "purge_dups -h 2>&1 | grep -F 'Version: %(version)s'",
+    "kmc --help",
+    "run_purge_dups.py -h",
+    "hist_plot.py -h",
+]
+
+modextrapaths = {'PATH': 'scripts'}
+
+moduleclass = 'bio'

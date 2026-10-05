@@ -1,0 +1,43 @@
+# Douglas G Scofield UPPMAX 6/2025
+# - new tool
+# - BinariesTarball may not be best easyblock for a github tarball containing a script and other files to be copied, not built
+##############################
+
+easyblock = 'BinariesTarball'
+
+name = 'READv2'
+version = '2.1.1'
+
+homepage = 'https://github.com/GuntherLab/READv2'
+description = """Relationship Estimation from Ancient DNA version 2.  Run using 'READ2.py'"""
+
+toolchain = {'name': 'gfbf', 'version': '2024a'}
+
+github_account = 'GuntherLab';
+source_urls = [ GITHUB_SOURCE + '/refs/tags' ]
+sources = ['%(version)s.tar.gz']
+checksums = ['5432fb3d6f5410d89685ec59749fb3dc4be20ded9fc968b5210c7c37d3ae5667']
+
+dependencies = [
+    ('Python', '3.12.3'),
+    ('plinkio', '0.9.8'),
+    ('SciPy-bundle', '2024.05'),
+    ('matplotlib', '3.9.2'),
+]
+
+local_linkdependencies = [ ]
+
+postinstallcmds = [
+    'mkdir %(installdir)s/example && mv %(installdir)s/bin/Srubnaya.* %(installdir)s/example/',
+    'mv %(installdir)s/bin/{LICENSE,README.md} %(installdir)s',
+    'chmod -x %(installdir)s/{LICENSE,README.md} %(installdir)s/example/*'
+]
+
+sanity_check_paths = {
+    'files': [ 'bin/READ2.py', 'LICENSE', 'README.md' ],
+    'dirs' : [ 'example' ],
+}
+
+sanity_check_commands = ['READ2.py --help']
+
+moduleclass = 'bio'

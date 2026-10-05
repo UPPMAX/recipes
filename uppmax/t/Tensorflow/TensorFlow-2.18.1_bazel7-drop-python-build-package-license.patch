@@ -1,0 +1,11 @@
+diff -ruN tensorflow-2.18.1.orig/tensorflow/python/BUILD tensorflow-2.18.1.work/tensorflow/python/BUILD
+--- tensorflow-2.18.1.orig/tensorflow/python/BUILD	2025-03-07 23:33:29.000000000 +0100
++++ tensorflow-2.18.1.work/tensorflow/python/BUILD	2026-04-13 11:38:36.088666267 +0200
+@@ -60,7 +60,6 @@
+ package(
+     # copybara:uncomment default_applicable_licenses = ["//tensorflow:license"],
+     default_visibility = visibility,
+-    licenses = ["notice"],
+ )
+ 
+ # Description:

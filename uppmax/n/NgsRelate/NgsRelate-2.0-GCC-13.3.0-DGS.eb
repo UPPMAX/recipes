@@ -1,0 +1,55 @@
+# Douglas G Scofield 12/2025 UPPMAX
+# - new tool
+# - use UPPMAX bioinfo toolchain 2024a
+
+easyblock = 'MakeCp'
+
+name = 'NgsRelate'
+version = '2.0'
+
+homepage = 'https://github.com/ANGSD/NgsRelate'
+description = """NgsRelate can be used to infer relatedness, inbreeding coefficients and many
+other summary statistics for pairs of individuals from low coverage Next
+Generation Sequencing (NGS) data by using genotype likelihoods instead of
+called genotypes. To be able to infer the relatedness you will need to know the
+population allele frequencies and have genotype likelihoods. This can be
+obtained e.g. using the program angsd.  VCF/BCF files can also be parsed."""
+
+toolchain = {'name': 'GCC', 'version': '13.3.0'}
+
+github_account = 'ANGSD'
+source_urls = [GITHUB_SOURCE]
+sources = ['v%(version)s.tar.gz']
+checksums = ['f2c20228720298d6ef2fd34324449ba7ebdd4b987477c78bd20ed99f176218c6']
+
+dependencies = [
+    ('zlib',   '1.3.1'),
+    ('bzip2',  '1.0.8'),
+    ('XZ',     '5.4.5'),
+    ('HTSlib', '1.21.1'),
+]
+
+local_linkdependencies = [
+    ('zlib',   '1.3.1'),
+    ('bzip2',  '1.0.8'),
+    ('XZ',     '5.4.5'),
+    ('HTSlib', '1.21.1'),
+    toolchain,
+]
+
+buildopts = "HTSSRC="  # make sure this is empty, to use the HTSlib module
+
+files_to_copy = [
+    (['ngsRelate'], 'bin'),
+]
+
+sanity_check_paths = {
+    'files': ['bin/ngsRelate'],
+    'dirs': [],
+}
+
+test_cmd = 'make test'
+
+sanity_check_commands = ['ngsRelate']
+
+moduleclass = 'bio'

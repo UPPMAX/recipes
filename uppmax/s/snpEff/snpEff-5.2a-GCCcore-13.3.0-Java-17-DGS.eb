@@ -1,0 +1,68 @@
+# Douglas Scofield UPPMAX 04/2026
+# - use older version that can be used with Java-17
+# - UPPMAX bioinfo toolchain 2024a
+# - use of snpEff_data/5.4a
+####################################
+
+easyblock = 'Tarball'
+
+name = 'snpEff'
+version = '5.2a'
+_dataversion = '5.4a'
+versionsuffix = '-Java-%(javaver)s'
+
+homepage = 'https://pcingola.github.io/SnpEff/'
+description = """SnpEff is a variant annotation and effect prediction tool.
+ It annotates and predicts the effects of genetic variants (such as amino acid changes)."""
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+source_urls = [ ] 
+# We are using our existing 5.2a source bundle for this
+sources = [ '%(name)s_%(version)s_core.zip' ]
+checksums = [ '6212729bc418c7bb23b2a9cf34912aa5960e1bc08ea64facc14159460d935d82' ]  # for 5.2a specifically
+
+# See the easyconfig for snpEff-5.4a for downloading databases.  This installation uses those.
+
+dependencies = [
+    ('Java', '17', '', SYSTEM),
+    ('Python', '3.12.3'),
+    ('Perl', '5.38.2'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+fix_perl_shebang_for = ['scripts/*.pl']
+fix_python_shebang_for = ['scripts/*.py']
+
+# data location pre-installed databases
+_snpeff_data_dir = '/sw/data/local/snpEff_data/%s/data/' % _dataversion
+postinstallcmds = [
+    "sed -i 's|^data.dir = ./data|data.dir = %s|' %%(installdir)s/snpEff.config" % _snpeff_data_dir,
+]
+
+sanity_check_paths = {
+    'files': ['%(name)s.jar', 'SnpSift.jar', 'scripts/%(name)s'],
+    'dirs': [],
+}
+
+sanity_check_commands = ["%(name)s -version"]
+
+modextrapaths = {'PATH': 'scripts'}
+
+modloadmsg = """
+%(name)s/%(version)s: This installation of %(name)s has downloaded all of the annotation
+             databases available (76812 in total) and is configured to use these by default.
+
+             If you wish to download your own databases for your project, or wish to create
+             additional database(s) using other data sources, use the '-dataDir DIRECTORY'
+             option to specify an alternative location for these databases.
+
+             Alternatively, you may provide your own configuration file and specify it using
+             the '-config CONFIGFILE' option.  The current config file is located at
+             $EBROOTSNPEFF/snpEff.config
+"""
+
+moduleclass = 'bio'

@@ -1,0 +1,22 @@
+diff -ruN KrakenUniq.orig/src/report-cols.hpp KrakenUniq/src/report-cols.hpp
+--- KrakenUniq.orig/src/report-cols.hpp	2023-04-26 17:39:35.000000000 +0200
++++ KrakenUniq/src/report-cols.hpp	2025-11-24 15:14:00.107599000 +0100
+@@ -7,6 +7,7 @@
+ #ifndef REPORT_COLS_H
+ #define REPORT_COLS_H
+ 
++#include<cstdint>
+ #include<map>
+ #include<string>
+ 
+diff -ruN KrakenUniq.orig/src/uid_mapping.hpp KrakenUniq/src/uid_mapping.hpp
+--- KrakenUniq.orig/src/uid_mapping.hpp	2023-04-26 17:39:35.000000000 +0200
++++ KrakenUniq/src/uid_mapping.hpp	2025-11-24 14:59:31.002640000 +0100
+@@ -20,6 +20,7 @@
+ #ifndef UID_MAPPING_H
+ #define UID_MAPPING_H
+ 
++#include<cstdint>
+ #include<vector>
+ #include<map>
+ #include<unordered_map>

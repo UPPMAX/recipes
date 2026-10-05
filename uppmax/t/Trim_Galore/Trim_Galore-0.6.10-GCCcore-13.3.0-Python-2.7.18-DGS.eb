@@ -1,0 +1,52 @@
+# Douglas Scofield UPPMAX 12/2025
+# - new tool
+# - UPPMAX bioinfo toolchain 2024a
+####################################
+
+easyblock = 'PackedBinary'
+
+name = 'Trim_Galore'
+version = '0.6.10'
+versionsuffix = '-Python-%(pyver)s'
+_javasuffix = '-Java-%(javaver)s'
+
+homepage = 'https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/'
+description = """Trim Galore! is a wrapper script to automate quality and adapter trimming as
+well as quality control, with some added functionality to remove biased
+methylation positions for RRBS sequence files (for directional, non-directional
+(or paired-end) sequencing)."""
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+github_account = 'FelixKrueger'
+source_urls = [ 'https://github.com/%(github_account)s/TrimGalore/archive/refs/tags' ]
+sources = [ '%(version)s.tar.gz' ]
+patches = [ 'Trim_Galore-0.6.10_shebang-fix.patch' ]
+checksums = [
+    '3a4e414fc658d6eb4356f1572351204e8475a9d7dc79f6798270b57d35bda017',  # 0.6.10.tar.gz
+    'fc3426c88715bddf6b5727c8b1bc6eb7afd86e91342306774297e127cd4a6d89',  # Trim_Galore-0.6.10_shebang-fix.patch
+]
+
+dependencies = [
+    ('Python', '2.7.18'),
+    ('Java', '17', '', SYSTEM),
+    ('Perl', '5.38.2'),
+    ('pigz', '2.8'),
+    ('cutadapt', '1.18', versionsuffix),
+    ('FastQC', '0.12.1', _javasuffix, SYSTEM),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+postinstallcmds = ["chmod +x %(installdir)s/trim_galore"]
+
+sanity_check_paths = {
+    'files': [ 'trim_galore', 'LICENSE', 'README.md' ],
+    'dirs': [ 'Docs', 'test_files'],
+}
+
+sanity_check_commands = [ 'trim_galore --version | grep -F "version %(version)s"' ]
+
+moduleclass = 'bio'

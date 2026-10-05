@@ -1,0 +1,71 @@
+# Douglas G Scofield UPPMAX 8/2026
+# - new tool
+# - precompiled Linux binaries, but dependencies need toolchains
+# - requires ghostscript, gnuplot, base perl
+# - patch for included perl scripts
+##################################
+
+easyblock = 'Tarball'
+
+name = 'TMHMM'
+version = '2.0d'
+
+homepage = 'https://services.healthtech.dtu.dk/services/TMHMM-2.0/'
+description = """Prediction of transmembrane helices in proteins
+
+This version provides the prebuilt binaries.
+
+For documentation, see the home page, and %(installdir)s/TMHMM2.0.html
+"""
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'} # required for dependencies
+
+download_instructions = """
+For academic sites, visit
+
+    https://services.healthtech.dtu.dk/services/TMHMM-2.0/
+
+A time-limited (4h at the time of this writing) download link will be sent to
+the provided email address.  Download both the source bundle and the license
+file.
+"""
+
+sources = [
+            '%(namelower)s-%(version)s.Linux.tar.gz',
+            # '%(namelower)s-%(version)s_license.txt',  ### how to install this too?
+]
+patches = [ '%(name)s-2.0d_fix-shebang-create-png.patch' ]
+
+checksums = [{
+    '%(namelower)s-%(version)s.Linux.tar.gz' : 'ec4d2c2b1eb20576ae5b2bd3a73a262f0560c879cb3b4fea7652463c51b6bc8d',
+    # '%(namelower)s-%(version)s_license.txt' : '3e42d50ea1185d7d9efeeb01022f5c27e84d069e2c043f2e94ce974ff825217d', ### how to install this too?
+    '%(name)s-2.0d_fix-shebang-create-png.patch' : '70698ad7a88e9e1997bb94247893ca8b4e5424c8cd8ae8b0d27258720d105712',
+}]
+
+dependencies = [
+    ('Perl', '5.38.2'),
+    ('Ghostscript', '10.03.1'),
+    ('gnuplot', '6.0.1'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+### fix_perl_shebang_for = [ 'bin/tmhmmformat.pl', 'bin/tmhmm' ]  ## currently handled in the .patch
+
+# postinstallcmds = [ 'cp %(builddir)s/%(namelower)s-%(version)s_license.txt %(installdir)s/ ' ] ### how to install this too?
+
+sanity_check_paths = {
+    'files': [ 
+               'TMHMM2.0.html',
+               'bin/tmhmm',
+               'bin/decodeanhmm.Linux_x86_64',
+               'lib/TMHMM1.0.model',
+               'lib/TMHMM2.0.model',
+               'lib/TMHMM2.0.options',
+    ],
+    'dirs': [ ],
+}
+
+moduleclass = 'bio'

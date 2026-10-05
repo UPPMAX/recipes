@@ -1,0 +1,19 @@
+Douglas Scofield UPPMAX 12/2025 include cstdint for 13.3.0
+diff -ruN megahit-1.2.9.orig/src/localasm/local_assemble.h megahit-1.2.9/src/localasm/local_assemble.h
+--- megahit-1.2.9.orig/src/localasm/local_assemble.h	2019-10-15 04:51:03.000000000 +0200
++++ megahit-1.2.9/src/localasm/local_assemble.h	2025-12-18 12:59:16.149280000 +0100
+@@ -22,6 +22,7 @@
+ #ifndef LOCAL_ASSEMBLER_H
+ #define LOCAL_ASSEMBLER_H
+ 
++#include <cstdint>
+ #include <string>
+ 
+ struct LocalAsmOption {
+@@ -44,4 +45,4 @@
+ 
+ void RunLocalAssembly(const LocalAsmOption &opt);
+ 
+-#endif
+\ No newline at end of file
++#endif

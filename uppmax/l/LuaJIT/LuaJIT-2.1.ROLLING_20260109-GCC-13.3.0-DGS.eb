@@ -1,0 +1,49 @@
+# Douglas Scofield UPPMAX 01/2026
+# - UPPMAX bioinfo toolchain 2024a
+#################################
+
+easyblock = 'ConfigureMake'
+
+name = 'LuaJIT'
+_ver = '2.1'
+_commitdate = '20260109'
+_commit = '707c12b'
+
+version = _ver + '.ROLLING_' + _commitdate
+
+homepage = "https://luajit.org/"
+description = """LuaJIT is a Just-In-Time Compiler (JIT) for the Lua
+programming language. Lua is a powerful, dynamic and light-weight programming
+language. It may be embedded or used as a general-purpose, stand-alone
+language. """
+
+toolchain = {'name': 'GCC', 'version': '13.3.0'}
+
+# Releases are only made occasionally. You're strongly encouraged to follow the git branches.
+sources = [{
+    'source_urls': ['https://github.com/LuaJIT/LuaJIT/archive'],
+    'download_filename': '%s.tar.gz' % _commit,
+    'filename': SOURCE_TAR_GZ,
+}]
+checksums = ['ac2defd1e9b4ab07ac0a52f2403318ffb0d54505b975dff0cfc49a927ab84d90']
+
+dependencies = [('ncurses', '6.4')]
+
+local_linkdependencies = [
+    ('ncurses', '6.4'),
+    toolchain,
+]
+
+skipsteps = ['configure']
+installopts = 'PREFIX=%(installdir)s'
+
+postinstallcmds = ['cd %%(installdir)s/bin && ln -sf luajit-%s.* luajit' % _ver]
+
+sanity_check_paths = {
+    'files': ["bin/luajit"],
+    'dirs': [],
+}
+
+sanity_check_commands = ['luajit -v']
+
+moduleclass = "lang"

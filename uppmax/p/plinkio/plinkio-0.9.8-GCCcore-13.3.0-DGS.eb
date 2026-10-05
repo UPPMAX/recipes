@@ -1,0 +1,30 @@
+# Douglas G Scofield UPPMAX 6/2025
+##################################
+
+easyblock = 'PythonBundle'
+
+name = 'plinkio'
+version = '0.9.8'
+
+homepage = 'https://github.com/mfranberg/libplinkio'
+description = """A library for parsing PLINK genotype files."""
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+dependencies = [
+    ('Python', '3.12.3'),
+]
+
+local_linkdependencies = [ ]
+
+exts_list = [
+    (name, version, {
+        'checksums': ['820cd57167ed28158f926ac4b2901b323f8593eb139bec000eeb3b895430011f'],
+    }),
+]
+
+sanity_check_commands = [
+    "python -c 'import plinkio'",
+]
+
+moduleclass = 'bio'

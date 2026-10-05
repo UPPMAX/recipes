@@ -1,0 +1,9 @@
+--- a/.bazelrc
++++ b/.bazelrc
+@@ -947,3 +947,6 @@
+ 
+ # Try to load the XLA warnings config if available
+ try-import %workspace%/warnings.bazelrc
++
++common --noenable_bzlmod
++common --enable_workspace

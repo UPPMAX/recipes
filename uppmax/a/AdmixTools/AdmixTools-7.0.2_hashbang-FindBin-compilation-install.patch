@@ -1,0 +1,165 @@
+diff -ruN AdmixTools-7.0.2.orig/convertf/example.perl AdmixTools-7.0.2/convertf/example.perl
+--- AdmixTools-7.0.2.orig/convertf/example.perl	2021-06-22 17:15:08.000000000 +0200
++++ AdmixTools-7.0.2/convertf/example.perl	2026-01-29 17:44:54.964223801 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl
+ 
+ # $parfile = "par.ANCESTRYMAP.EIGENSTRAT";
+diff -ruN AdmixTools-7.0.2.orig/convertf/ind2pheno.perl AdmixTools-7.0.2/convertf/ind2pheno.perl
+--- AdmixTools-7.0.2.orig/convertf/ind2pheno.perl	2021-06-22 17:15:08.000000000 +0200
++++ AdmixTools-7.0.2/convertf/ind2pheno.perl	2026-01-29 17:44:54.964223801 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl
+ 
+ $in = $ARGV[0]; # .ind file
+diff -ruN AdmixTools-7.0.2.orig/perlsrc/dof4 AdmixTools-7.0.2/perlsrc/dof4
+--- AdmixTools-7.0.2.orig/perlsrc/dof4	2021-06-22 17:15:08.000000000 +0200
++++ AdmixTools-7.0.2/perlsrc/dof4	2026-01-29 17:44:54.967223826 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl  -w 
+ 
+ ($par) = @ARGV ; 
+diff -ruN AdmixTools-7.0.2.orig/perlsrc/dof4a AdmixTools-7.0.2/perlsrc/dof4a
+--- AdmixTools-7.0.2.orig/perlsrc/dof4a	2021-06-22 17:15:08.000000000 +0200
++++ AdmixTools-7.0.2/perlsrc/dof4a	2026-01-29 17:44:54.965223809 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl  -w 
+ 
+ ($par) = @ARGV ; 
+diff -ruN AdmixTools-7.0.2.orig/perlsrc/getresult AdmixTools-7.0.2/perlsrc/getresult
+--- AdmixTools-7.0.2.orig/perlsrc/getresult	2021-06-22 17:15:08.000000000 +0200
++++ AdmixTools-7.0.2/perlsrc/getresult	2026-01-29 17:44:54.964223801 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl -w
+ 
+ ($IN, $OUT, $tag) = @ARGV ;
+diff -ruN AdmixTools-7.0.2.orig/perlsrc/jackdiff AdmixTools-7.0.2/perlsrc/jackdiff
+--- AdmixTools-7.0.2.orig/perlsrc/jackdiff	2021-06-22 17:15:08.000000000 +0200
++++ AdmixTools-7.0.2/perlsrc/jackdiff	2026-01-29 17:44:54.965223809 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl  -w 
+ 
+ use Getopt::Std ;
+diff -ruN AdmixTools-7.0.2.orig/perlsrc/mkpretty AdmixTools-7.0.2/perlsrc/mkpretty
+--- AdmixTools-7.0.2.orig/perlsrc/mkpretty	2021-06-22 17:15:08.000000000 +0200
++++ AdmixTools-7.0.2/perlsrc/mkpretty	2026-01-29 17:44:54.967223826 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl  -w 
+ 
+ ## mkpretty infile outfile 
+diff -ruN AdmixTools-7.0.2.orig/perlsrc/numlines AdmixTools-7.0.2/perlsrc/numlines
+--- AdmixTools-7.0.2.orig/perlsrc/numlines	2021-06-22 17:15:08.000000000 +0200
++++ AdmixTools-7.0.2/perlsrc/numlines	2026-01-29 17:44:54.965223809 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl -w
+ 
+ ($IN) = @ARGV ;
+diff -ruN AdmixTools-7.0.2.orig/perlsrc/xtractcol AdmixTools-7.0.2/perlsrc/xtractcol
+--- AdmixTools-7.0.2.orig/perlsrc/xtractcol	2021-06-22 17:15:08.000000000 +0200
++++ AdmixTools-7.0.2/perlsrc/xtractcol	2026-01-29 17:44:54.966223818 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl -w
+ 
+ ($COLS, $xflag) = @ARGV ;
+diff -ruN AdmixTools-7.0.2.orig/perlsrc/xtractcolv AdmixTools-7.0.2/perlsrc/xtractcolv
+--- AdmixTools-7.0.2.orig/perlsrc/xtractcolv	2021-06-22 17:15:08.000000000 +0200
++++ AdmixTools-7.0.2/perlsrc/xtractcolv	2026-01-29 17:44:54.966223818 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl -w
+ 
+ ($COLS, $xflag) = @ARGV ;
+diff -ruN AdmixTools-7.0.2.orig/perlsrc2/dof4 AdmixTools-7.0.2/perlsrc2/dof4
+--- AdmixTools-7.0.2.orig/perlsrc2/dof4	2021-06-22 17:15:08.000000000 +0200
++++ AdmixTools-7.0.2/perlsrc2/dof4	2026-01-29 17:44:54.963223792 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl  -w 
+ 
+ ($par) = @ARGV ; 
+diff -ruN AdmixTools-7.0.2.orig/perlsrc2/getresult AdmixTools-7.0.2/perlsrc2/getresult
+--- AdmixTools-7.0.2.orig/perlsrc2/getresult	2021-06-22 17:15:08.000000000 +0200
++++ AdmixTools-7.0.2/perlsrc2/getresult	2026-01-29 17:44:54.961223775 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl -w
+ 
+ ($IN, $OUT, $tag) = @ARGV ;
+diff -ruN AdmixTools-7.0.2.orig/perlsrc2/jackdiff AdmixTools-7.0.2/perlsrc2/jackdiff
+--- AdmixTools-7.0.2.orig/perlsrc2/jackdiff	2021-06-22 17:15:08.000000000 +0200
++++ AdmixTools-7.0.2/perlsrc2/jackdiff	2026-01-29 17:44:54.961223775 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl  -w 
+ 
+ use Getopt::Std ;
+diff -ruN AdmixTools-7.0.2.orig/perlsrc2/mkpretty AdmixTools-7.0.2/perlsrc2/mkpretty
+--- AdmixTools-7.0.2.orig/perlsrc2/mkpretty	2021-06-22 17:15:08.000000000 +0200
++++ AdmixTools-7.0.2/perlsrc2/mkpretty	2026-01-29 17:44:54.962223783 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl  -w 
+ 
+ ## mkpretty infile outfile 
+diff -ruN AdmixTools-7.0.2.orig/perlsrc2/xtractcol AdmixTools-7.0.2/perlsrc2/xtractcol
+--- AdmixTools-7.0.2.orig/perlsrc2/xtractcol	2021-06-22 17:15:08.000000000 +0200
++++ AdmixTools-7.0.2/perlsrc2/xtractcol	2026-01-29 17:44:54.962223783 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl -w
+ 
+ ($COLS, $xflag) = @ARGV ;
+diff -ruN AdmixTools-7.0.2.orig/src/Makefile AdmixTools-7.0.2/src/Makefile
+--- AdmixTools-7.0.2.orig/src/Makefile	2021-06-22 17:15:08.000000000 +0200
++++ AdmixTools-7.0.2/src/Makefile	2026-01-29 17:57:54.097890073 +0100
+@@ -2,11 +2,11 @@
+ TOP=../bin
+ BIN=$(HOMEL)/../bin
+ 
+-override LDLIBS += -lgsl -lopenblas -lm -lnick
++override LDLIBS += -lgsl -lflexiblas -lm -lnick
+ # Some Linux distributions require separate lapacke library
+ # override LDLIBS += -llapacke
+-override LDFLAGS += -g  -L./nicksrc
+-override CFLAGS += -c -g -p -pg -Wimplicit -I./ -I./nicksrc
++override LDFLAGS += -L./nicksrc
++override CFLAGS += -c -Wimplicit -I./ -I./nicksrc
+ # Mac additions using homebrew installations
+ #override CFLAGS += -I/usr/local/opt/openblas/include -I/usr/local/opt/gsl/include
+ #override LDFLAGS += -L/usr/local/opt/openblas/lib -L/usr/local/opt/gsl/lib
+diff -ruN AdmixTools-7.0.2.orig/src/rexpfit.r AdmixTools-7.0.2/src/rexpfit.r
+--- AdmixTools-7.0.2.orig/src/rexpfit.r	2021-06-22 17:15:08.000000000 +0200
++++ AdmixTools-7.0.2/src/rexpfit.r	2026-01-29 17:45:29.895523000 +0100
+@@ -1,3 +1,4 @@
++#!/usr/bin/env Rscript
+ #!/usr/bin/Rscript
+ args <- commandArgs(TRUE)
+ 
+diff -ruN AdmixTools-7.0.2.orig/src/wtjack.pl AdmixTools-7.0.2/src/wtjack.pl
+--- AdmixTools-7.0.2.orig/src/wtjack.pl	2021-06-22 17:15:08.000000000 +0200
++++ AdmixTools-7.0.2/src/wtjack.pl	2026-01-29 17:44:54.963223792 +0100
+@@ -1,10 +1,13 @@
++#!/usr/bin/env perl
+ #!/usr/bin/perl
+ use Getopt::Std ;
++use FindBin;
+ 
+ getopts('i:m:b:',\%opts) ;
+ 
+-$BIN ="/groups/reich/pm82/dev/ADMIXTOOLS/bin";
+- 
++#$BIN ="/groups/reich/pm82/dev/ADMIXTOOLS/bin";
++$BIN = $FindBin::RealBin;
++
+ # filename of rolloff output file, in parfile output:
+ if (defined $opts{"i"}) {
+         $pop = $opts{"i"} ;

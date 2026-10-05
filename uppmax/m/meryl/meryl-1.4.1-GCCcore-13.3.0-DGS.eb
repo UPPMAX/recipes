@@ -1,0 +1,48 @@
+# Douglas Scofield UPPMAX 02/2026
+# - new tool
+# - UPPMAX bioinfo toolchain 2024a
+####################################
+
+easyblock = 'MakeCp'
+
+name = 'meryl'
+version = '1.4.1'
+
+homepage = 'https://github.com/marbl/meryl'
+description = "A genomic k-mer counter (and sequence utility) with nice features."
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+toolchainopts = {'pic': True}
+
+github_account = 'marbl'
+source_urls = [ GITHUB_RELEASE ]
+sources = [ SOURCE_TAR_XZ ]
+checksums = [ 'adaa713b8cd9151db2a08e7eadd8114d16bf91dae0d191674b75d7be72bdd53d' ]
+
+builddependencies = [
+    ('binutils', '2.42'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+start_dir = 'src'
+
+files_to_copy = [
+    (['build/bin/*'], 'bin'),
+    'README.licenses',
+]
+
+_bins = ['%(name)s', '%(name)s-analyze', '%(name)s-import', '%(name)s-lookup', '%(name)s-simple', 'position-lookup']
+
+sanity_check_paths = {
+    'files': ['bin/%s' % x for x in _bins],
+    'dirs': []
+}
+
+sanity_check_commands = [
+    '%(name)s --version 2>&1 | grep -F "%(name)s %(version)s"',
+]
+
+moduleclass = 'bio'

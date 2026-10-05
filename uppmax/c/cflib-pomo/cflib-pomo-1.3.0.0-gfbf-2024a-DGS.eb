@@ -1,0 +1,56 @@
+# Douglas Scofield UPPMAX 2026/06
+# - new tool, use PyPi installation
+# - use UPPMAX bioinfo toolchain 2024a
+#################################
+
+easyblock = 'PythonBundle'
+
+name = 'cflib-pomo'
+version = '1.3.0.0'
+
+homepage = 'https://github.com/pomo-dev/cflib'
+description = """This python library cflib provides scripts to convert between fasta, VCF and
+counts files. Counts files are used by PoMo, an implementation of a 
+polymorphism-aware phylogenetic model. We advice you to use PoMo implemented
+in IQ-TREE."""
+
+toolchain = {'name': 'gfbf', 'version': '2024a'}
+
+# for github download
+# github_account = 'pomo-dev'
+# source_urls = [ 'https://github.com/%(github_account)s/cflib/archive/refs/tags' ]
+# sources = ['%(version)s.tar.gz']
+# checksums = ['c56dc2f9cb6040ea23d285860e5a64d6d5dabb6d9c13821a98ece4fd3b917bb9']
+
+# PyPi package: da5bf473f56c040c0fd36fb590b5944bfcdbc071c9472ad301a8b2df2c82e700
+
+dependencies = [
+    ('Python', '3.12.3'),
+    ('Pysam', '0.22.1'),
+    ('SciPy-bundle', '2024.05'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+# PyPi download
+exts_list = [
+    (name, version, {
+        'checksums': ['da5bf473f56c040c0fd36fb590b5944bfcdbc071c9472ad301a8b2df2c82e700'],
+        'modulename': 'cflib',
+    }),
+]
+
+
+_bins = [ 'CountsToFasta.py', 'FastaToCounts.py', 'FastaToVCF.py', 'FastaVCFToCounts.py',
+          'FilterMSA.py', 'GPToCounts.py', 'MSAToCounts.py' ]
+
+sanity_check_paths = {
+    'files': ['bin/%s' % x for x in _bins],
+    'dirs': ['lib/python%(pyshortver)s/site-packages'],
+}
+
+sanity_check_commands = ["CountsToFasta.py -h"]
+
+moduleclass = 'bio'

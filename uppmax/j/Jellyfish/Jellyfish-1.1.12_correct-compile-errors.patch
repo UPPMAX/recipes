@@ -1,0 +1,27 @@
+# Douglas Scofield UPPMAX 03/2026
+# - fix a couple compile errors in old code
+#################################
+diff -ruN Jellyfish-1.1.12.orig/jellyfish/compacted_hash.hpp Jellyfish-1.1.12/jellyfish/compacted_hash.hpp
+--- Jellyfish-1.1.12.orig/jellyfish/compacted_hash.hpp	2018-05-01 16:36:56.000000000 +0200
++++ Jellyfish-1.1.12/jellyfish/compacted_hash.hpp	2026-03-04 16:45:56.430201351 +0100
+@@ -111,7 +111,7 @@
+ 
+       void write_header(std::ostream *out) const {
+         struct header head;
+-        memset(&head, '\0', sizeof(head));
++        memset((void *)&head, '\0', sizeof(head));
+         memcpy(&head.type, file_type, sizeof(head.type));
+         head.key_len = klen;
+         head.val_len = val_len;
+diff -ruN Jellyfish-1.1.12.orig/jellyfish/dump_main.cc Jellyfish-1.1.12/jellyfish/dump_main.cc
+--- Jellyfish-1.1.12.orig/jellyfish/dump_main.cc	2018-05-01 16:36:56.000000000 +0200
++++ Jellyfish-1.1.12/jellyfish/dump_main.cc	2026-03-04 16:43:43.589688916 +0100
+@@ -83,7 +83,7 @@
+     mapped_file dbf(args.db_arg.c_str());
+     dump_mapped_file(dbf, out);
+     dumped = true;
+-  } catch(mapped_file::ErrorMMap) {
++  } catch(mapped_file::ErrorMMap const&) {
+     dumped = false;
+   }
+ 

@@ -1,0 +1,11 @@
+diff -ruN tensorflow-2.18.1.pkg-license-removed.orig/tensorflow/tensorflow.bzl tensorflow-2.18.1.pkg-license-removed.work/tensorflow/tensorflow.bzl
+--- tensorflow-2.18.1.pkg-license-removed.orig/tensorflow/tensorflow.bzl	2025-03-07 23:33:29.000000000 +0100
++++ tensorflow-2.18.1.pkg-license-removed.work/tensorflow/tensorflow.bzl	2026-04-13 13:01:48.136839861 +0200
+@@ -3123,7 +3123,6 @@
+             compatible_with = compatible_with,
+             deprecation = deprecation,
+             features = features + ["-use_header_modules"],
+-            licenses = licenses,
+             restricted_to = restricted_to,
+             shared_lib_name = so_file,
+             testonly = testonly,

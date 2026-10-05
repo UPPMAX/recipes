@@ -1,0 +1,188 @@
+# Douglas Scofield UPPMAX 02/2026
+# - new tool, bash scripts and jarfiles
+# - uses new tool meryl/1.4.1
+# - patch to use EB dependencies
+# - installs R packages locally (argparse, ggplot2 and dependencies) so as not to go up a toolchain level by loading R-bundle-CRAN
+# - I don't think we need to set versionsuffix since we're using Java/17 loaded by R?
+####################################
+
+easyblock = 'PackedBinary'
+
+name = 'merqury'
+_commit = '1ad7c32'
+_commitdate = '20240628'
+version = '%s-%s' % (_commitdate, _commit)
+#versionsuffix = '-Java-%(javaver)s'
+
+homepage = 'https://github.com/marbl/merqury'
+description = "Evaluate genome assemblies with k-mers and more"
+
+usage = """For %(name)s/%(version)s, top-level scripts can be run directly:
+
+    merqury.sh ...
+    best_k.sh ...
+    merqury-mash.sh ...
+
+Subscripts require the $MERQURY environment variable:
+
+    $MERQURY/trio/hapmers.sh ... 
+
+    All dependencies (meryl, SAMtools, BEDTools, Mash, Kent_tools, R) are already loaded.
+
+The _submit* scripts for job submission are not configured, but may be examined for pipeline
+ideas at the homepage, or directly here. For example:
+
+    less $MERQURY/_submit_build_10x.sh
+"""
+
+toolchain = {'name': 'gfbf', 'version': '2024a'}  # because of R/4.4.2
+
+github_account = 'marbl'
+source_urls = [ GITHUB_LOWER_SOURCE ]
+sources = [{
+    'download_filename': '%s.tar.gz' % _commit,
+    'filename': SOURCE_TAR_GZ,
+}]
+patches = [ '%(name)s-%(version)s_use-EB-dependencies-etc.patch' ]
+checksums = [{
+    SOURCE_TAR_GZ: '80406035fdfb9d2397e5a5017ec9489881da8e54abaca04afa74c8ffa81f390f',
+    '%(name)s-%(version)s_use-EB-dependencies-etc.patch': '28e45f3249cf55e5cd3c9529ad171db9740f85840eb4d7ac36aed55b7bb0894b',
+}]
+
+dependencies = [
+    ('Java', '17', '', SYSTEM),
+    ('R', '4.4.2'),
+    ('meryl', '1.4.1'),
+    ('SAMtools', '1.21.1'),
+    ('BEDTools', '2.31.1'),
+    ('Mash', '2.3'),
+    ('Kent_tools', '479'),
+]
+
+local_linkdependencies = [
+    toolchain,  # minimal R needed only for plotting
+]
+
+# write-protect the installation's packages library to prevent me or other
+# users from polluting it with updated and/or additional packages during other
+# installations.  install with 'eb --disable-group-writable-installdir ...' if
+# you set group-writable installdirs in the config
+postinstallcmds = [ "mkdir %(installdir)s/easybuild && chmod -R -w %(installdir)s && chmod -R ug+w %(installdir)s/easybuild" ]
+
+exts_defaultclass = 'RPackage'
+local_exts_subdir = 'R'
+# following copied from R-bundle-CRAN
+exts_default_options = {
+    'source_urls': [
+        'https://cran.r-project.org/src/contrib/Archive/%(name)s',  # package archive
+        'https://cran.r-project.org/src/contrib/',  # current version of packages
+        'https://cran.freestatistics.org/src/contrib',  # mirror alternative for current packages
+    ],
+    'source_tmpl': '%(name)s_%(version)s.tar.gz',
+}
+
+# check whether correct version is installed in extension filter
+# (some versions in this bundle may be newer than the ones provided by R)
+local_ext_version_check = "pkgver = packageVersion('%(ext_name)s'); if (pkgver != '%(ext_version)s') "
+local_stop_msg = "stop('%(ext_name)s %(ext_version)s not installed, found ', pkgver, ' instead')"
+exts_filter = ("R -q --no-save", "%s { %s }" % (local_ext_version_check, local_stop_msg))
+
+# Same package order as found in R-bundle-CRAN-2024.11-foss-2024a-DGS.eb
+exts_list = [
+    ('MASS', '7.3-61', {
+        'checksums': ['3144c8bf579dd7b7c47c259728c27f53f53e294e7ed307da434dfd144e800a90'],
+        'exts_subdir': local_exts_subdir,
+    }),
+    ('lattice', '0.22-6', {
+        'checksums': ['4b377211e472ece7872b9d6759f9b9c660b09594500462eb6146312a1d4d00f7'],
+        'exts_subdir': local_exts_subdir,
+    }),
+    ('nlme', '3.1-166', {
+        'checksums': ['237a14ee8d78755b11a7efe234b95be40b46fbdd1b4aaf463f6d532be1909762'],
+        'exts_subdir': local_exts_subdir,
+    }),
+    ('Matrix', '1.7-1', {
+        'checksums': ['a2cabbf04e4e2cafbd0a04281f130bb58e4f7653a91951368a404ef8682b38a1'],
+        'exts_subdir': local_exts_subdir,
+    }),
+    ('RColorBrewer', '1.1-3', {
+        'checksums': ['4f42f5423c45688b39f492c7892d93f37b4541831c8ffb140364d2bd89031ac0'],
+        'exts_subdir': local_exts_subdir,
+    }),
+    ('gtable', '0.3.6', {
+        'checksums': ['d305a5fa11278b649d2d8edc5288bf28009be888a42be58ff8714018e49de0ef'],
+        'exts_subdir': local_exts_subdir,
+    }),
+    ('colorspace', '2.1-1', {
+        'checksums': ['e721cee5f4d6e4b0fc8eb18265e316b4f856fd3be02f0775a26032663758cd0b'],
+        'exts_subdir': local_exts_subdir,
+    }),
+    ('munsell', '0.5.1', {
+        'checksums': ['03a2fd9ac40766cded96dfe33b143d872d0aaa262a25482ce19161ca959429a6'],
+        'exts_subdir': local_exts_subdir,
+    }),
+    ('labeling', '0.4.3', {
+        'checksums': ['c62f4fc2cc74377d7055903c5f1913b7295f7587456fe468592738a483e264f2'],
+        'exts_subdir': local_exts_subdir,
+    }),
+    ('viridisLite', '0.4.2', {
+        'checksums': ['893f111d31deccd2cc959bc9db7ba2ce9020a2dd1b9c1c009587e449c4cce1a1'],
+        'exts_subdir': local_exts_subdir,
+    }),
+    ('farver', '2.1.2', {
+        'checksums': ['528823b95daab4566137711f1c842027a952bea1b2ae6ff098e2ca512b17fe25'],
+        'exts_subdir': local_exts_subdir,
+    }),
+    ('scales', '1.3.0', {
+        'checksums': ['b33e0f6b44259551ce02befd52eac53602509fbfdd903920620c658c50f35888'],
+        'exts_subdir': local_exts_subdir,
+    }),
+    ('mgcv', '1.9-1', {
+        'checksums': ['700fbc37bedd3a49505b9bc4949faee156d9cfb4f669d797d06a10a15a5bdb32'],
+        'exts_subdir': local_exts_subdir,
+    }),
+    ('isoband', '0.2.7', {
+        'checksums': ['7693223343b45b86de2b5b638ff148f0dafa6d7b1237e822c5272902f79cdf61'],
+        'exts_subdir': local_exts_subdir,
+    }),
+    ('ggplot2', '3.5.1', {
+        'checksums': ['7c58b424f99b3634038e6f6d1fe4b0241b8aecb50e9c50466d5590f7e3144721'],
+        'exts_subdir': local_exts_subdir,
+    }),
+    ('findpython', '1.0.9', {
+        'checksums': ['b6a15e0cdfcdd4b1cfc76f7e4eaad0125d4d52889711200075280e9b2a2cb7cb'],
+        'exts_subdir': local_exts_subdir,
+    }),
+    ('argparse', '2.2.4', {
+        'checksums': ['1d4efd137b8c3760f5beea2e0ba71293ce26a9d5533223adef0ffc5b816a1e47'],
+        'exts_subdir': local_exts_subdir,
+    }),
+]
+
+# subsets of installed jars and scripts
+_jars =    [ 'util/merylDumpToWig.jar', 'trio/fastaGetGaps.jar', 'trio/bedMerToPhaseBlock.jar',
+             'eval/kmerHistToPloidyDepth.jar', 'eval/bedCalcN50.jar', ]
+_scripts = [ 'merqury.sh', 'merqury-mash.sh', 'best_k.sh', 'trio/phase_block.sh', 'trio/spectra-hap.sh',
+             'eval/spectra-cn.sh', 'trio/hap_blob.sh', 'util/util.sh', 'plot/plot_blob.R', ]
+
+sanity_check_paths = {
+    'files': _jars + _scripts,
+    'dirs': [ 'build', 'eval', 'plot', 'trio', 'util' ]
+}
+
+sanity_check_commands = [
+    '%(name)s.sh | grep "Usage:"',
+] + [ 'java -jar $MERQURY/%s' % x for x in _jars ]
+
+modextravars = {
+    'MERQURY': '%(installdir)s',
+}
+
+modextrapaths = {
+    'PATH': '',
+    'R_LIBS_SITE': local_exts_subdir,
+}
+
+modloadmsg = "%(name)s/%(version)s: See 'module help %(name)s/%(version)s' for important usage information"
+
+moduleclass = 'bio'

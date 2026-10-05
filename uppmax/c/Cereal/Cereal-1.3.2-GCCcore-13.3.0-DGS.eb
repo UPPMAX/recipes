@@ -1,0 +1,46 @@
+# @Authors:: Maxime Boissonneault, Compute Canada
+# @date: October 15, 2020
+# Douglas G Scofield UPPMAX 8/2025
+# - new patch to create pkgconfig file, also submitted as cereal PR https://github.com/USCiLab/cereal/pull/844
+#####################################
+
+easyblock = 'CMakeMake'
+
+name = 'Cereal'
+version = '1.3.2'
+
+homepage = 'https://uscilab.github.io/cereal/'
+description = """cereal is a header-only C++11 serialization library. cereal takes arbitrary data types and reversibly
+turns them into different representations, such as compact binary encodings, XML, or JSON. cereal was designed to be
+fast, light-weight, and easy to extend - it has no external dependencies and can be easily bundled with other code or
+used standalone."""
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+github_account = 'USCiLab'
+source_urls = [ GITHUB_LOWER_SOURCE ]
+sources = [ 'v%(version)s.tar.gz' ]
+patches = [ 'Cereal-1.3.2-add_pkgconfig.patch' ]
+
+checksums = [
+    '16a7ad9b31ba5880dac55d62b5d6f243c3ebc8d46a3514149e56b5e7ea81f85f',  # v1.3.2.tar.gz
+    'f00f9ca84046232b2ea01fac4ef186b60243030569f3f839ec37fb3c358b5c8a',  # Cereal-1.3.2-add_pkgconfig.patch
+]
+
+builddependencies = [
+    ('binutils', '2.42'),
+    ('CMake',    '3.29.3'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+configopts = '-DJUST_INSTALL_CEREAL=ON -DSKIP_PERFORMANCE_COMPARISON=ON '
+
+sanity_check_paths = {
+    'files': [ 'include/cereal/cereal.hpp', 'share/pkgconfig/%(namelower)s.pc' ],
+    'dirs':  [ 'include', 'lib/cmake' ],
+}
+
+moduleclass = 'lib'

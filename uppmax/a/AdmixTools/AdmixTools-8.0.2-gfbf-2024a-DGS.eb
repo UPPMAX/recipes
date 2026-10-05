@@ -1,0 +1,107 @@
+# Douglas G Scofield UPPMAX 01/2026
+# - new tool
+# - install DEoptim into a local R extensions directory rather than loading the heavyweight R-bundle-CRAN/2024.11
+# - link to FlexiBLAS instead of OpenBLAS; both are included in gfbf/2024a toolchain and we should link to FlexiBLAS when it is present
+# - remove compilation flags for debug info and profiling (-g -p -pg)
+# - use gfbf toolchain because we need R/4.4.2 
+#######################################
+easyblock = 'ConfigureMake'
+
+name = 'AdmixTools'
+version = '8.0.2'
+
+homepage = 'https://github.com/DReichLab/AdmixTools'
+description = """purge_dups is designed to remove haplotigs and contig overlaps in a de novo assembly based on read depth."""
+
+toolchain = {'name': 'gfbf', 'version': '2024a'}
+
+github_account = 'DReichLab'
+source_urls = [ GITHUB_SOURCE ]
+sources = [ 'v%(version)s.tar.gz' ]
+patches = [ 'AdmixTools-8.0.2_hashbang-FindBin-compilation-install.patch' ]
+checksums = [ 'fea3eaabc5c47aa85dbc4346b6be0c377249064ccba087c246cbc7bec4b18777',  # v8.0.2.tar.gz
+              '0295bf231c5662ccbc8556cca0b5e249c58e8db1f9b7e7ebf1d994216d3f1d12' ] # patch
+
+dependencies = [
+    ('GSL', '2.8'),
+    ('Perl', '5.38.2'),  # Perl scripts
+    ('R', '4.4.2'),      # one R script
+]
+
+local_linkdependencies = [
+    ('GSL', '2.8'),
+    toolchain,
+]
+
+skipsteps = [ 'configure' ]
+
+prebuildopts  = 'cd src && make clobber && '
+
+max_parallel = 1
+
+build_cmd = 'make all'
+
+install_cmd = 'cd src && mkdir -p %(installdir)s/bin && make TOP=%(installdir)s/bin install'
+
+postinstallcmds = [ "chmod +x  %(installdir)s/bin/rexpfit.r" ]
+
+### 
+### ## hashbang:
+### ## #!/usr/bin/env perl
+### perlsrc/{dof4,dof4a,fxtract,getresult,jackdiff,mkpretty,numlines,xtractcol,xtractcoltab,xtractcolv,xtractcolx}
+### convertf/ind2pheno.perl
+### src/{fxtract,wtjack.pl}
+### src/script/{grepcol,grepcolf,mktmp,xtractcol}
+### 
+### ## #!/usr/bin/env Rscript
+### src/rexpfit.r
+### 
+### ## permissions:
+### chmod +x
+### src/rexpfit.r
+### convertf/ind2pheno.perl
+### 
+### ## patch:
+### src/wtjack.pl
+### 
+
+exts_defaultclass = 'RPackage'
+local_exts_subdir = 'R'
+# following copied from R-bundle-CRAN
+exts_default_options = {
+    'source_urls': [
+        'https://cran.r-project.org/src/contrib/Archive/%(name)s',  # package archive
+        'https://cran.r-project.org/src/contrib/',  # current version of packages
+        'https://cran.freestatistics.org/src/contrib',  # mirror alternative for current packages
+    ],
+    'source_tmpl': '%(name)s_%(version)s.tar.gz',
+}
+
+# check whether correct version is installed in extension filter
+# (some versions in this bundle may be newer than the ones provided by R)
+local_ext_version_check = "pkgver = packageVersion('%(ext_name)s'); if (pkgver != '%(ext_version)s') "
+local_stop_msg = "stop('%(ext_name)s %(ext_version)s not installed, found ', pkgver, ' instead')"
+exts_filter = ("R -q --no-save", "%s { %s }" % (local_ext_version_check, local_stop_msg))
+
+exts_list = [
+    ('DEoptim', '2.2-8', {
+        'checksums': ['631eabdcf26ec25a759651f699db1971beca3ae193c7fbd1c63a78248fdbf54c'],
+        'exts_subdir': local_exts_subdir,
+    }),
+]
+
+sanity_check_paths = {
+    'files': ['bin/convertf', 'bin/qpfstats', 'bin/rexpfit.r'],
+    'dirs': ['bin/script'],
+}
+
+sanity_check_commands = [
+    "qpfstats",
+    "qpGraph -v",
+]
+
+modextrapaths = {
+    'R_LIBS_SITE': local_exts_subdir,
+}
+
+moduleclass = 'bio'

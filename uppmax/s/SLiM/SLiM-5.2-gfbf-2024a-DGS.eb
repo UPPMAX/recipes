@@ -1,0 +1,70 @@
+# Update to version 5.0 with test-jobs enabled.
+# Based of previous 4.x build as template
+# Author: J. Saßmannshausen (Imperial College London/UK)
+#
+# Douglas Scofield UPPMAX 05/2026
+# - update version to 5.2
+# - use updated patch
+#################################
+
+easyblock = 'CMakeMake'
+
+name = 'SLiM'
+version = '5.2'
+
+homepage = 'https://messerlab.org/slim'
+description = """SLiM is an evolutionary simulation framework that combines
+a powerful engine for population genetic simulations with the capability of
+modeling arbitrarily complex evolutionary scenarios."""
+
+toolchain = {'name': 'gfbf', 'version': '2024a'}
+
+source_urls = ['https://github.com/MesserLab/%(name)s/archive']
+sources = ['v%(version)s.tar.gz']
+patches = [
+    f'{name}-{version}_cmake_use_external_zlib_gsl.patch',
+]
+checksums = [
+    {'v%(version)s.tar.gz': 'ec13f5bcc1784786a556594fa362605cc569b66d3e31838513ab71138df65341'},
+    {'%(name)s-%(version)s_cmake_use_external_zlib_gsl.patch':
+     '98d47a99dd75dfd0db3c675299f84a0bbb27672ea932c877a295422c44b82ec5'},
+]
+
+builddependencies = [
+    ('CMake', '3.29.3'),
+]
+
+dependencies = [
+    ('zlib', '1.3.1'),
+    ('GSL', '2.8'),
+    ('Mesa', '24.1.3'),
+    ('libglvnd', '1.7.0'),
+    ('Qt6', '6.7.2'),
+]
+
+local_linkdependencies = [
+    ('zlib', '1.3.1'),
+    ('GSL', '2.8'),
+    ('Mesa', '24.1.3'),
+    ('libglvnd', '1.7.0'),
+    ('Qt6', '6.7.2'),
+    toolchain,
+]
+
+configopts = '-DBUILD_SLIMGUI=ON '
+
+runtest = 'test'
+
+sanity_check_paths = {
+    'files': ['bin/eidos', 'bin/slim'],
+    'dirs': [],
+}
+
+sanity_check_commands = [
+    "eidos -usage",
+    "eidos -testEidos",
+    "slim -usage",
+    "slim -testSLiM",
+]
+
+moduleclass = 'tools'

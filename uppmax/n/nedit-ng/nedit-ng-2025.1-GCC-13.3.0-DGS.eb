@@ -1,0 +1,47 @@
+# Douglas G Scofield UPPMAX 11/2025
+# - new tool
+#####################################
+
+easyblock = 'CMakeMake'
+
+name = 'nedit-ng'
+version = '2025.1'
+
+homepage = 'https://eteran.github.io/nedit-ng/latest/'
+description = """nedit-ng is a Qt port of the Nirvana Editor (NEdit) version 5.6. It is intended to be
+a drop in replacement for nedit in every practical way.
+
+Because it is a true port of the original code, it (at least for now) inherits some (but not all) of the
+limitations of the original. On the other hand, some aspects have been improved simply by the fact that
+it is now a Qt application."""
+
+toolchain = {'name': 'GCC', 'version': '13.3.0'}
+
+github_account = 'eteran'
+source_urls = [ GITHUB_LOWER_SOURCE ]
+sources = [ '%(version)s.tar.gz' ]
+
+checksums = [ 'c18d9497056945e397b0726f4f7afd3621ea5929b55fabd2c9c321f81a241396' ]
+
+builddependencies = [
+    ('CMake',  '3.29.3'),
+    ('Bison',  '3.8.2'),
+]
+
+dependencies = [
+    ('Boost',  '1.85.0'),
+    ('Qt5',    '5.15.16'),
+]
+
+local_linkdependencies = [
+    ('Boost',  '1.85.0'),
+    ('Qt5',    '5.15.16'),
+    toolchain,
+]
+
+sanity_check_paths = {
+    'files': [ 'bin/nedit-ng', 'bin/nc-ng', 'bin/nedit-import' ],
+    'dirs':  [ ],
+}
+
+moduleclass = 'tools'

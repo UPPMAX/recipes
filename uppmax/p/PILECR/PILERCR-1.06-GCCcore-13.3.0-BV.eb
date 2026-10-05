@@ -1,0 +1,24 @@
+easyblock = 'MakeCp'
+
+name = 'PILERCR'
+version = '1.06'
+
+homepage = 'https://www.drive5.com/pilercr/'
+description = "PILER-CR: software for finding CRISPR repeats"
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+source_urls = ['https://www.drive5.com/pilercr/']
+sources = ['%(namelower)s%(version)s.tar.gz']
+
+# Files to copy from build dir to installation dir
+files_to_copy = [(['pilercr'], 'bin')]
+
+sanity_check_paths = {
+    'files': ['bin/pilercr'],
+    'dirs': [],
+}
+
+sanity_check_commands = ['pilercr -version']
+
+moduleclass = 'bio'

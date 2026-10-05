@@ -1,0 +1,35 @@
+easyblock = 'ConfigureMake'
+
+name = 'PhyML'
+version = '3.3.20190321'
+
+homepage = 'https://github.com/stephaneguindon/phyml'
+description = """PhyML is a software package that uses modern statistical approaches to
+analyse alignments of nucleotide or amino acid sequences in a phylogenetic framework."""
+
+toolchain = {'name': 'gompi', 'version': '2024a'}
+
+source_urls = ['https://github.com/stephaneguindon/phyml/archive/']
+sources = ['v%(version)s.tar.gz']
+checksums = ['5274546cda7445c947fd26838487cd4246e2becf18d333882b7a2a24dff853ee']
+
+patches = ['PhyML-3.3.20190321-fix-gcc13.3.0-BV.patch']
+
+builddependencies = [
+    ('Autoconf', '2.72'),
+    ('Automake', '1.16.5'),
+    ('pkgconf', '2.2.0'),
+]
+
+preconfigopts = 'sh autogen.sh && '
+
+# phytime is no longer maintained, see PhyML issue #207
+#configopts = ['--enable-phyml', '--enable-phyrex', '--enable--mpi']
+configopts = ['--enable-phyml --enable-mpi', '--enable-phyrex', '--enable-phytime', '--enable-phyml']
+
+sanity_check_paths = {
+    'files': ['bin/phyml-mpi', 'bin/phyml', 'bin/phyrex', 'bin/phytime'],
+    'dirs': ['bin']
+}
+
+moduleclass = 'bio'

@@ -1,0 +1,87 @@
+# Douglas G Scofield UPPMAX 01/2026
+# - legacy version of new tool, changed below similar to those for 8.0.2
+# - install DEoptim into a local R extensions directory rather than loading the heavyweight R-bundle-CRAN/2024.11
+# - link to FlexiBLAS instead of OpenBLAS; both are included in gfbf/2024a toolchain and we should link to FlexiBLAS when it is present
+# - remove compilation flags for debug info and profiling (-g -p -pg)
+# - use gfbf toolchain because we need R/4.4.2 
+# o make sure expfit.sh is installed
+#######################################
+easyblock = 'ConfigureMake'
+
+name = 'AdmixTools'
+version = '7.0.2'
+
+homepage = 'https://github.com/DReichLab/AdmixTools'
+description = """purge_dups is designed to remove haplotigs and contig overlaps in a de novo assembly based on read depth."""
+
+toolchain = {'name': 'gfbf', 'version': '2024a'}
+
+github_account = 'DReichLab'
+source_urls = [ GITHUB_SOURCE ]
+sources = [ 'v%(version)s.tar.gz' ]
+patches = [ 'AdmixTools-7.0.2_hashbang-FindBin-compilation-install.patch' ]
+checksums = [ 'd1dc1963e01017f40e05e28009008e14388a14a3facc75cff46653da585bd91e',  # v7.0.2.tar.gz
+              'cdee1664e81cbb8bed07310a1788bfda6800739ec20465acd198a24e9de89434' ] # patch
+
+dependencies = [
+    ('GSL', '2.8'),
+    ('Perl', '5.38.2'),  # Perl scripts
+    ('R', '4.4.2'),      # one R script
+]
+
+local_linkdependencies = [
+    ('GSL', '2.8'),
+    toolchain,
+]
+
+skipsteps = [ 'configure' ]
+
+prebuildopts  = 'cd src && make clobber && '
+
+max_parallel = 1
+
+build_cmd = 'make all'
+
+install_cmd = 'cd src && mkdir -p %(installdir)s/bin && make TOP=%(installdir)s/bin install'
+
+postinstallcmds = [ "chmod +x %(installdir)s/bin/rexpfit.r" ]
+
+exts_defaultclass = 'RPackage'
+local_exts_subdir = 'R'
+# following copied from R-bundle-CRAN
+exts_default_options = {
+    'source_urls': [
+        'https://cran.r-project.org/src/contrib/Archive/%(name)s',  # package archive
+        'https://cran.r-project.org/src/contrib/',  # current version of packages
+        'https://cran.freestatistics.org/src/contrib',  # mirror alternative for current packages
+    ],
+    'source_tmpl': '%(name)s_%(version)s.tar.gz',
+}
+
+# check whether correct version is installed in extension filter
+# (some versions in this bundle may be newer than the ones provided by R)
+local_ext_version_check = "pkgver = packageVersion('%(ext_name)s'); if (pkgver != '%(ext_version)s') "
+local_stop_msg = "stop('%(ext_name)s %(ext_version)s not installed, found ', pkgver, ' instead')"
+exts_filter = ("R -q --no-save", "%s { %s }" % (local_ext_version_check, local_stop_msg))
+
+exts_list = [
+    ('DEoptim', '2.2-8', {
+        'checksums': ['631eabdcf26ec25a759651f699db1971beca3ae193c7fbd1c63a78248fdbf54c'],
+        'exts_subdir': local_exts_subdir,
+    }),
+]
+
+sanity_check_paths = {
+    'files': ['bin/convertf', 'bin/qpfstats', 'bin/expfit.sh', 'bin/rexpfit.r'],
+    'dirs': [ ],
+}
+
+sanity_check_commands = [
+    "qpfstats",
+]
+
+modextrapaths = {
+    'R_LIBS_SITE': local_exts_subdir,
+}
+
+moduleclass = 'bio'

@@ -1,0 +1,35 @@
+# Douglas Scofield UPPMAX 01/2026
+# - new, very old version, install prebuilt x86_64
+####################################################
+
+easyblock = 'Tarball'
+
+name = 'Bowtie'
+version = '0.12.9'
+
+homepage = 'http://bowtie-bio.sourceforge.net/index.shtml'
+description = """Bowtie is an ultrafast, memory-efficient short read aligner.
+ It aligns short DNA sequences (reads) to the human genome."""
+
+toolchain = SYSTEM
+
+source_urls = ['https://downloads.sourceforge.net/project/bowtie-bio/bowtie/%(version)s/']
+sources = ['%(namelower)s-%(version)s-linux-x86_64.zip']
+checksums = ['285811f241bf7aa6e2d50fbc2bf5daaeb15e5ea5e318570930792e5970d4179e']
+
+_bowtie_release   = ['bowtie', 'bowtie-build', 'bowtie-inspect']  # release executables
+_bowtie_debug     = ['bowtie-debug', 'bowtie-build-debug', 'bowtie-inspect-debug']  # debug executables
+_bowtie_extradirs = ['genomes', 'indexes', 'reads', 'scripts']  # unneeded directories
+
+postinstallcmds = ['rm -f %%(installdir)s/%s' % x for x in _bowtie_debug] + ['rm -rf %%(installdir)s/%s' % x for x in _bowtie_extradirs]
+
+modextrapaths = {'PATH': ''}
+
+sanity_check_paths = {
+    'files': ['%s' % x for x in _bowtie_release],
+    'dirs': ['doc'],
+}
+
+sanity_check_commands = [ "bowtie-build --version | grep -F 'version %(version)s'" ]
+
+moduleclass = 'bio'

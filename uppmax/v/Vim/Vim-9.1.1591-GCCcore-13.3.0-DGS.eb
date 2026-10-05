@@ -1,0 +1,40 @@
+easyblock = 'ConfigureMake'
+
+name = 'Vim'
+version = "9.1.1591"
+
+homepage = 'http://www.vim.org'
+description = """ Vim is an advanced text editor that seeks to provide the power
+ of the de-facto Unix editor 'Vi', with a more complete feature set. """
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+source_urls = ['https://github.com/%(namelower)s/%(namelower)s/archive/refs/tags/']
+sources = ['v%(version)s.tar.gz']
+checksums = ['2fd06799919a88dd912c5bc4b5cfdcfd34fbc24063265e986021472f7f0ef385']
+
+builddependencies = [
+    ('binutils', '2.42'),
+]
+dependencies = [
+    ('Python', '3.12.3'),
+    ('Perl', '5.38.2'),
+    ('PCRE', '8.45'),
+]
+
+local_linkdependencies = [
+    ('PCRE', '8.45'),
+    toolchain,
+]
+
+configopts = "--with-features=huge --enable-python3interp=yes --enable-perlinterp=yes"
+
+
+sanity_check_paths = {
+    'files': ['bin/%(namelower)s', 'bin/vimtutor', 'bin/xxd'],
+    'dirs': ['bin', 'share'],
+}
+
+sanity_check_commands = ['%(namelower)s --version']
+
+moduleclass = 'tools'

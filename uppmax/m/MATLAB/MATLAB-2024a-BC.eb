@@ -1,0 +1,29 @@
+name = 'MATLAB'
+version = '2024a'
+
+homepage = 'https://www.mathworks.com/products/matlab'
+description = """MATLAB is a high-level language and interactive environment
+ that enables you to perform computationally intensive tasks faster than with
+ traditional programming languages such as C, C++, and Fortran."""
+
+toolchain = SYSTEM
+
+sources = ['R2024a_Update_6_Linux.iso']
+checksums = ['7faa8e75225f8ca0ebdfff62d4fbec1971d1cfe3cb745f6d3229ebef33c05c1c']
+download_instructions = f'Download {sources[0]} from mathworks.com'
+
+java_options = '-Xmx2048m'
+
+osdependencies = [('p7zip-plugins', 'p7zip-full')]  # for extracting iso-files
+dependencies = [('MathWorksServiceHost', '2024.13.0.2')]
+
+# Use EB_MATLAB_KEY environment variable or uncomment and modify license key
+key = '40823-15990-17563-14743-52472-49648-38326-52909-49230-23333-56644-36623-57239-60793-32399-42841-29221-03273-05941-46409-00234-34092-15452-33475-39196'
+
+# Use EB_MATLAB_LICENSE_SERVER and EB_MATLAB_LICENSE_SERVER_PORT environment variables or
+# uncomment and modify the following variables for installation with floating license server
+#license_file = ''
+license_server = 'flexlmtmw1.uu.se 00600869815d'
+license_server_port = '1712'
+
+moduleclass = 'math'

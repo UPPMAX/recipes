@@ -1,0 +1,38 @@
+# Douglas Scofield UPPMAX 01/2026
+# - new tool
+#####################################
+
+easyblock = 'Tarball'
+
+name = 'zig'
+version = '0.15.2'
+
+homepage = 'https://ziglang.org/'
+description = """Zig is a general-purpose programming language and toolchain for maintaining robust,
+optimal and reusable software."""
+
+toolchain = SYSTEM
+
+source_urls = ['https://ziglang.org/download/%(version)s/']
+sources = ['zig-%s-linux-%%(version)s.tar.xz' % ARCH]
+checksums = [{
+    'zig-x86_64-linux-%(version)s.tar.xz': '02aa270f183da276e5b5920b1dac44a63f1a49e55050ebde3aecc9eb82f93239',
+    'zig-aarch64-linux-%(version)s.tar.xz': '958ed7d1e00d0ea76590d27666efbf7a932281b3d7ba0c6b01b0ff26498f667f',
+    'zig-arm-linux-%(version)s.tar.xz': '7d8401495065dae45d6249c68d5faf10508f8203c86362ccb698aeaafc66b7cd',
+    'zig-riscv64-linux-%(version)s.tar.xz': '493512bdca485be3c6a9b0f69dcb4cbe4587f3af8e1be282fdd827108ba39930',
+    'zig-powerpc64le-linux-%(version)s.tar.xz': 'e182c5f8d30fc7f97d17d2ffef1488826aa3afaa51e5f0dbe14c597a98b45778',
+    'zig-loongarch64-linux-%(version)s.tar.xz': '95d6a03e0415dbe30ae9c00d58b5446fd681ebf3d4044a8b707e1784c8074a61',
+    'zig-s390x-linux-%(version)s.tar.xz': 'cd4b295f43b1b7ca3d603368caea82dbd00fce6691affb7527e607c0b6eafe8e',
+}]
+
+sanity_check_paths = {
+    'files': ['zig', 'LICENSE'],
+    'dirs': ['doc', 'lib'],
+}
+
+sanity_check_commands = ["zig version | grep -F '%(version)s'"]
+
+modextrapaths = {'PATH': ''}
+
+moduleclass = 'compiler'
+

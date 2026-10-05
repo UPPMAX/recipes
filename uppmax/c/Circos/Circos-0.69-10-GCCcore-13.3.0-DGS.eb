@@ -1,0 +1,54 @@
+##
+# This is an easyconfig file for EasyBuild, see https://github.com/easybuilders/easybuild
+#
+# Author: Jonas Demeulemeester
+# The Francis Crick Insitute, London, UK
+##
+# This file is an EasyBuild reciPY as per https://github.com/easybuilders/easybuild
+#
+# Douglas Scofield UPPMAX 12/2025
+# - update to 0.69-10
+# - UPPMAX bioinfo toolchain 2024a
+# - currently needs to be built with eb --insecure-download
+
+easyblock = 'Tarball'
+
+name = 'Circos'
+version = '0.69-10'
+
+homepage = 'https://circos.ca/'
+description = """Circos is a software package for visualizing data and information.
+ It visualizes data in a circular layout - this makes Circos ideal for exploring
+ relationships between objects or positions."""
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+source_urls = ['http://circos.ca/distribution/']
+sources = [SOURCELOWER_TGZ]
+checksums = ['6ff1014c1682eb2e222ab47a12406759e9a1242bb19a013c595d1f9b645c5b06']
+
+download_instructions = "Run eb with the --insecure-download option."
+
+builddependencies = [
+    ('binutils', '2.42'),
+]
+
+dependencies = [
+    ('Perl', '5.38.2'),
+    ('GD', '2.77'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+sanity_check_paths = {
+    'files': ['bin/%(namelower)s'],
+    'dirs': ['lib/%(name)s'],
+}
+
+modextrapaths = {'PERL5LIB': 'lib'}
+
+sanity_check_commands = [('perl', '-e "use Circos"')]
+
+moduleclass = 'bio'

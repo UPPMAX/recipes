@@ -1,0 +1,30 @@
+Repeat dependency fix from 0.3.10, missing header from 0.3.21+ now supplied in source (Douglas Scofield UPPMAX 11/2025)
+diff -r -u pod5-file-format-0.3.27.orig/c++/CMakeLists.txt pod5-file-format-0.3.27/c++/CMakeLists.txt
+--- pod5-file-format-0.3.27.orig/c++/CMakeLists.txt	2025-05-19 15:48:04.000000000 +0200
++++ pod5-file-format-0.3.27/c++/CMakeLists.txt	2025-11-06 13:53:27.289142000 +0100
+@@ -2,7 +2,7 @@
+ 
+ if (ENABLE_CONAN)
+     find_package(Arrow REQUIRED CONFIG)
+-    find_package(Flatbuffers REQUIRED CONFIG)
++    find_package(FlatBuffers REQUIRED CONFIG)
+     find_package(zstd REQUIRED CONFIG)
+     find_package(ZLIB REQUIRED CONFIG)
+ 
+@@ -11,7 +11,7 @@
+     endif()
+ else()
+     find_package(Arrow REQUIRED)
+-    find_package(Flatbuffers REQUIRED)
++    find_package(FlatBuffers REQUIRED)
+     find_package(zstd REQUIRED)
+     find_package(ZLIB REQUIRED)
+ 
+@@ -21,6 +21,7 @@
+ endif()
+ 
+ find_package(Threads REQUIRED)
++find_package(pybind11 REQUIRED)
+ 
+ find_program(
+     FLATBUFFERS_FLATC_EXECUTABLE

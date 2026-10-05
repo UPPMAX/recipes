@@ -1,0 +1,73 @@
+# Bjorn Viklund UPPMAX 11/2025
+# - UPPMAX bioinfo toolchain 2024a
+# - create patch
+#
+# Douglas Scofield UPPMAX 02/2026
+# - lower toolchain to GCCcore, carryover from Jellyfish being lowered
+#################################
+
+easyblock = 'Binary'
+
+name = 'KrakenUniq'
+version = '1.0.4'
+
+homepage = 'https://github.com/fbreitwieser/krakenuniq/'
+description = "KrakenUniq: confident and fast metagenomics classification using unique k-mer counts"
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+patches = [
+    '%(name)s-%(version)s_fix_installation_for_easybuild_BV.patch',
+]
+
+source_urls = [GITHUB_SOURCE]
+sources = ['v%(version)s.tar.gz']
+
+
+checksums = [
+    {'%(sources)s': '69380e7c22e314245cbe61b2a69d6719c95edadd80ad171577c1e681927c7b88'},
+    {'%(name)s-%(version)s_fix_installation_for_easybuild_BV.patch':
+     'e88b3eab448c750e769aa6226e8ef5c85d69bfbc65a80802de99a08065462189'},
+]
+
+checksums = ['5e2ef21878c1c4ce92be9925e47b9ccae0ecb59a79d71cc4cbb53d057e0de9ec']
+
+
+builddependencies = [
+    ('binutils', '2.42'),
+]
+
+dependencies = [
+    ('Jellyfish', '2.3.1'),
+    ('Perl', '5.38.2'),
+    ('Perl-bundle-CPAN', '5.38.2'),
+    ('bzip2', '1.0.8'),
+    ('Compress-Raw-Zlib', '2.213'),
+]
+
+local_linkdependencies = [
+    ('Jellyfish', '2.3.1'),
+    ('bzip2', '1.0.8'),
+    toolchain,
+]
+
+# Add KrakenUniq_data as a dependency in the module file
+modluafooter = """
+depends_on("KrakenUniq_data/latest")
+"""
+
+github_account = 'fbreitwieser'
+extract_sources = True
+install_cmd = "./install_krakenuniq.sh -l %(installdir)s/bin %(installdir)s "
+
+sanity_check_paths = {
+    'files': ['bin/%(namelower)s', 'bin/%(namelower)s-build', 'bin/%(namelower)s-report'],
+    'dirs': ['bin'],
+}
+
+sanity_check_commands = [
+    "%(namelower)s --version",
+    "%(namelower)s-download --db %(installdir)s/DBDIR taxonomy && rm -r %(installdir)s/DBDIR",
+]
+
+moduleclass = 'bio'

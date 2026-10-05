@@ -1,0 +1,16 @@
+# Douglas Scofield UPPMAX 03/2026
+# - raw string required to avoid SyntaxWarning for regexp
+# - de-escape double quotes within single-quote string
+#################################
+diff -ruN gmes_linux_64_4.orig/ProtHint/bin/prothint.py gmes_linux_64_4/ProtHint/bin/prothint.py
+--- gmes_linux_64_4.orig/ProtHint/bin/prothint.py	2022-10-23 05:18:35.000000000 +0200
++++ gmes_linux_64_4/ProtHint/bin/prothint.py	2026-03-31 18:17:55.867609829 +0200
+@@ -500,7 +500,7 @@
+     sys.stderr.write("[" + time.ctime() + "] Pre-processing protein input\n")
+     os.chdir(workDir)
+     protFile = tempfile.NamedTemporaryFile(delete=False, dir='.', prefix="prot")
+-    systemCall('sed \"s/\.//\" ' + args.proteins + ' | sed \"s/|/_/g\" > ' +
++    systemCall(r'sed "s/\.//" ' + args.proteins + ' | sed "s/|/_/g" > ' +
+                protFile.name)
+     proteins = checkFileAndMakeAbsolute(protFile.name)
+ 
