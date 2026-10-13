@@ -1,0 +1,43 @@
+# The STAR binary included in this version has been vectorized with AVX
+# hence it is not recommended for systems that do not support it.
+
+easyblock = 'Tarball'
+
+name = 'CellRanger'
+version = '10.1.0'
+
+homepage = 'https://www.10xgenomics.com/support/software/cell-ranger/latest'
+description = """Cell Ranger is a set of analysis pipelines that process Chromium
+ single-cell RNA-seq output to align reads, generate gene-cell matrices and perform
+ clustering and gene expression analysis."""
+
+toolchain = SYSTEM
+
+modextravars = {
+    'TENX_DISABLE_TELEMETRY': '1',
+    'MROFLAGS': '--localcores=1 --localmem=8',
+}
+
+modloadmsg = """
+NOTE: By default, Cell Ranger may try to use all CPU cores and most of the memory
+visible on the compute node rather than only the resources allocated by Slurm.
+
+This module sets default limits of 1 CPU core and 8 GB memory to prevent this.
+For real analyses, override these defaults with --localcores and --localmem to
+match the resources requested in your Slurm job.
+"""
+
+download_instructions = """
+Download manually from https://www.10xgenomics.com/support/software/cell-ranger/downloads
+"""
+sources = [SOURCELOWER_TAR_GZ]
+checksums = ['bce72f4739f2e8193758037ff52e20b85ca716ad44e729dc748d10b25b4ccb9a']
+
+sanity_check_paths = {
+    'files': ['bin/cellranger'],
+    'dirs': ['bin/rna', 'bin/tenkit'],
+}
+
+sanity_check_commands = ['cellranger testrun --id=tiny']
+
+moduleclass = 'bio'

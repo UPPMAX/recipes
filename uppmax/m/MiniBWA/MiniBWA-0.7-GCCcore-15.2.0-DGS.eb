@@ -1,0 +1,62 @@
+# Douglas Scofield UPPMAX 10/2026
+# - new tool
+# - based on BWA easyconfig ; see note below
+#################################
+
+easyblock = 'MakeCp'
+
+name = 'MiniBWA'
+version = '0.7'
+
+homepage = 'https://github.com/lh3/minibwa'
+
+description = """
+MiniBWA aligns short reads against a reference genome. It is the successor of
+bwa-mem with a different algorithm. Minibwa is over three times as fast as the
+original bwa-mem and twice as fast as bwa-mem2 at comparable accuracy. While
+MiniBWA works with accurate long reads, minimap2 is more robust under high
+error rate.
+
+MiniBWA is a hybrid of bwa-mem and minimap2: it indexes the genome with
+Burrow-Wheeler Transform (BWT), finds variable-length seeds like bwa-mem, and
+performs chaining and SIMD-based nucleotide alignment with the minimap2
+algorithm. Minibwa speeds up bwa-mem2 further with additional prefetch for
+seeding, new heuristics to skip unnecessary mate rescue and reduced effort in
+highly repetitive regions where reads would often be wrongly mapped due to
+structural changes anyway.
+"""
+
+toolchain = {'name': 'GCCcore', 'version': '15.2.0'}
+toolchainopts = {'pic': True}
+
+source_urls = ['https://github.com/lh3/%(namelower)s/releases/download/v%(version)s']
+sources = ['%(namelower)s-%(version)s.tar.bz2']
+checksums = ['ea5f974a03fbd5f5dd3c7d4323d6e63917c440d26767bf649d008cebb96c7701']
+
+builddependencies = [('binutils', '2.45')]
+
+dependencies = [
+    ('zlib', '2.3.2'),
+]
+
+local_linkdependencies = [
+    ('zlib',   '2.3.2'),
+    toolchain,
+]
+
+# The BWA easyconfig includes prebuildopts lines that are commented to
+# "Allow use of x86 intrinsics on PPC"
+#
+# I can't test for this; if they're needed here, begin by copying them
+# from BWA easyconfig to here.
+
+files_to_copy = [(['minibwa'], 'bin')]
+
+sanity_check_paths = {
+    'files': ['bin/minibwa'],
+    'dirs': [],
+}
+
+sanity_check_commands = [ "minibwa version | grep '^%(version)s-'" ]
+
+moduleclass = 'bio'

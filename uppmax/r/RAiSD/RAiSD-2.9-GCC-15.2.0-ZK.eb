@@ -1,0 +1,40 @@
+
+easyblock = 'MakeCp'
+
+name = 'RAiSD'
+version = '2.9'
+
+homepage = 'https://github.com/alachins/raisd'
+description = """RAiSD detects signatures of positive selection
+in genomic variation data."""
+
+toolchain = {'name': 'GCC', 'version': '15.2.0'}
+
+sources = ['RAiSD-%(version)s.tar.gz']
+checksums = ['eff37b72dd0e7d37eae962a8902305e13397a3cb450b865f360d49f5e984c14d']
+
+dependencies = [
+    ('GSL', '2.8'),
+    ('zlib', '2.3.2', '', ('GCCcore', '15.2.0')),
+]
+
+prebuildopts = 'cp makefiles/Makefile.ZLIB Makefile && '
+
+buildopts = (
+    'release '
+    'INCLUDES="-I sources -I $EBROOTGSL/include '
+    '-I $EBROOTZLIB/include" '
+    'LINK_FLAGS="-L$EBROOTGSL/lib -L$EBROOTZLIB/lib '
+    '-lgsl -lgslcblas -lm -lrt -lz"'
+)
+
+files_to_copy = [
+    (['bin/release/RAiSD'], 'bin'),
+]
+
+sanity_check_paths = {
+    'files': ['bin/RAiSD'],
+    'dirs': [],
+}
+
+moduleclass = 'bio'
