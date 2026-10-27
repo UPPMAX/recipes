@@ -1,0 +1,105 @@
+# Douglas G Scofield UPPMAX 10/2026
+# - new tool, an R package
+# - depends on R-bundle-CRAN plus a few other things
+# - no executables exposed
+#######################################
+
+easyblock = 'Bundle'
+
+name = 'AdmixTools2'
+_packagename = 'admixtools'  # the name of the R package to load
+version = '2.0.10'
+versionsuffix = '-R-%(rver)s'
+
+homepage = 'https://uqrmaie1.github.io/admixtools/index.html'
+description = """
+ADMIXTOOLS is a collection of programs which use genetic data to infer how populations are related to one another. It has been used in countless publications to test whether populations form clades (qpDstat, qpWave), to estimate ancestry proportions (qpAdm), and to fit admixture graphs (qpGraph).
+
+ADMIXTOOLS 2 provides the same functionality as ADMIXTOOLS in a new look, and it is orders of magnitude faster. This is achieved through separating the computation of f2-statistics from all other computations, and through a number of other optimizations.
+"""
+usage = f"""
+Instead of the module name, a different name must be used to load this package within R:
+
+    library({_packagename})
+
+"""
+
+github_account = 'uqrmaie1'
+
+toolchain = {'name': 'foss', 'version': '2024a'}
+
+dependencies = [
+    ('R', '4.4.2'),
+    ('R-bundle-CRAN', '2024.11'),
+]
+
+exts_defaultclass = 'RPackage'
+exts_filter = ("R -q --no-save", "library(%(ext_name)s)")
+exts_default_options = {
+    'source_urls': [
+        'https://cran.r-project.org/src/contrib/Archive/%(name)s',  # package archive
+        'https://cran.r-project.org/src/contrib/',  # current version of packages
+        'https://cran.freestatistics.org/src/contrib',  # mirror alternative for current packages
+    ],
+    'source_tmpl': '%(name)s_%(version)s.tar.gz',
+}
+
+exts_list = [
+    ('otel', '0.2.0', {
+        'checksums': ['ef8afe5a1bc8074bbeb8a84134699ef348a1f8ac629ffba25ee43ea7bcd8dd17'],
+    }),
+    ('S7', '0.2.2', {
+        'checksums': ['6f33245dde05b74265b1c4d379e034bc3a8923d41e7b52e6e75a75ce97d42af7'],
+    }),
+    ('pak', '0.11.1', {
+        'checksums': ['762ec8acc2d2ccbe5a217859c846c2de83254e3948112b437dde7a0ad5b15999'],
+    }),
+    ('sets', '1.0-25', {
+        'checksums': ['5ca469218f9679f2372e33e56f781b52947ccbedf730b91a2d3a572993c024f4'],
+    }),
+    ('partitions', '1.11-1', {
+        'checksums': ['581e080d52a6dc7cde413005d2fb0027261a25d28e45938c1624bc352b4e7569'],
+    }),
+    ('mpoly', '1.1.2', {
+        'checksums': ['dbef5aff839d567c5a7e697dfb70f116832501aec79364779caf827796b50cca'],
+    }),
+    ('shinyWidgets', '0.8.7', {
+        'checksums': ['add4b4c5125c4242f6439700fce7aceec3062d1faf4c99f03eddcfab51727722'],
+    }),
+    ('shinyalert', '3.1.0', {
+        'checksums': ['ee882788d0cf3d969c83cdfb39b19d12c6cab005bb850ec596164194a1d137be'],
+    }),
+    ('shinyFiles', '0.9.3', {
+        'checksums': ['4a72e165ee8a6e8256988f27286a2cfc4d7a42e2a902f4f2a728b1c237c07286'],
+    }),
+    ('shinyBS', '0.61.1', {
+        'checksums': ['0aed72473060531d0e782ba62092493002137df6b251af9e2294e2a40a32a140'],
+    }),
+    ('m2r', '1.0.3', {
+        'checksums': ['ea6904826c12d8a72af9f95e27ce1afeda6604460353badf7d4fd9950589ff9c'],
+    }),
+    ('genio', '1.1.2', {
+        'checksums': ['f4ad6737a9f5cdfea8ac4f9ed8df33fac3c01b15d75e6c71ebceee8ab647fd47'],
+    }),
+    ('pgenlibr', '0.7.0', {
+        'checksums': ['b9ee17643b41d21053a65e2349e4f1e737ca07caa404628bed720510554a3858'],
+    }),
+    (_packagename, version, {
+        'source_urls': ['https://github.com/%(github_account)s/%(name)s/archive/refs/tags'],
+        'sources': [{'download_filename': 'v%(version)s.tar.gz', 'filename': '%(name)s-%(version)s.tar.gz'}],
+        'checksums': ['6276c81a353574d138192159994ee3a2540ad36c5b6ec97e5c5701f94a92542b'],
+    }),
+]
+
+sanity_check_paths = {
+    'files': [ _packagename + '/R/' + _packagename ],
+    'dirs':  [],
+}
+
+modextrapaths = {
+    'R_LIBS_SITE': '',
+}
+
+modloadmsg  = f"%(name)s/%(version)s: To load this package within R:   library({_packagename})"
+
+moduleclass = 'bio'

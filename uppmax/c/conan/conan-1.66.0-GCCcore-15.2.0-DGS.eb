@@ -1,0 +1,77 @@
+# Douglas Scofield UPPMAX 10/2026
+# - UPPMAX bioinfo toolchain 2026.1 older version for HiCExplorer/3.7.6
+# - an older version of conan, so keep older versions of exts
+# - add legaci-cgi to exts as cgi is no longer part of Python standard library after 3.12
+# - hatchling required
+#################################
+
+easyblock = 'PythonBundle'
+
+name = 'conan'
+version = '1.66.0'  # have to stick to an older version because catboost is not compatible with newer one
+
+homepage = 'https://conan.io'
+description = "Decentralized, open-source (MIT), C/C++ package manager."
+
+toolchain = {'name': 'GCCcore', 'version': '15.2.0'}
+
+builddependencies = [
+    ('binutils', '2.45'),
+    ('hatchling', '1.29.0'),
+]
+
+dependencies = [
+    ('Python', '3.14.2'),
+    ('PyYAML', '6.0.3'),
+    ('tqdm', '4.67.3'),
+    ('Python-bundle-PyPI', '2026.04'),
+]
+
+exts_list = [
+    ('urllib3', '1.26.20', {
+        'checksums': ['40c2dc0c681e47eb8f90e7e27bf6ff7df2e677421fd46756da1161c39ca70d32'],
+    }),
+    ('legacy-cgi', '2.6.4', {
+        'modulename': 'cgi',
+        'checksums': ['abb9dfc7835772f7c9317977c63253fd22a7484b5c9bbcdca60a29dcce97c577'],
+    }),
+    ('bottle', '0.12.25', {
+        'checksums': ['e1a9c94970ae6d710b3fb4526294dfeb86f2cb4a81eff3a4b98dc40fb0e5e021'],
+    }),
+    ('distro', '1.8.0', {
+        'checksums': ['02e111d1dc6a50abb8eed6bf31c3e48ed8b0830d1ea2a1b78c61765c2513fdd8'],
+    }),
+    ('fasteners', '0.19', {
+        'checksums': ['b4f37c3ac52d8a445af3a66bce57b33b5e90b97c696b7b984f530cf8f0ded09c'],
+    }),
+    ('node-semver', '0.6.1', {
+        'modulename': 'semver',
+        'checksums': ['4016f7c1071b0493f18db69ea02d3763e98a633606d7c7beca811e53b5ac66b7'],
+    }),
+    ('patch-ng', '1.17.4', {
+        'checksums': ['627abc5bd723c8b481e96849b9734b10065426224d4d22cd44137004ac0d4ace'],
+    }),
+    ('pluginbase', '1.0.1', {
+        'checksums': ['ff6c33a98fce232e9c73841d787a643de574937069f0d18147028d70d7dee287'],
+    }),
+    ('PyJWT', '2.9.0', {
+        'modulename': 'jwt',
+        'source_tmpl': SOURCELOWER_TAR_GZ,
+        'checksums': ['7e1e5b56cc735432a7369cbfa0efe50fa113ebecdc04ae6922deba8b84582d0c'],
+    }),
+    (name, version, {
+        'source_tmpl': '%(version)s.tar.gz',
+        'source_urls': ['https://github.com/conan-io/conan/archive/'],
+        'checksums': ['5b07388fa2e2896af771f63b6f9db5ddfa421c2857cf880f4d5b084d4568638d'],
+        'preinstallopts': "sed -i 's/^six>=1.10.0,<=1.16.0$/six>=1.10.0,<=1.17.0/' conans/requirements.txt && ",
+    }),
+]
+
+sanity_check_paths = {
+    'files': ['bin/conan'],
+    'dirs': ['lib/python%(pyshortver)s/site-packages'],
+}
+
+sanity_check_commands = ["conan --help"]
+
+moduleclass = 'devel'

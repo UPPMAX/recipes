@@ -1,0 +1,51 @@
+# Douglas Scofield UPPMAX 10/2026
+# - new version and toolchain, based on new version for foss-2024a
+# - add anndata dependency, necessitates raising toolchain to foss
+# - patch for misspecification of license in pyproject.toml
+#################################
+
+easyblock = 'PythonBundle'
+
+name = 'MACS3'
+version = '3.0.5'
+
+homepage = 'https://macs3-project.github.io/MACS/'
+description = """Model Based Analysis for ChIP-Seq data"""
+
+toolchain = {'name': 'foss', 'version': '2026.1'}
+
+builddependencies = [
+    ('pybind11', '3.0.4'),
+    ('Cython', '3.2.4'),
+    ('hatchling', '1.29.0'),
+]
+
+dependencies = [
+    ('Python', '3.14.2'),
+    ('SciPy-bundle', '2026.05'),
+    ('matplotlib', '3.10.9'),
+    ('hmmlearn', '0.3.3'),
+    ('anndata', '0.13.3.post0'),
+]
+
+local_linkdependencies = [
+    toolchain,
+]
+
+exts_list = [
+    ('cykhash', '2.0.1', {
+        'checksums': ['b4794bc9f549114d8cf1d856d9f64e08ff5f246bf043cf369fdb414e9ceb97f7'],
+    }),
+    ('%(namelower)s', version, {
+        'patches': ['MACS3-3.0.5_license-specification.patch'],
+        'checksums': [
+            {'%(namelower)s-%(version)s.tar.gz' : '22cb5e22903ef0598e8078cc19d4593cb43be43870808335c98e0f7298597224'},
+            {'MACS3-3.0.5_license-specification.patch' : 'b1c9a239005b861c29e54bdfaaf1796d8b75f12e336696586b8a1e1e5c4a9e89'},
+        ],
+        'modulename': 'MACS3',
+    }),
+]
+
+sanity_check_commands = ["macs3 --help"]
+
+moduleclass = 'bio'

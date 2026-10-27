@@ -1,0 +1,24 @@
+easyblock = 'PythonPackage'
+
+name = 'pyBigWig'
+version = '0.3.26'
+
+homepage = 'https://github.com/deeptools/pyBigWig'
+description = """A python extension, written in C, for quick access to bigBed
+files and access to and creation of bigWig files."""
+
+toolchain = {'name': 'gfbf', 'version': '2026.1'}
+
+sources = [SOURCELOWER_TAR_GZ]
+checksums = ['8b01c6542ed9e65d0758ff18a43d6fd7b1c517e1f6aa6132368fe17ee32c1533']
+
+dependencies = [
+    ('Python', '3.14.2'),
+    ('cURL', '8.17.0'),
+    ('NSS', '3.119'),    # provides libfreebl3
+    ('SciPy-bundle', '2026.05'),    # optional, for numpy support
+]
+
+options = {'modulename': name}
+
+moduleclass = 'bio'

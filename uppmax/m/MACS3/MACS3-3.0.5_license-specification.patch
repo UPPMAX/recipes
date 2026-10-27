@@ -1,0 +1,15 @@
+# Douglas Scofield UPPMAX 10/2026
+# - correct license specification
+######################################################
+diff -ruN macs3-3.0.5.orig/pyproject.toml macs3-3.0.5/pyproject.toml
+--- macs3-3.0.5.orig/pyproject.toml	2026-09-25 23:26:18.220463800 +0200
++++ macs3-3.0.5/pyproject.toml	2026-10-16 15:26:02.869613565 +0200
+@@ -10,7 +10,7 @@
+ 	   {name = "Philippa Doherty", email = "Philippa.Doherty@RoswellPark.org"}]
+ readme = "README.md"
+ requires-python = ">=3.12"
+-license = "BSD-3-Clause"
++license = {text = "BSD-3-Clause"}
+ classifiers =['Development Status :: 5 - Production/Stable',
+               'Environment :: Console',
+               'Intended Audience :: Developers',

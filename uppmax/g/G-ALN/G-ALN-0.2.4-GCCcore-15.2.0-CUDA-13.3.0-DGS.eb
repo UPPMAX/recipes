@@ -1,0 +1,52 @@
+# Douglas Scofield UPPMAX 10/2026
+# - new version of new tool
+# - switch to internally provided zlib-ng
+#################################
+
+easyblock = 'CMakeMakeCp'
+
+name = 'G-ALN'
+_toolname = 'galn'
+version = '0.2.4'
+versionsuffix = '-CUDA-%(cudaver)s'
+
+github_account = 'bilalbioinfo'
+homepage = f'https://github.com/%(github_account)s/{_toolname}'
+description = f"""
+GPU implementation of bwa aln and bwa index with byte-identical output to BWA 0.7.19
+
+Run '{_toolname}' for help.
+
+"""
+
+toolchain = {'name': 'GCCcore', 'version': '15.2.0'}
+
+source_urls = [ f'https://github.com/%(github_account)s/{_toolname}/archive/refs/tags/' ]
+sources = ['v%(version)s.tar.gz']
+checksums = ['1a2b8ae6916d39257d625d97fbc6a49af145badb0e44419f0726ee80f55065f3']
+
+builddependencies = [
+    ('binutils', '2.45'),  # needed to avoid Error: unknown pseudo-op: `.base64' when compiling local zlib-ng
+    ('CMake', '4.2.1'),
+]
+
+dependencies = [
+    ('CUDA', '13.3.0', '', SYSTEM),
+]
+
+files_to_copy = [
+    ( [ f'{_toolname}' ], 'bin' ),
+]
+
+sanity_check_paths = {
+    'files': [
+        f'bin/{_toolname}',
+    ],
+    'dirs': [ ],
+}
+
+sanity_check_commands = [
+    f"{_toolname} 2>&1 | grep ' version %(version)s'",
+]
+
+moduleclass = 'bio'

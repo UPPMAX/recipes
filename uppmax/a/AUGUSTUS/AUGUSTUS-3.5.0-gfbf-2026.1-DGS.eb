@@ -1,0 +1,148 @@
+# Updated by: Pavel Grochal (INUITS)
+# License: GPLv2
+# Update: Petr Král (INUITS)
+#
+# Douglas Scofield UPPMAX 10/2026
+# - bringing forward my changes from gfbf-2024a
+# - include <cstdint> in auxprogs/filterBam/src/headers/bamaccess.hh
+#################################
+
+easyblock = 'ConfigureMake'
+
+name = 'AUGUSTUS'
+version = '3.5.0'
+
+homepage = 'https://bioinf.uni-greifswald.de/augustus/'
+description = "%(name)s is a program that predicts genes in eukaryotic genomic sequences."
+
+usage = """The default %(name)s config path is %(installdir)s/config and is also
+provided in the AUGUSTUS_CONFIG_PATH environment variable.
+
+To make your own writable copy of the config/ in the current directory, which is required to train
+a new species or augment existing models, copy the directory and make the copy writable with:
+
+    cp -dR --preserve=mode,timestamps --no-preserve=ownership $AUGUSTUS_CONFIG_PATH %(name)s_config
+    chmod -R +w %(name)s_config
+
+and set the AUGUSTUS_CONFIG_PATH environment variable to this location:
+
+    export AUGUSTUS_CONFIG_PATH=$PWD/%(name)s_config
+
+The config directory contains precomputed training data as well as your own de novo training results.
+So, you probably do not want to recreate this each time you use %(name)s.  However, do ensure that
+AUGUSTUS_CONFIG_PATH is set to this location each time:
+
+    export AUGUSTUS_CONFIG_PATH=<my AUGUSTUS config location>/%(name)s_config
+"""
+
+toolchain = {'name': 'gfbf', 'version': '2026.1'}
+
+github_account = 'Gaius-Augustus'
+source_urls = [GITHUB_SOURCE]
+sources = ['v%(version)s.tar.gz']
+checksums = ['5ed6ce6106303b800c5e91d37a250baff43b20824657b853ae04d11ad8bdd686']
+
+dependencies = [
+    ('Perl', '5.42.0'), # scripts/*.pl
+    ('Perl-bundle-CPAN', '5.42.0'), # scripts/*.pl
+    ('Python', '3.14.2'), # scripts/*.py
+    ('SciPy-bundle', '2026.05'), # scripts/*.py
+    ('Biopython', '1.87'), # scripts/*.py
+    ('zlib', '2.3.2'),
+    ('bzip2', '1.0.8'),
+    ('XZ', '5.8.2'),
+    ('zstd', '1.5.7'),
+    ('Boost', '1.90.0'),
+    ('GSL', '2.8'),
+    ('SAMtools', '1.23.1'),
+    ('HTSlib', '1.23.1'),  # also provides tabix
+    ('BCFtools', '1.23.1'),
+    ('lpsolve', '5.5.2.14'),
+    ('SuiteSparse', '7.12.2'),
+    ('BamTools', '2.5.3'),
+    ('SQLite', '3.51.1'),
+]
+
+local_linkdependencies = [
+    ('zlib', '2.3.2'),
+    ('bzip2', '1.0.8'),
+    ('XZ', '5.8.2'),
+    ('zstd', '1.5.7'),
+    ('Boost', '1.90.0'),
+    ('GSL', '2.8'),
+    ('lpsolve', '5.5.2.14'),
+    ('SuiteSparse', '7.12.2'),
+    ('BamTools', '2.5.3'),
+    ('SQLite', '3.51.1'),
+    toolchain,
+]
+
+skipsteps = ['configure']
+# run "make clean" to avoid using binaries included with the source tarball
+prebuildopts = "make clean && "
+# fix_missing include <cstdint>
+# There is also a patch for this amongst the easyconfigs
+#   a7e093c61d3f1938be22d7b3240a9f3c37a3b86bdae9b7acd504594fb7606eb3  AUGUSTUS-3.5.0_fix-gcc13.patch
+# but this easyconfig apparently prefers the seds
+
+prebuildopts += "sed -i 's/#include <sqlite3.h>/#include <sqlite3.h>\\n#include <cstdint>/g' "
+prebuildopts += "%(builddir)s/Augustus-%(version)s/include/sqliteDB.hh && "
+prebuildopts += "sed -i 's/#include <sqlite3.h>/#include <sqlite3.h>\\n#include <cstdint>/g' "
+prebuildopts += "%(builddir)s/Augustus-%(version)s/auxprogs/homGeneMapping/include/sqliteDB.hh && "
+prebuildopts += "sed -i 's/#include <algorithm>/#include <cstdint>\\n#include <algorithm>/g' "
+prebuildopts += "%(builddir)s/Augustus-%(version)s/auxprogs/filterBam/src/headers/bamaccess.hh && "
+
+_tmpl = 'INCLUDE_PATH_{dep}=-I{root}{incl} LIBRARY_PATH_{dep}="-L{root}{lib} -Wl,-rpath,{root}{lib}"'
+
+buildopts = ' '.join([
+    'COMPGENEPRED=true SQLITE=true ZIPINPUT=true MYSQL=false CXX="$CXX" ',
+    _tmpl.format(dep='ZLIB', root='$EBROOTZLIB', incl='/include', lib='/lib'),
+    _tmpl.format(dep='BOOST', root='$EBROOTBOOST', incl='/include', lib='/lib'),
+    _tmpl.format(dep='LPSOLVE', root='$EBROOTLPSOLVE', incl='/include', lib='/lib'),
+    _tmpl.format(dep='SUITESPARSE', root='$EBROOTSUITESPARSE', incl='/include', lib='/lib'),
+    _tmpl.format(dep='GSL', root='$EBROOTGSL', incl='/include', lib='/lib'),
+    _tmpl.format(dep='SQLITE', root='$EBROOTSQLITE', incl='/include', lib='/lib'),
+    _tmpl.format(dep='BAMTOOLS', root='$EBROOTBAMTOOLS', incl='/include/bamtools', lib='/lib'),
+    _tmpl.format(dep='HTSLIB', root='$EBROOTHTSLIB', incl='/include/htslib', lib='/lib'),
+])
+
+preinstallopts  = "sed -i '/ln -sf/d' Makefile && "
+installopts = 'INSTALLDIR=%(installdir)s '
+postinstallcmds  = [ 
+    # lift out utrrnaseq, which is built but not installed
+    "cp -r %(builddir)s/Augustus-%(version)s/auxprogs/utrrnaseq/utrrnaseq %(installdir)s/bin/",  
+    # the #! line in pasapolyA2hints.pl is weird
+    "sed -i '1i#!/usr/bin/env perl' scripts/pasapolyA2hints.pl", 
+    # read-protect the config directory
+    "chmod -R -w %(installdir)s/config",
+    # install the man pages
+    "mkdir -p %(installdir)s/share/man/man1 && cp -r %(builddir)s/Augustus-%(version)s/mansrc/*.1 %(installdir)s/share/man/man1/",
+]
+
+fix_perl_shebang_for = ['scripts/*.pl']
+fix_python_shebang_for = ['scripts/*.py']
+
+sanity_check_paths = {
+    'files': ['bin/augustus', 'bin/bam2hints', 'bin/etraining', 'bin/fastBlockSearch',
+              'bin/filterBam', 'bin/getSeq', 'bin/homGeneMapping', 'bin/joingenes',
+              'bin/load2sqlitedb', 'bin/prepareAlign', 'bin/utrrnaseq',
+              'share/man/man1/getSeq.1'],
+    'dirs': ['config', 'scripts', 'share/man/man1'],
+}
+sanity_check_commands = ['augustus --help']
+
+modextrapaths = {
+    'PATH': 'scripts',
+    'MANPATH': 'share/man',
+}
+
+modextravars = {
+    'AUGUSTUS_BIN_PATH': '%(installdir)s/bin',
+    'AUGUSTUS_CONFIG_PATH': '%(installdir)s/config',
+    'AUGUSTUS_SCRIPTS_PATH': '%(installdir)s/scripts',
+}
+
+modloadmsg  = "%(name)s/%(version)s: A read-only config directory is at $AUGUSTUS_CONFIG_PATH. See"
+modloadmsg += " 'module help %(name)s/%(version)s' for guidance to create your own writable copy."
+
+moduleclass = 'bio'

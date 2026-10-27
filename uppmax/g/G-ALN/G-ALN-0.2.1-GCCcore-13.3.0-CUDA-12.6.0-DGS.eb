@@ -1,0 +1,51 @@
+# Douglas Scofield UPPMAX 10/2026
+# - new tool
+#################################
+
+easyblock = 'CMakeMakeCp'
+
+name = 'G-ALN'
+_toolname = 'galn'
+version = '0.2.1'
+versionsuffix = '-CUDA-%(cudaver)s'
+
+github_account = 'bilalbioinfo'
+homepage = f'https://github.com/%(github_account)s/{_toolname}'
+description = f"""
+GPU implementation of bwa aln and bwa index with byte-identical output to BWA 0.7.19
+
+Run '{_toolname}' for help.
+
+"""
+
+toolchain = {'name': 'GCCcore', 'version': '13.3.0'}
+
+source_urls = [ f'https://github.com/%(github_account)s/{_toolname}/archive/refs/tags/' ]
+sources = ['v%(version)s.tar.gz']
+checksums = ['a2799bde86974788daf2509e666777b2cbaac06bd19580cc6a73a824e221e631']
+
+builddependencies = [
+    ('CMake', '3.29.3'),
+]
+
+dependencies = [
+    ('zlib', '1.3.1'),
+    ('CUDA', '12.6.0', '', SYSTEM),
+]
+
+files_to_copy = [
+    ( [ f'{_toolname}' ], 'bin' ),
+]
+
+sanity_check_paths = {
+    'files': [
+        f'bin/{_toolname}',
+    ],
+    'dirs': [ ],
+}
+
+sanity_check_commands = [
+    f"{_toolname} 2>&1 | grep ' version %(version)s'",
+]
+
+moduleclass = 'bio'

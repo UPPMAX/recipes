@@ -1,0 +1,85 @@
+# Douglas G Scofield UPPMAX 10/2026
+# - from foss 2024a to foss 2026.1
+#######################################
+
+easyblock = 'Bundle'
+
+name = 'AdmixTools2'
+_packagename = 'admixtools'  # the name of the R package to load
+version = '2.0.10'
+versionsuffix = '-R-%(rver)s'
+
+homepage = 'https://uqrmaie1.github.io/admixtools/index.html'
+description = """
+ADMIXTOOLS is a collection of programs which use genetic data to infer how populations are related to one another. It has been used in countless publications to test whether populations form clades (qpDstat, qpWave), to estimate ancestry proportions (qpAdm), and to fit admixture graphs (qpGraph).
+
+ADMIXTOOLS 2 provides the same functionality as ADMIXTOOLS in a new look, and it is orders of magnitude faster. This is achieved through separating the computation of f2-statistics from all other computations, and through a number of other optimizations.
+"""
+usage = f"""
+Instead of the module name, a different name must be used to load this package within R:
+
+    library({_packagename})
+
+"""
+
+github_account = 'uqrmaie1'
+
+toolchain = {'name': 'foss', 'version': '2026.1'}
+
+dependencies = [
+    ('R', '4.6.1'),
+    ('R-bundle-CRAN', '2026.07'),
+]
+
+exts_defaultclass = 'RPackage'
+exts_filter = ("R -q --no-save", "library(%(ext_name)s)")
+exts_default_options = {
+    'source_urls': [
+        'https://cran.r-project.org/src/contrib/Archive/%(name)s',  # package archive
+        'https://cran.r-project.org/src/contrib/',  # current version of packages
+        'https://cran.freestatistics.org/src/contrib',  # mirror alternative for current packages
+    ],
+    'source_tmpl': '%(name)s_%(version)s.tar.gz',
+}
+
+exts_list = [
+    ('shinyWidgets', '0.9.1', {
+        'checksums': ['ebfb0a0b919a233dce6761b359a3ae120eefe15ee459c57b0c8cda16a9c71e85'],
+    }),
+    ('shinyalert', '3.1.0', {
+        'checksums': ['ee882788d0cf3d969c83cdfb39b19d12c6cab005bb850ec596164194a1d137be'],
+    }),
+    ('shinyFiles', '0.9.3', {
+        'checksums': ['4a72e165ee8a6e8256988f27286a2cfc4d7a42e2a902f4f2a728b1c237c07286'],
+    }),
+    ('shinyBS', '0.65.0', {
+        'checksums': ['a1c4463475937562e31fbc3b99d9eae3fed4b2cfd3ce70fc86e046ea65131049'],
+    }),
+    ('m2r', '1.0.3', {
+        'checksums': ['ea6904826c12d8a72af9f95e27ce1afeda6604460353badf7d4fd9950589ff9c'],
+    }),
+    ('genio', '1.1.2', {
+        'checksums': ['f4ad6737a9f5cdfea8ac4f9ed8df33fac3c01b15d75e6c71ebceee8ab647fd47'],
+    }),
+    ('pgenlibr', '0.7.0', {
+        'checksums': ['b9ee17643b41d21053a65e2349e4f1e737ca07caa404628bed720510554a3858'],
+    }),
+    (_packagename, version, {
+        'source_urls': ['https://github.com/%(github_account)s/%(name)s/archive/refs/tags'],
+        'sources': [{'download_filename': 'v%(version)s.tar.gz', 'filename': '%(name)s-%(version)s.tar.gz'}],
+        'checksums': ['6276c81a353574d138192159994ee3a2540ad36c5b6ec97e5c5701f94a92542b'],
+    }),
+]
+
+sanity_check_paths = {
+    'files': [ _packagename + '/R/' + _packagename ],
+    'dirs':  [],
+}
+
+modextrapaths = {
+    'R_LIBS_SITE': '',
+}
+
+modloadmsg  = f"%(name)s/%(version)s: To load this package within R:   library({_packagename})"
+
+moduleclass = 'bio'
